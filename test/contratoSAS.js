@@ -12,7 +12,7 @@ contract("ContratoSAS", function(accounts) {
       .then(function(instance) {
         contractInstance = instance;
         balanceBeforeSend = web3.eth.getBalance(instance.address).toNumber();
-        return contractInstance.sendTransaction({
+        return contractInstance.receiveFunds(1, {
           address: contractInstance.address,
           from: accounts[1],
           value: amountToSend

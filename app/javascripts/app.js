@@ -1,15 +1,17 @@
 // Import the page's CSS. Webpack will know what to do with it.
 import "../stylesheets/app.css";
 
+import "bootstrap/dist/css/bootstrap.css";
+
 // Import libraries we need.
-import { default as Web3} from 'web3';
-import { default as contract } from 'truffle-contract'
+import {default as Web3} from 'web3';
+import {default as contract} from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
-import metacoin_artifacts from '../../build/contracts/MetaCoin.json'
+import contrato_artifacts from '../../build/contracts/ContratoSAS.json'
 
 // MetaCoin is our usable abstraction, which we'll use through the code below.
-var MetaCoin = contract(metacoin_artifacts);
+var ContratoSAS = contract(contrato_artifacts);
 
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
@@ -17,12 +19,18 @@ var MetaCoin = contract(metacoin_artifacts);
 var accounts;
 var account;
 
+function convertPesosIntoEther(amountInPesos) {
+  // TODO: Tomar el valor de alguna API
+  // Se usa el valor $/ETH del 17/05/2018
+  return amountInPesos/16200;
+};
+
 window.App = {
   start: function() {
     var self = this;
 
     // Bootstrap the MetaCoin abstraction for Use.
-    MetaCoin.setProvider(web3.currentProvider);
+    ContratoSAS.setProvider(web3.currentProvider);
 
     // Get the initial account balance so it can be displayed.
     web3.eth.getAccounts(function(err, accs) {
@@ -39,50 +47,82 @@ window.App = {
       accounts = accs;
       account = accounts[0];
 
-      self.refreshBalance();
+      App.basicInfoUpdate();
+      App.listenToEvents();
     });
   },
 
-  setStatus: function(message) {
-    var status = document.getElementById("status");
-    status.innerHTML = message;
-  },
+  submitTransactionPesos: function() {
+    var _amountInPesos = parseInt(document.getElementById("monto_pesos").value);
+    var userId = parseInt(document.getElementById("user_id").value);
 
-  refreshBalance: function() {
-    var self = this;
-
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.getBalance.call(account, {from: account});
-    }).then(function(value) {
-      var balance_element = document.getElementById("balance");
-      balance_element.innerHTML = value.valueOf();
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error getting balance; see log.");
+    ContratoSAS.deployed().then(function(instance) {
+      var amountInEther = convertPesosIntoEther(_amountInPesos);
+      return instance.receiveFunds(userId, {
+        value: web3.toWei(amountInEther, 'ether'),
+        from: accounts[2],
+        address: instance.address,
+        gas: 500000
+      });
+    }).then(function(result) {
+      console.log(result);
+      App.basicInfoUpdate();
+    }).catch(function(err) {
+      console.error(err);
     });
   },
 
-  sendCoin: function() {
-    var self = this;
+  submitTransactionEther: function() {
+    var _amount = parseInt(document.getElementById("monto_ether").value);
+    var userId = parseInt(document.getElementById("user_id").value);
 
-    var amount = parseInt(document.getElementById("amount").value);
-    var receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... (please wait)");
-
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.sendCoin(receiver, amount, {from: account});
-    }).then(function() {
-      self.setStatus("Transaction complete!");
-      self.refreshBalance();
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error sending coin; see log.");
+    ContratoSAS.deployed().then(function(instance) {
+      return instance.receiveFunds(userId, {
+        value: web3.toWei(_amount, 'ether'),
+        from: accounts[2],
+        address: instance.address,
+        gas: 500000
+      });
+    }).then(function(result) {
+      console.log(result);
+      App.basicInfoUpdate();
+    }).catch(function(err) {
+      console.error(err);
     });
+  },
+
+  basicInfoUpdate: function() {
+    ContratoSAS.deployed().then(function(instance) {
+      document.getElementById("walletAddress").innerHTML = instance.address;
+      document.getElementById("walletEther").innerHTML = web3.fromWei(web3.eth.getBalance(instance.address).toNumber(), "ether");
+    })
+  },
+
+  listenToEvents: function() {
+    ContratoSAS.deployed().then(function(instance) {
+      instance.receivedFunds({}, {
+        fromBlock: 0,
+        toBlock: 'latest'
+      }).watch(function(error, event) {
+        document.getElementById("fundEvents").innerHTML += JSON.stringify(event);
+      });
+      instance.contributionFiled({}, {
+        fromBlock: 0,
+        toBlock: 'latest'
+      }).watch(function(error, event) {
+        // Agrega en la lista de Contribuciones
+        var contributions = document.createElement("LI");
+        console.log(event);
+        contributions.innerHTML = 'Valor: ' + JSON.stringify(event.args.amount) + '</br> De: ' + JSON.stringify(event.args.from) + '</br> ID usuario: ' + JSON.stringify(event.args.uid);
+        document.getElementById("contribEvents").append(contributions);
+
+        // Agrega en lista de Socios Crowdfunders
+        var socio = document.createElement("LI");
+        console.log(event);
+        socio.innerHTML = 'ID usuario: ' + JSON.stringify(event.args.uid) + '</br> Valor: ' + JSON.stringify(event.args.amount);
+        document.getElementById("socios_crowdfunders").append(socio);
+      });
+    })
   }
 };
 
@@ -93,9 +133,9 @@ window.addEventListener('load', function() {
     // Use Mist/MetaMask's provider
     window.web3 = new Web3(web3.currentProvider);
   } else {
-    console.warn("No web3 detected. Falling back to http://127.0.0.1:9545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
+    console.warn("No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    window.web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:9545"));
+    window.web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
   }
 
   App.start();
