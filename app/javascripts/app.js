@@ -118,7 +118,8 @@ window.App = {
 
         // Agrega en lista de Socios Crowdfunders
         var socio = document.createElement("LI");
-        console.log(event);
+        // console.log(event);
+        console.log(instance);
         socio.innerHTML = 'ID usuario: ' + JSON.stringify(event.args.uid) + '</br> Valor: ' + JSON.stringify(event.args.amount);
         document.getElementById("socios_crowdfunders").append(socio);
       });

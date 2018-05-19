@@ -11,6 +11,7 @@ contract ContratoSAS is mortal {
     event fechaSet(string fecha);
     event descripcionSet(string descripcion);
     event cuitSet(uint cuit);
+    event uidSet(uint uid);
 
     struct Contribution {
         address _from;
@@ -18,12 +19,13 @@ contract ContratoSAS is mortal {
         uint256 _amount;
     }
 
-    uint contribution_counter;
-    string  m_nombre;
-    uint256 m_monto;
-    string  m_fecha;
-    string  m_descripcion;
-    uint    m_cuit;
+    uint public    contribution_counter;
+    string public  m_nombre;
+    uint256 public m_monto;
+    string public  m_fecha;
+    string public  m_descripcion;
+    uint public    m_cuit;
+    uint public    m_uid;
 
     mapping(uint => Contribution) m_contributions;
 
@@ -32,13 +34,17 @@ contract ContratoSAS is mortal {
         if(msg.value > 0) {
             emit receivedFunds(msg.sender, msg.value);
         }
-
         /* File contribution*/
-        /*uint uid = getUserId();*/
         contribution_counter++;
         m_contributions[contribution_counter] = Contribution(msg.sender, uid, msg.value);
         emit contributionFiled(msg.sender, uid, msg.value);
+
+        m_nombre = 'Pepe';
     }
+
+    /*function getNombre() public returns (string) {
+        return m_nombre;
+    }*/
 
     /* Setea el nombre de la SAS/proyecto */
     function setNombre(string nombre) onlyowner public {
@@ -68,6 +74,12 @@ contract ContratoSAS is mortal {
     function setCuit(uint cuit) onlyowner public {
         m_cuit = cuit;
         emit cuitSet(m_cuit);
+    }
+
+    /* Setea el uid de la SAS/proyecto */
+    function setUid(uint uid) onlyowner public {
+        m_uid = uid;
+        emit uidSet(m_uid);
     }
 
     /* TODO: Fill in function or get from frontend */
