@@ -8,14 +8,14 @@
       "type": "constructor"
     }
   ],
-  "bytecode": "0x6080604052348015600f57600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550603580605d6000396000f3006080604052600080fd00a165627a7a723058204bec2161791f86e2edf5e844b0a0d173ded5c2b6c0dd8e804e9c5b35349913fd0029",
-  "deployedBytecode": "0x6080604052600080fd00a165627a7a723058204bec2161791f86e2edf5e844b0a0d173ded5c2b6c0dd8e804e9c5b35349913fd0029",
-  "sourceMap": "26:402:2:-;;;367:59;8:9:-1;5:2;;;30:1;27;20:12;5:2;367:59:2;409:10;401:5;;:18;;;;;;;;;;;;;;;;;;26:402;;;;;;",
-  "deployedSourceMap": "26:402:2:-;;;;;",
-  "source": "pragma solidity ^0.4.15;\n\ncontract owned {\n    address owner;\n\n    modifier onlyowner() {\n        /**\n         * Update Exception Handling from Solidity 0.4.13!\n         * See: https://vomtom.at/exception-handling-in-solidity/\n         * If you have any questions, head over to the course Q&A!\n         **/\n        require(msg.sender == owner);\n        _;\n    }\n\n    function owned() public {\n        owner = msg.sender;\n    }\n}\n",
-  "sourcePath": "/home/bruno/Proyectos/Cripto/Hackaton-BPN/contracts/owned.sol",
+  "bytecode": "0x6080604052348015600f57600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550603580605d6000396000f3006080604052600080fd00a165627a7a72305820eac6a76d20cadd343d8ace267ee06b8348f1da682b9aa054924a6c7587ffcc9f0029",
+  "deployedBytecode": "0x6080604052600080fd00a165627a7a72305820eac6a76d20cadd343d8ace267ee06b8348f1da682b9aa054924a6c7587ffcc9f0029",
+  "sourceMap": "26:399:2:-;;;367:56;8:9:-1;5:2;;;30:1;27;20:12;5:2;367:56:2;406:10;398:5;;:18;;;;;;;;;;;;;;;;;;26:399;;;;;;",
+  "deployedSourceMap": "26:399:2:-;;;;;",
+  "source": "pragma solidity ^0.4.15;\n\ncontract owned {\n    address owner;\n\n    modifier onlyowner() {\n        /**\n         * Update Exception Handling from Solidity 0.4.13!\n         * See: https://vomtom.at/exception-handling-in-solidity/\n         * If you have any questions, head over to the course Q&A!\n         **/\n        require(msg.sender == owner);\n        _;\n    }\n\n    constructor() public {\n        owner = msg.sender;\n    }\n}\n",
+  "sourcePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/owned.sol",
   "ast": {
-    "absolutePath": "/home/bruno/Proyectos/Cripto/Hackaton-BPN/contracts/owned.sol",
+    "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/owned.sol",
     "exportedSymbols": {
       "owned": [
         254
@@ -209,7 +209,7 @@
             "body": {
               "id": 252,
               "nodeType": "Block",
-              "src": "391:35:2",
+              "src": "388:35:2",
               "statements": [
                 {
                   "expression": {
@@ -226,7 +226,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 233,
-                      "src": "401:5:2",
+                      "src": "398:5:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -243,7 +243,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 269,
-                        "src": "409:3:2",
+                        "src": "406:3:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
                           "typeString": "msg"
@@ -257,13 +257,13 @@
                       "memberName": "sender",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "409:10:2",
+                      "src": "406:10:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "src": "401:18:2",
+                    "src": "398:18:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -271,7 +271,7 @@
                   },
                   "id": 251,
                   "nodeType": "ExpressionStatement",
-                  "src": "401:18:2"
+                  "src": "398:18:2"
                 }
               ]
             },
@@ -281,36 +281,36 @@
             "isConstructor": true,
             "isDeclaredConst": false,
             "modifiers": [],
-            "name": "owned",
+            "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
               "id": 245,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "381:2:2"
+              "src": "378:2:2"
             },
             "payable": false,
             "returnParameters": {
               "id": 246,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "391:0:2"
+              "src": "388:0:2"
             },
             "scope": 254,
-            "src": "367:59:2",
+            "src": "367:56:2",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
         "scope": 255,
-        "src": "26:402:2"
+        "src": "26:399:2"
       }
     ],
-    "src": "0:429:2"
+    "src": "0:426:2"
   },
   "legacyAST": {
-    "absolutePath": "/home/bruno/Proyectos/Cripto/Hackaton-BPN/contracts/owned.sol",
+    "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/owned.sol",
     "exportedSymbols": {
       "owned": [
         254
@@ -504,7 +504,7 @@
             "body": {
               "id": 252,
               "nodeType": "Block",
-              "src": "391:35:2",
+              "src": "388:35:2",
               "statements": [
                 {
                   "expression": {
@@ -521,7 +521,7 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 233,
-                      "src": "401:5:2",
+                      "src": "398:5:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -538,7 +538,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 269,
-                        "src": "409:3:2",
+                        "src": "406:3:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
                           "typeString": "msg"
@@ -552,13 +552,13 @@
                       "memberName": "sender",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "409:10:2",
+                      "src": "406:10:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "src": "401:18:2",
+                    "src": "398:18:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -566,7 +566,7 @@
                   },
                   "id": 251,
                   "nodeType": "ExpressionStatement",
-                  "src": "401:18:2"
+                  "src": "398:18:2"
                 }
               ]
             },
@@ -576,39 +576,39 @@
             "isConstructor": true,
             "isDeclaredConst": false,
             "modifiers": [],
-            "name": "owned",
+            "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
               "id": 245,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "381:2:2"
+              "src": "378:2:2"
             },
             "payable": false,
             "returnParameters": {
               "id": 246,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "391:0:2"
+              "src": "388:0:2"
             },
             "scope": 254,
-            "src": "367:59:2",
+            "src": "367:56:2",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
         "scope": 255,
-        "src": "26:402:2"
+        "src": "26:399:2"
       }
     ],
-    "src": "0:429:2"
+    "src": "0:426:2"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.4.23+commit.124ca40d.Emscripten.clang"
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-18T23:04:32.833Z"
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2018-09-20T16:02:58.055Z"
 }

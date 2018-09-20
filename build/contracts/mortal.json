@@ -11,14 +11,14 @@
       "type": "function"
     }
   ],
-  "bytecode": "0x6080604052336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550610114806100536000396000f300608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146044575b600080fd5b348015604f57600080fd5b5060566058565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141560e6576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b5600a165627a7a7230582036b406607f96df46497870737788641f31c6ea8d002f580a45740a3bbe3131ea0029",
-  "deployedBytecode": "0x608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146044575b600080fd5b348015604f57600080fd5b5060566058565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141560e6576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b5600a165627a7a7230582036b406607f96df46497870737788641f31c6ea8d002f580a45740a3bbe3131ea0029",
-  "sourceMap": "49:125:1:-;;;409:10:2;401:5;;:18;;;;;;;;;;;;;;;;;;49:125:1;;;;;;",
+  "bytecode": "0x6080604052336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550610114806100536000396000f300608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146044575b600080fd5b348015604f57600080fd5b5060566058565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141560e6576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b5600a165627a7a7230582026025d979fd7060363347ee0f94a6d7061ddac94604ea950f6b50f18e17afe5d0029",
+  "deployedBytecode": "0x608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146044575b600080fd5b348015604f57600080fd5b5060566058565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141560e6576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b5600a165627a7a7230582026025d979fd7060363347ee0f94a6d7061ddac94604ea950f6b50f18e17afe5d0029",
+  "sourceMap": "49:125:1:-;;;406:10:2;398:5;;:18;;;;;;;;;;;;;;;;;;49:125:1;;;;;;",
   "deployedSourceMap": "49:125:1:-;;;;;;;;;;;;;;;;;;;;;;;;80:92;;8:9:-1;5:2;;;30:1;27;20:12;5:2;80:92:1;;;;;;;131:5;;;;;;;;;;;117:19;;:10;:19;;;113:52;;;159:5;;;;;;;;;;;146:19;;;113:52;80:92::o",
   "source": "pragma solidity ^0.4.15;\n\nimport \"./owned.sol\";\n\ncontract mortal is owned {\n    function kill() public {\n        if (msg.sender == owner)\n        selfdestruct(owner);\n    }\n}\n",
-  "sourcePath": "/home/bruno/Proyectos/Cripto/Hackaton-BPN/contracts/mortal.sol",
+  "sourcePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/mortal.sol",
   "ast": {
-    "absolutePath": "/home/bruno/Proyectos/Cripto/Hackaton-BPN/contracts/mortal.sol",
+    "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/mortal.sol",
     "exportedSymbols": {
       "mortal": [
         229
@@ -39,7 +39,7 @@
         "src": "0:24:1"
       },
       {
-        "absolutePath": "/home/bruno/Proyectos/Cripto/Hackaton-BPN/contracts/owned.sol",
+        "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/owned.sol",
         "file": "./owned.sol",
         "id": 213,
         "nodeType": "ImportDirective",
@@ -248,7 +248,7 @@
     "src": "0:175:1"
   },
   "legacyAST": {
-    "absolutePath": "/home/bruno/Proyectos/Cripto/Hackaton-BPN/contracts/mortal.sol",
+    "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/mortal.sol",
     "exportedSymbols": {
       "mortal": [
         229
@@ -269,7 +269,7 @@
         "src": "0:24:1"
       },
       {
-        "absolutePath": "/home/bruno/Proyectos/Cripto/Hackaton-BPN/contracts/owned.sol",
+        "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/owned.sol",
         "file": "./owned.sol",
         "id": 213,
         "nodeType": "ImportDirective",
@@ -479,9 +479,9 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.4.23+commit.124ca40d.Emscripten.clang"
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-18T23:04:32.833Z"
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2018-09-20T16:02:58.054Z"
 }
