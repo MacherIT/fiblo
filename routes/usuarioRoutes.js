@@ -1,7 +1,7 @@
 var express = require('express')
 var router = express.Router()
 var usuarioController = require('../controllers/usuarioController')
-var guardian = require('../config/guardian')
+var guardian = require('../security/guardian')
 const { ROL_ADMIN } = require('../const')
 const Usuario = require('../models/usuarioModel')
 

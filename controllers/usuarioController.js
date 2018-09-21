@@ -50,25 +50,28 @@ module.exports = {
   // //////////////
   mail_pass_check: (req, res) => {
     if (req.body.email) {
-      usuarioModel.findOne({ email: req.body.email }, (err, usuario) => {
-        if (err) {
+      usuarioModel.findOne({ where: { email: req.body.email } }).then(
+        usuario => {
+          if (usuario) {
+            let token = usuario.generateMailToken()
+            mpc(usuario.email, token, (error, info) => {
+              if (error) {
+                return res.status(500).json({ message: 'Ocurrió un error', token: token })
+              } else {
+                return res.json()
+              }
+            })
+          } else {
+            return res.status(404).json()
+          }
+        },
+        error => {
           return res.status(500).json({
             message: 'Error when getting usuario.',
-            error: err
+            error: error
           })
         }
-        if (usuario) {
-          mpc(usuario.email, usuario.generateMailToken(), (error, info) => {
-            if (error) {
-              return res.status(500).json({ message: 'Ocurrió un error' })
-            } else {
-              return res.json()
-            }
-          })
-        } else {
-          return res.status(404).json()
-        }
-      })
+      )
     } else {
       return res.status(400).json({
         message: 'Error'
@@ -176,30 +179,35 @@ module.exports = {
   // /////////////
   ch_pass: function (req, res) {
     if (req.body.password) {
-      usuarioModel.findOne({ id: req.payload.uid }, function (err, usuario) {
-        if (err) {
+      usuarioModel.findOne({ where: { id: req.payload.uid } }).then(
+        usuario => {
+          if (!usuario) {
+            return res.status(404).json({
+              message: 'No such usuario'
+            })
+          } else {
+            usuario.setPassword(req.body.password)
+
+            usuario.save().then(
+              usuario => {
+                return res.json(usuario)
+              },
+              error => {
+                return res.status(500).json({
+                  message: 'Error when updating usuario',
+                  error: error
+                })
+              }
+            )
+          }
+        },
+        error => {
           return res.status(500).json({
             message: 'Error when getting usuario',
-            error: err
-          })
-        } else if (!usuario) {
-          return res.status(404).json({
-            message: 'No such usuario'
-          })
-        } else {
-          usuario.setPassword(req.body.password)
-
-          usuario.save().then((err, usuario) => {
-            if (err) {
-              return res.status(500).json({
-                message: 'Error when updating usuario.',
-                error: err
-              })
-            }
-            return res.json(usuario)
+            error: error
           })
         }
-      })
+      )
     } else {
       return res.status(400).json({
         message: 'Error'

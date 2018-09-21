@@ -6,7 +6,7 @@ var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
 
 require('./models/db')
-require('./config/passport')
+require('./security/passport')
 
 var app = express()
 
