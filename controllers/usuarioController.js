@@ -1,8 +1,8 @@
-var passport = require('passport')
-var usuarioModel = require('../models/usuarioModel.js')
-var mpc = require('../modules/mpc.js')
-var mca = require('../modules/mca.js')
-var crypto = require('crypto')
+var passport = require('passport');
+var usuarioModel = require('../models/usuarioModel.js');
+var mpc = require('../modules/mpc.js');
+var mca = require('../modules/mca.js');
+var crypto = require('crypto');
 
 /**
  * usuarioController.js
@@ -13,39 +13,41 @@ module.exports = {
   /**
    * usuarioController.list()
    */
-  list: function (req, res) {
-    usuarioModel.find({}).exec(function (err, usuarios) {
-      if (err) {
+  list: function(req, res) {
+    usuarioModel.find({}).then(
+      usuarios => {
+        return res.json(usuarios);
+      },
+      error => {
         return res.status(500).json({
           message: 'Error when getting usuario.',
-          error: err
-        })
-      }
-      return res.json(usuarios)
-    })
+          error: error,
+        });
+      },
+    );
   },
 
   /**
    * usuarioController.show()
    */
-  show: function (req, res) {
-    var id = req.params.id ? req.params.id : req.payload.id
+  show: function(req, res) {
+    var id = req.params.id ? req.params.id : req.payload.id;
     usuarioModel.findOne({ where: { id: id } }).then(
       usuario => {
         if (!usuario) {
           return res.status(404).json({
-            message: 'No such usuario'
-          })
+            message: 'No such usuario',
+          });
         }
-        return res.json(usuario)
+        return res.json(usuario);
       },
       error => {
         return res.status(500).json({
           message: 'Error when getting usuario.',
-          error: error
-        })
-      }
-    )
+          error: error,
+        });
+      },
+    );
   },
   // //////////////
   mail_pass_check: (req, res) => {
@@ -53,198 +55,198 @@ module.exports = {
       usuarioModel.findOne({ where: { email: req.body.email } }).then(
         usuario => {
           if (usuario) {
-            let token = usuario.generateMailToken()
+            let token = usuario.generateMailToken();
             mpc(usuario.email, token, (error, info) => {
               if (error) {
-                return res.status(500).json({ message: 'Ocurrió un error', token: token })
+                return res.status(500).json({ message: 'Ocurrió un error', token: token });
               } else {
-                return res.json()
+                return res.json();
               }
-            })
+            });
           } else {
-            return res.status(404).json()
+            return res.status(404).json();
           }
         },
         error => {
           return res.status(500).json({
             message: 'Error when getting usuario.',
-            error: error
-          })
-        }
-      )
+            error: error,
+          });
+        },
+      );
     } else {
       return res.status(400).json({
-        message: 'Error'
-      })
+        message: 'Error',
+      });
     }
   },
   // //////////////
   login: (req, res) => {
-    passport.authenticate('local', function (err, usuario, info) {
-      var token
+    passport.authenticate('local', function(err, usuario, info) {
+      var token;
 
       // If Passport throws/catches an error
       if (err) {
-        res.status(404).json(err)
-        return
+        res.status(404).json(err);
+        return;
       }
 
       // If a usuario is found
       if (usuario) {
-        token = usuario.generateJwt()
-        res.status(200)
-        res.json({ token: token })
+        token = usuario.generateJwt();
+        res.status(200);
+        res.json({ token: token });
       } else {
         // If usuario is not found
-        res.status(401).json(info)
+        res.status(401).json(info);
       }
-    })(req, res)
+    })(req, res);
   },
 
   /**
    * usuarioController.create()
    */
 
-  create: function (req, res) {
+  create: function(req, res) {
+
     var usuario = usuarioModel.build({
       email: req.body.email,
       nombre: req.body.nombre,
       hash: req.body.hash,
-      role: req.body.role
-    })
+      role: req.body.role,
+    });
 
-    usuario.setPassword(req.body.password)
-    usuario.generateActivationToken()
+    usuario.setPassword(req.body.password);
+    usuario.generateActivationToken();
 
     usuario.save().then(
       usuario => {
         if (!req.headers.authorization) {
           mca(usuario.email, usuario.activation, (error, info) => {
             if (error) {
-              console.log(error)
-              return res.status(500).json({ message: 'Ocurrió un error', usuario: usuario })
+              return res.status(500).json({ message: 'Ocurrió un error', usuario: usuario });
             } else {
-              return res.status(206).json()
+              return res.status(206).json();
             }
-          })
+          });
         }
       },
       error => {
         return res.status(500).json({
           message: 'Error when creating usuario',
-          error: error
-        })
-      }
-    )
+          error: error,
+        });
+      },
+    );
   },
 
   /**
    * usuarioController.update()
    */
-  update: function (req, res) {
-    var id = req.payload.id
+  update: function(req, res) {
+    var id = req.payload.id;
     usuarioModel.findOne({ where: { id: id } }).then(
       usuario => {
         if (!usuario) {
           return res.status(404).json({
-            message: 'No such usuario'
-          })
+            message: 'No such usuario',
+          });
         }
 
-        usuario.email = req.body.email ? req.body.email : usuario.email
-        usuario.nombre = req.body.nombre ? req.body.nombre : usuario.nombre
-        usuario.hash = req.body.hash ? req.body.hash : usuario.hash
-        usuario.role = req.body.role ? req.body.role : usuario.role
+        usuario.email = req.body.email ? req.body.email : usuario.email;
+        usuario.nombre = req.body.nombre ? req.body.nombre : usuario.nombre;
+        usuario.hash = req.body.hash ? req.body.hash : usuario.hash;
+        usuario.role = req.body.role ? req.body.role : usuario.role;
 
         usuario.save().then(
           usuario => {
-            return res.json(usuario)
+            return res.json(usuario);
           },
           error => {
             return res.status(500).json({
               message: 'Error when updating usuario.',
-              error: error
-            })
-          }
-        )
+              error: error,
+            });
+          },
+        );
       },
       error => {
         return res.status(500).json({
           message: 'Error when getting usuario',
-          error: error
-        })
-      }
-    )
+          error: error,
+        });
+      },
+    );
   },
   // /////////////
-  ch_pass: function (req, res) {
+  ch_pass: function(req, res) {
     if (req.body.password) {
       usuarioModel.findOne({ where: { id: req.payload.uid } }).then(
         usuario => {
           if (!usuario) {
             return res.status(404).json({
-              message: 'No such usuario'
-            })
+              message: 'No such usuario',
+            });
           } else {
-            usuario.setPassword(req.body.password)
+            usuario.setPassword(req.body.password);
 
             usuario.save().then(
               usuario => {
-                return res.json(usuario)
+                return res.json(usuario);
               },
               error => {
                 return res.status(500).json({
                   message: 'Error when updating usuario',
-                  error: error
-                })
-              }
-            )
+                  error: error,
+                });
+              },
+            );
           }
         },
         error => {
           return res.status(500).json({
             message: 'Error when getting usuario',
-            error: error
-          })
-        }
-      )
+            error: error,
+          });
+        },
+      );
     } else {
       return res.status(400).json({
-        message: 'Error'
-      })
+        message: 'Error',
+      });
     }
   },
   // /////////
-  c_ac: function (req, res) {
+  c_ac: function(req, res) {
     if (req.payload.acuid) {
-      usuarioModel.findOne({ id: req.payload.acuid }, function (err, usuario) {
+      usuarioModel.findOne({ id: req.payload.acuid }, function(err, usuario) {
         if (err) {
           return res.status(500).json({
             message: 'Error when getting usuario',
-            error: err
-          })
+            error: err,
+          });
         } else if (!usuario) {
           return res.status(404).json({
-            message: 'No such usuario'
-          })
+            message: 'No such usuario',
+          });
         } else {
-          usuario.activation = ''
+          usuario.activation = '';
 
           usuario.save().then((err, usuario) => {
             if (err) {
               return res.status(500).json({
                 message: 'Error when updating usuario.',
-                error: err
-              })
+                error: err,
+              });
             }
-            return res.json()
-          })
+            return res.json();
+          });
         }
-      })
+      });
     } else {
       return res.status(400).json({
-        message: 'Error'
-      })
+        message: 'Error',
+      });
     }
   },
   // /////////
@@ -253,16 +255,16 @@ module.exports = {
      * usuarioController.remove()
   remove: function(req, res) {
      */
-  remove: function (req, res) {
-    var id = req.payload.id
-    usuarioModel.findByIdAndRemove(id, function (err, usuario) {
+  remove: function(req, res) {
+    var id = req.payload.id;
+    usuarioModel.findByIdAndRemove(id, function(err, usuario) {
       if (err) {
         return res.status(500).json({
           message: 'Error when deleting the usuario.',
-          error: err
-        })
+          error: err,
+        });
       }
-      return res.status(204).json()
-    })
-  }
-}
+      return res.status(204).json();
+    });
+  },
+};
