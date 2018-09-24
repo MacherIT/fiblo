@@ -7,9 +7,9 @@ const usuarioSchema = sequelize.define('usuario', {
   email: {
     type: STRING,
     unique: true,
-    required: true,
+    allowNull: false,
   },
-  nombre: { type: STRING, required: true },
+  nombre: { type: STRING, allowNull: false },
   role: STRING,
   activation: STRING,
   hash: STRING,

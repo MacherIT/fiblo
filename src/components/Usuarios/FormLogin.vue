@@ -23,8 +23,8 @@
 </template>
 
 <script>
-import mixins from '@/mixins/mixins';
 import { mapActions } from 'vuex';
+import mixins from '@/mixins/mixins';
 
 export default {
   name: 'UsuariosFormLogin',

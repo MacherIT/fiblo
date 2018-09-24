@@ -50,28 +50,38 @@ module.exports = {
    * proyectoController.create()
    */
   create: function(req, res) {
-    var proyecto = proyectoModel.build({
-      nombre: req.body.nombre,
-      domicilio: req.body.domicilio,
-      telefono: req.body.telefono,
-      email: req.body.email,
-      monto: req.body.monto,
-      montoSuperaMax: req.body.montoSuperaMax,
-      sector: req.body.sector,
-      emprendedores: req.body.emprendedores,
-    });
+    if (req.payload && req.payload.id) {
+      var proyecto = proyectoModel.build({
+        usuario_id: req.payload.id,
+        hash: require('crypto')
+          .randomBytes(64)
+          .toString('hex'),
+        nombre: req.body.nombre,
+        domicilio: req.body.domicilio,
+        telefono: req.body.telefono,
+        email: req.body.email,
+        monto: req.body.monto,
+        montoSuperaMax: req.body.montoSuperaMax,
+        sector: req.body.sector,
+        emprendedores: req.body.emprendedores,
+      });
 
-    proyecto.save().then(
-      proyecto => {
-        return res.status(201).json(proyecto);
-      },
-      error => {
-        return res.status(500).json({
-          message: 'Error when creating proyecto',
-          error: error,
-        });
-      },
-    );
+      proyecto.save().then(
+        proyecto => {
+          return res.status(201).json(proyecto);
+        },
+        error => {
+          return res.status(500).json({
+            message: 'Error when creating proyecto',
+            error: error,
+          });
+        },
+      );
+    } else {
+      return res.status(500).json({
+        message: 'Error when creating proyecto',
+      });
+    }
   },
 
   /**

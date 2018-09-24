@@ -1,6 +1,6 @@
 var passport = require('passport');
 var usuarioModel = require('../models/usuarioModel.js');
-// var proyectoModel = require('../models/proyectoModel.js');
+var proyectoModel = require('../models/proyectoModel.js');
 var mpc = require('../modules/mpc.js');
 var mca = require('../modules/mca.js');
 var crypto = require('crypto');
@@ -15,8 +15,8 @@ module.exports = {
    * usuarioController.list()
    */
   list: function(req, res) {
-    // usuarioModel.findAll({ include: [{ model: proyectoModel, as: 'proyectos' }] }).then(
-    usuarioModel.findAll().then(
+    usuarioModel.findAll({ include: [{ model: proyectoModel, as: 'proyectos' }] }).then(
+    // usuarioModel.findAll().then(
       usuarios => {
         return res.json(usuarios);
       },

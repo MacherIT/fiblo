@@ -26,6 +26,8 @@ body {
     * {
       font-size: 16px;
       font-family: monospace;
+      box-sizing: border-box;
+      max-width: 100% !important;
     }
     input {
       @include ease-transition();
