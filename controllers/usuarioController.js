@@ -85,6 +85,7 @@ module.exports = {
   // //////////////
   login: (req, res) => {
     passport.authenticate('local', function(err, usuario, info) {
+
       var token;
 
       // If Passport throws/catches an error

@@ -8,8 +8,9 @@ import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 import faSolid from '@fortawesome/fontawesome-free-solid';
 import faBrands from '@fortawesome/fontawesome-free-brands';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import App from './App';
-import router from './router';
+import App from '@/App';
+import router from '@/router';
+import store from '@/store/index';
 
 library.add(faCoffee, faSolid, faBrands);
 
@@ -24,6 +25,7 @@ Vue.config.productionTip = false;
 window.App = new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>',
 });

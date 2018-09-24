@@ -1,16 +1,17 @@
 <template lang="pug">
   div(id="root-app")
-    ul
-      li
-        router-link(:to="{ name: 'Home', path: '/' }") Home
-      li
-        router-link(:to="{ name: 'Usuarios', path: 'usuarios' }") Usuarios
+    MainMenu
     router-view
 </template>
 
 <script>
+import MainMenu from '@/components/General/MainMenu';
+
 export default {
   name: 'App',
+  components: {
+    MainMenu,
+  },
 };
 </script>
 

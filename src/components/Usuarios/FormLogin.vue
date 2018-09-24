@@ -23,11 +23,12 @@
 </template>
 
 <script>
-import m from '@/mixins/mixins';
+import mixins from '@/mixins/mixins';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'UsuariosFormLogin',
-  mixins: [m.FormValidation],
+  mixins: [mixins.FormValidation],
   data() {
     return {
       sent: false,
@@ -38,17 +39,14 @@ export default {
     };
   },
   methods: {
+    ...mapActions('usuarios', ['login']),
     iniciarSesion() {
       if (this.dirtyForm && this.validForm) {
         this.sent = true;
-        this.$http({
-          method: 'POST',
-          url: '/api/usuarios/login',
-          body: this.usuario,
-        }).then(
-          ({ status }) => {
+        this.login({ email: this.usuario.email, password: this.usuario.password }).then(
+          ({ status, data }) => {
             this.sent = false;
-            console.log(status);
+            if (status === 200) localStorage.setItem('@fibloST:usuario', data.token);
           },
           error => {
             this.sent = false;

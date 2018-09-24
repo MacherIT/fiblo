@@ -7,8 +7,8 @@ var guardian = require('../security/guardian')
 /*
  * GET
  */
-// router.get('/', usuarioController.list)
-router.get('/', guardian({}), usuarioController.list)
+router.get('/', usuarioController.list)
+// router.get('/', guardian({}), usuarioController.list)
 
 router.get('/c_ac', guardian({ activationToken: true }), usuarioController.c_ac)
 
