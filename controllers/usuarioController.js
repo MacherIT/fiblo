@@ -1,5 +1,6 @@
 var passport = require('passport');
 var usuarioModel = require('../models/usuarioModel.js');
+// var proyectoModel = require('../models/proyectoModel.js');
 var mpc = require('../modules/mpc.js');
 var mca = require('../modules/mca.js');
 var crypto = require('crypto');
@@ -14,7 +15,8 @@ module.exports = {
    * usuarioController.list()
    */
   list: function(req, res) {
-    usuarioModel.find({}).then(
+    // usuarioModel.findAll({ include: [{ model: proyectoModel, as: 'proyectos' }] }).then(
+    usuarioModel.findAll().then(
       usuarios => {
         return res.json(usuarios);
       },
@@ -108,7 +110,6 @@ module.exports = {
    */
 
   create: function(req, res) {
-
     var usuario = usuarioModel.build({
       email: req.body.email,
       nombre: req.body.nombre,
@@ -219,30 +220,33 @@ module.exports = {
   // /////////
   c_ac: function(req, res) {
     if (req.payload.acuid) {
-      usuarioModel.findOne({ id: req.payload.acuid }, function(err, usuario) {
-        if (err) {
+      usuarioModel.findOne({ where: { id: req.payload.acuid } }).then(
+        usuario => {
+          if (!usuario) {
+            return res.status(404).json({
+              message: 'No such usuario',
+            });
+          } else {
+            usuario.activation = '';
+
+            usuario.save().then((err, usuario) => {
+              if (err) {
+                return res.status(500).json({
+                  message: 'Error when updating usuario.',
+                  error: err,
+                });
+              }
+              return res.json();
+            });
+          }
+        },
+        error => {
           return res.status(500).json({
             message: 'Error when getting usuario',
             error: err,
           });
-        } else if (!usuario) {
-          return res.status(404).json({
-            message: 'No such usuario',
-          });
-        } else {
-          usuario.activation = '';
-
-          usuario.save().then((err, usuario) => {
-            if (err) {
-              return res.status(500).json({
-                message: 'Error when updating usuario.',
-                error: err,
-              });
-            }
-            return res.json();
-          });
-        }
-      });
+        },
+      );
     } else {
       return res.status(400).json({
         message: 'Error',
@@ -256,15 +260,17 @@ module.exports = {
   remove: function(req, res) {
      */
   remove: function(req, res) {
-    var id = req.payload.id;
-    usuarioModel.findByIdAndRemove(id, function(err, usuario) {
-      if (err) {
+    var id = req.params.id;
+    usuarioModel.destroy({ where: { id: id } }).then(
+      () => {
+        return res.status(204).json();
+      },
+      error => {
         return res.status(500).json({
           message: 'Error when deleting the usuario.',
-          error: err,
+          error: error,
         });
-      }
-      return res.status(204).json();
-    });
+      },
+    );
   },
 };

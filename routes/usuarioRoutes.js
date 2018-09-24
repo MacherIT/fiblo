@@ -2,12 +2,12 @@ var express = require('express')
 var router = express.Router()
 var usuarioController = require('../controllers/usuarioController')
 var guardian = require('../security/guardian')
-const { ROL_ADMIN } = require('../const')
-const Usuario = require('../models/usuarioModel')
+// const { ROL_ADMIN } = require('../const')
 
 /*
  * GET
  */
+// router.get('/', usuarioController.list)
 router.get('/', guardian({}), usuarioController.list)
 
 router.get('/c_ac', guardian({ activationToken: true }), usuarioController.c_ac)
