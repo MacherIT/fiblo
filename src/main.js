@@ -8,6 +8,7 @@ import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 import faSolid from '@fortawesome/fontawesome-free-solid';
 import faBrands from '@fortawesome/fontawesome-free-brands';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import moment from 'moment';
 import App from '@/App';
 import router from '@/router';
 import store from '@/store/index';
@@ -18,6 +19,11 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.use(VueResource);
 Vue.use(VeeValidate);
+
+Vue.filter(
+  'formatDate',
+  (val, format) => (val ? (format ? moment(String(val)).format(format) : val) : ''),
+);
 
 Vue.config.productionTip = false;
 

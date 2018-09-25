@@ -9,11 +9,13 @@ export default {
     login({ commit }, { email, password }) {
       usuarioService
         .login(email, password)
-        .then(({ data }) => {
-          commit('loginSuccess', data.token);
+        .then(res => {
+          commit('loginSuccess', res.data.token);
+          return res;
         })
         .catch(error => {
           commit('loginFailure', error);
+          console.error(error);
         });
     },
     logout({ commit }) {

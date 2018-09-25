@@ -37,9 +37,10 @@
           input(
             type="text"
             placeholder="Monto maximo de supersuscripción en ARS ($xx.xx)"
-            v-validate="{required: true, decimal: 2}"
+            v-validate="{required: true, decimal: 2, valorMax: proyecto.monto}"
             name="monto"
             v-model="proyecto.montoSuperaMax")
+          span {{proyecto.montoSuperaMax ? errors.first('monto') : ''}}
         .emprendedores
           .titulo
             span Lista de emprendedores
@@ -69,7 +70,13 @@
 
 <script>
 import { mapState } from 'vuex';
+import { Validator } from 'vee-validate';
 import mixins from '@/mixins/mixins';
+
+Validator.extend('valorMax', {
+  getMessage: () => 'El valor de supersuscripción debe ser mayor o igual que el monto esperado',
+  validate: (value, [monto]) => parseFloat(value, 10) >= parseFloat(monto, 10),
+});
 
 export default {
   name: 'ProyectosFormNew',

@@ -57,5 +57,6 @@ module.exports = {
     'no-console': 'off',
     'arrow-parens': 0,
     'array-callback-return': 0,
+    'no-nested-ternary': 0,
   },
 };

@@ -43,16 +43,9 @@ export default {
     iniciarSesion() {
       if (this.dirtyForm && this.validForm) {
         this.sent = true;
-        this.login({ email: this.usuario.email, password: this.usuario.password }).then(
-          ({ status, data }) => {
-            this.sent = false;
-            if (status === 200) localStorage.setItem('@fibloST:usuario', data.token);
-          },
-          error => {
-            this.sent = false;
-            console.error(error);
-          },
-        );
+        this.login({ email: this.usuario.email, password: this.usuario.password }).then(() => {
+          this.sent = false;
+        });
       } else {
         this.$validator.validateAll();
       }
