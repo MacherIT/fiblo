@@ -1,0 +1,29 @@
+<template lang="pug">
+  section.page-proyectos
+    h1 Proyectos
+    ProyectosFormNew(v-if="loggedIn")
+    div(v-if="!loggedIn")
+      span Para poder añadir proyectos, inicie sesión
+      UsuariosFormLogin
+</template>
+
+<script>
+import { mapState } from 'vuex';
+import ProyectosFormNew from '@/components/Proyectos/FormNew';
+import UsuariosFormLogin from '@/components/Usuarios/FormLogin';
+
+export default {
+  name: 'Proyectos',
+  components: {
+    ProyectosFormNew,
+    UsuariosFormLogin,
+  },
+  computed: {
+    ...mapState('usuarios', ['loggedIn']),
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+@import '~Styles/_config.scss';
+</style>

@@ -13,7 +13,7 @@ contract owned {
         _;
     }
 
-    function owned() public {
+    constructor() public {
         owner = msg.sender;
     }
 }
