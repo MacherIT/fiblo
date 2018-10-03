@@ -58,5 +58,6 @@ module.exports = {
     'arrow-parens': 0,
     'array-callback-return': 0,
     'no-nested-ternary': 0,
+    'no-underscore-dangle': 0,
   },
 };

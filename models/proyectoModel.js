@@ -1,12 +1,21 @@
 const { STRING, INTEGER, DOUBLE, JSONB } = require('sequelize');
 const sequelize = require('./db');
 var usuarioModel = require('./usuarioModel.js');
+var categoriaModel = require('./categoriaModel.js');
 
 var proyectoSchema = sequelize.define('proyecto', {
   usuario_id: {
     type: INTEGER,
     references: {
       model: usuarioModel,
+      key: 'id',
+    },
+    allowNull: false,
+  },
+  categoria_id: {
+    type: INTEGER,
+    references: {
+      model: categoriaModel,
       key: 'id',
     },
     allowNull: false,
@@ -21,6 +30,9 @@ var proyectoSchema = sequelize.define('proyecto', {
     type: STRING,
     allowNull: false,
     unique: true,
+  },
+  ciudad: {
+    type: JSONB,
   },
   domicilio: {
     type: STRING,
@@ -42,7 +54,6 @@ var proyectoSchema = sequelize.define('proyecto', {
     type: DOUBLE,
     allowNull: false,
   },
-  sector: STRING,
   emprendedores: JSONB,
 });
 

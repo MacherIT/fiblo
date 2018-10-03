@@ -29,6 +29,9 @@ app.use('/api/usuarios', usuario);
 const proyecto = require('./routes/proyectoRoutes');
 app.use('/api/proyectos', proyecto);
 
+const categoria = require('./routes/categoriaRoutes');
+app.use('/api/categorias', categoria);
+
 require('./models/relations');
 
 if (process.env.NODE_ENV === 'development')

@@ -1,4 +1,5 @@
 var proyectoModel = require('../models/proyectoModel.js');
+var categoriaModel = require('../models/categoriaModel.js');
 
 /**
  * proyectoController.js
@@ -10,17 +11,26 @@ module.exports = {
    * proyectoController.list()
    */
   list: function(req, res) {
-    proyectoModel.findAll().then(
-      proyectos => {
-        return res.json(proyectos);
-      },
-      error => {
-        return res.status(500).json({
-          message: 'Error when getting proyecto.',
-          error: error,
-        });
-      },
-    );
+    proyectoModel
+      .findAll({
+        include: [
+          {
+            model: categoriaModel,
+            as: 'categoria',
+          },
+        ],
+      })
+      .then(
+        proyectos => {
+          return res.json(proyectos);
+        },
+        error => {
+          return res.status(500).json({
+            message: 'Error when getting proyecto.',
+            error: error,
+          });
+        },
+      );
   },
 
   /**
@@ -52,10 +62,12 @@ module.exports = {
   create: function(req, res) {
     if (req.payload && req.payload.id) {
       var proyecto = proyectoModel.build({
+        categoria_id: req.body.categoria_id,
         usuario_id: req.payload.id,
         hash: require('crypto')
           .randomBytes(64)
           .toString('hex'),
+        ciudad: req.body.ciudad,
         nombre: req.body.nombre,
         domicilio: req.body.domicilio,
         telefono: req.body.telefono,
@@ -97,7 +109,11 @@ module.exports = {
           });
         }
 
+        proyecto.categoria_id = req.body.categoria_id
+          ? req.body.categoria_id
+          : proyecto.categoria_id;
         proyecto.nombre = req.body.nombre ? req.body.nombre : proyecto.nombre;
+        proyecto.ciudad = req.body.ciudad ? req.body.ciudad : proyecto.ciudad;
         proyecto.domicilio = req.body.domicilio ? req.body.domicilio : proyecto.domicilio;
         proyecto.telefono = req.body.telefono ? req.body.telefono : proyecto.telefono;
         proyecto.email = req.body.email ? req.body.email : proyecto.email;

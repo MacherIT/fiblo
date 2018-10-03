@@ -1,5 +1,6 @@
 @mixin default-form {
-  input[aria-required='true'] {
+  input[aria-required='true'],
+  input.required {
     -webkit-box-shadow: inset -5px 0 0 0 #fcc !important;
     box-shadow: inset -5px 0 0 0 #fcc !important;
   }
@@ -89,3 +90,5 @@
   filter: drop-shadow($sombra);
   -webkit-filter: drop-shadow($sombra);
 }
+
+@import 'animaciones';

@@ -4,6 +4,38 @@
     form(@submit.prevent="crearProyecto", novalidate)
       .secciones
         .campos-base
+          .campo-ciudades
+            select(v-model="provincia")
+              option(selected, value="", disabled="") -- Provincia --
+              option(
+                v-for="provincia in provincias"
+                :key="provincia.id"
+                :value="provincia") {{provincia.nombre}}
+            select(v-model="proyecto.ciudad", :disabled="!provincia")
+              option(selected, value="", disabled="") -- Ciudad --
+              option(
+                v-for="ciudad in provincia.ciudades"
+                :key="ciudad.id"
+                :value="{provincia: {id: provincia.id, nombre: provincia.nombre}, ciudad: ciudad}")
+                  | {{ciudad.nombre}}
+          .campo-categoria
+            input.required(
+              type="text"
+              placeholder="Categoria"
+              name="categoria"
+              v-model="selectedCategoria"
+              autocomplete="off"
+              @focus="setCatFocused()"
+              @blur="setCatBlured()")
+            .categorias.fadeIn(
+              v-if="catFocused"
+              @mouseover="setListaFocused()"
+              @mouseleave="setListaBlured()")
+              .categoria(
+                v-for="categoria in categoriasVisibles"
+                :key="categoria.id"
+                @click="catFocused = true; setCategoria(categoria)")
+                span {{categoria.nombre}}
           input(
             type="text"
             placeholder="Nombre"
@@ -63,7 +95,7 @@
       input(
         type="submit"
         value="Crear proyecto!"
-        :disabled="!validForm || sent || proyecto.emprendedores.length === 0")
+        :disabled="!validForm || sent || proyecto.emprendedores.length === 0 || !selectedCategoria")
       .loading(v-if="sent")
         font-awesome-icon(icon="circle-notch", spin)
 </template>
@@ -72,6 +104,7 @@
 import { mapState } from 'vuex';
 import { Validator } from 'vee-validate';
 import mixins from '@/mixins/mixins';
+import provincias from '@/assets/data/ciudades-argentinas.json';
 
 Validator.extend('valorMax', {
   getMessage: () => 'El valor de supersuscripción debe ser mayor o igual que el monto esperado',
@@ -84,8 +117,16 @@ export default {
   data() {
     return {
       sent: false,
+      catFocused: false,
+      listaFocused: false,
       nuevoEmprendedor: '',
+      categorias: [],
+      provincias,
+      provincia: '',
+      selectedCategoria: '',
       proyecto: {
+        ciudad: '',
+        categoria_id: '',
         nombre: '',
         domicilio: '',
         telefono: '',
@@ -99,8 +140,44 @@ export default {
   },
   computed: {
     ...mapState('usuarios', ['token']),
+    categoriasVisibles() {
+      return this.selectedCategoria
+        ? this.categorias.filter(categ => categ.nombre.indexOf(this.selectedCategoria) >= 0)
+        : this.categorias;
+    },
+  },
+  mounted() {
+    this.$http({
+      method: 'GET',
+      url: '/api/categorias',
+    }).then(
+      ({ data }) => {
+        this.categorias = data;
+      },
+      error => {
+        console.error(error);
+      },
+    );
   },
   methods: {
+    setCatFocused() {
+      this.catFocused = true;
+    },
+    setCatBlured() {
+      if (!this.listaFocused) {
+        this.catFocused = false;
+      }
+    },
+    setListaFocused() {
+      this.listaFocused = true;
+    },
+    setListaBlured() {
+      this.listaFocused = false;
+    },
+    setCategoria(categoria) {
+      this.selectedCategoria = categoria.nombre;
+      this.catFocused = false;
+    },
     addEmprendedor() {
       if (!this.proyecto.emprendedores.find(e => e.nombre === this.nuevoEmprendedor)) {
         this.proyecto.emprendedores.push({ nombre: this.nuevoEmprendedor });
@@ -117,28 +194,60 @@ export default {
       this.proyecto.emprendedores.splice(index, 1);
     },
     crearProyecto() {
-      if (this.dirtyForm && this.validForm && this.proyecto.emprendedores.length > 0) {
+      if (
+        this.dirtyForm &&
+        this.validForm &&
+        this.proyecto.emprendedores.length > 0 &&
+        this.selectedCategoria
+      ) {
         this.sent = true;
-        this.$http({
-          method: 'POST',
-          url: '/api/proyectos',
-          body: this.proyecto,
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        }).then(
-          ({ status }) => {
-            this.sent = false;
-            console.log(status);
-          },
-          error => {
-            this.sent = false;
-            console.error(error);
-          },
-        );
+        const categoria = this.categorias.find(categ => categ.nombre === this.selectedCategoria);
+        if (!categoria) {
+          this.$http({
+            method: 'POST',
+            url: '/api/categorias',
+            body: {
+              nombre: this.selectedCategoria,
+            },
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          }).then(
+            ({ status, data }) => {
+              console.log(status);
+              this._saveProyecto(data);
+            },
+            error => {
+              this.sent = false;
+              console.error(error);
+            },
+          );
+        } else {
+          this._saveProyecto(categoria);
+        }
       } else {
         this.$validator.validateAll();
       }
+    },
+    _saveProyecto(categoria) {
+      this.proyecto.categoria_id = categoria.id;
+      this.$http({
+        method: 'POST',
+        url: '/api/proyectos',
+        body: this.proyecto,
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      }).then(
+        ({ status }) => {
+          this.sent = false;
+          console.log(status);
+        },
+        error => {
+          this.sent = false;
+          console.error(error);
+        },
+      );
     },
   },
 };
@@ -163,6 +272,43 @@ export default {
         align-items: flex-start;
         width: 50%;
         margin: 5px;
+      }
+      .campos-base {
+        .campo-ciudades {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          select {
+            width: 50%;
+          }
+        }
+        .campo-categoria {
+          margin-bottom: 25px;
+          width: 100%;
+          position: relative;
+          input {
+            margin-bottom: 0;
+          }
+          .categorias {
+            width: 100%;
+            position: absolute;
+            background-color: #fff;
+            top: 100%;
+            @include sombra(0 0 3px 0 #999);
+            .categoria {
+              padding: 8px 6px;
+              cursor: pointer;
+              @include ease-transition;
+              &:hover {
+                background-color: #eee;
+              }
+              &:not(:last-of-type) {
+                border-bottom: 1px solid #ccc;
+              }
+            }
+          }
+        }
       }
       .emprendedores {
         .titulo {

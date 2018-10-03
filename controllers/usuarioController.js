@@ -15,18 +15,27 @@ module.exports = {
    * usuarioController.list()
    */
   list: function(req, res) {
-    usuarioModel.findAll({ include: [{ model: proyectoModel, as: 'proyectos' }] }).then(
-    // usuarioModel.findAll().then(
-      usuarios => {
-        return res.json(usuarios);
-      },
-      error => {
-        return res.status(500).json({
-          message: 'Error when getting usuario.',
-          error: error,
-        });
-      },
-    );
+    usuarioModel
+      .findAll({
+        include: [
+          {
+            model: proyectoModel,
+            as: 'proyectos',
+          },
+        ],
+      })
+      .then(
+        // usuarioModel.findAll().then(
+        usuarios => {
+          return res.json(usuarios);
+        },
+        error => {
+          return res.status(500).json({
+            message: 'Error when getting usuario.',
+            error: error,
+          });
+        },
+      );
   },
 
   /**
@@ -85,7 +94,6 @@ module.exports = {
   // //////////////
   login: (req, res) => {
     passport.authenticate('local', function(err, usuario, info) {
-
       var token;
 
       // If Passport throws/catches an error
