@@ -38,22 +38,32 @@ module.exports = {
    */
   show: function(req, res) {
     var id = req.params.id;
-    proyectoModel.findOne({ where: { id: id } }).then(
-      proyecto => {
-        if (!proyecto) {
-          return res.status(404).json({
-            message: 'No such proyecto',
+    proyectoModel
+      .findOne({
+        where: { id: id },
+        include: [
+          {
+            model: categoriaModel,
+            as: 'categoria',
+          },
+        ],
+      })
+      .then(
+        proyecto => {
+          if (!proyecto) {
+            return res.status(404).json({
+              message: 'No such proyecto',
+            });
+          }
+          return res.json(proyecto);
+        },
+        error => {
+          return res.status(500).json({
+            message: 'Error when getting proyecto.',
+            error: error,
           });
-        }
-        return res.json(proyecto);
-      },
-      error => {
-        return res.status(500).json({
-          message: 'Error when getting proyecto.',
-          error: error,
-        });
-      },
-    );
+        },
+      );
   },
 
   /**

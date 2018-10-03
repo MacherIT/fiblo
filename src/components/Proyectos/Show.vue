@@ -1,17 +1,25 @@
 <template lang="pug">
   .proyecto-show
+    .categoria
+      span CATEGORÍA: {{proyecto.categoria.nombre}}
+    .ciudad
+      span CIUDAD: {{ciudad.provincia.nombre}} - {{ciudad.ciudad.nombre}}
     .nombre
       span NOMBRE: {{proyecto.nombre}}
     .monto
-      span MONTO: {{proyecto.monto}}
+      span MONTO: ${{proyecto.monto}}
     .monto-supera-max
-      span MONTO-SUPERA-MAX: {{proyecto.montoSuperaMax}}
+      span MONTO-SUPERA-MAX: ${{proyecto.montoSuperaMax}}
     .sector
-      span SECTOR: {{proyecto.sector}}
+      span SECTOR ¯\_(°_°)_/¯ {{proyecto.sector}}
     .emprendedores
-      span EMPRENDEDORES: {{proyecto.emprendedores}}
+      span EMPRENDEDORES:
+      ul
+        li(
+          v-for="(emprendedor, index) in proyecto.emprendedores"
+          :key="index") {{emprendedor.nombre}}
     .pubdate
-      span PUBDATE: {{proyecto.createdAt | formatDate('DD/MM/YYYY hh:mm')}}
+      span CREACIÓN: {{proyecto.createdAt | formatDate('DD/MM/YYYY hh:mm')}}
 </template>
 
 <script>
@@ -21,6 +29,11 @@ export default {
     return {
       proyecto: {},
     };
+  },
+  computed: {
+    ciudad() {
+      return JSON.parse(this.proyecto.ciudad);
+    },
   },
   mounted() {
     this.$http({
