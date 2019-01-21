@@ -1,5 +1,6 @@
 var proyectoModel = require('../models/proyectoModel.js');
 var categoriaModel = require('../models/categoriaModel.js');
+const { create } = require('./fibloContract');
 
 /**
  * proyectoController.js
@@ -74,9 +75,7 @@ module.exports = {
       var proyecto = proyectoModel.build({
         categoria_id: req.body.categoria_id,
         usuario_id: req.payload.id,
-        hash: require('crypto')
-          .randomBytes(64)
-          .toString('hex'),
+        address: '-',
         ciudad: req.body.ciudad,
         nombre: req.body.nombre,
         domicilio: req.body.domicilio,
@@ -90,9 +89,27 @@ module.exports = {
 
       proyecto.save().then(
         proyecto => {
-          return res.status(201).json(proyecto);
+          // Proyecto creado, ahora, vamos a deployarlo en la Blockchain
+
+          create(proyecto, address => {
+            proyecto.address = address;
+            proyecto.save().then(
+              proyecto => {
+                // Contrato fiblo creado :D
+                return res.status(201).json(proyecto);
+              },
+              error => {
+                console.log(error);
+                return res.status(500).json({
+                  message: 'Error when creating proyecto',
+                  error: error,
+                });
+              },
+            );
+          });
         },
         error => {
+          console.log(error);
           return res.status(500).json({
             message: 'Error when creating proyecto',
             error: error,

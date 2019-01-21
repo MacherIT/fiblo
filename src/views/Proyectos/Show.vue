@@ -1,9 +1,11 @@
 <template lang="pug">
   .proyecto-show
     .categoria
-      span CATEGORÍA: {{proyecto.categoria.nombre}}
+      span(v-if="proyecto.categoria") CATEGORÍA: {{proyecto.categoria.nombre}}
     .ciudad
-      span CIUDAD: {{ciudad.provincia.nombre}} - {{ciudad.ciudad.nombre}}
+      span(
+        v-if="ciudad && ciudad.provincia")
+        | CIUDAD: {{ciudad.provincia.nombre}} - {{ciudad.ciudad.nombre}}
     .nombre
       span NOMBRE: {{proyecto.nombre}}
     .monto
@@ -32,7 +34,7 @@ export default {
   },
   computed: {
     ciudad() {
-      return JSON.parse(this.proyecto.ciudad);
+      return this.proyecto && this.proyecto.ciudad ? JSON.parse(this.proyecto.ciudad) : '';
     },
   },
   mounted() {

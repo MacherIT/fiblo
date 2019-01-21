@@ -5,6 +5,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 const sequelize = require('./models/db');
+const { init } = require('./modules/fiblo/index');
+
+const w3 = init();
 
 require('./models/db');
 require('./security/passport');

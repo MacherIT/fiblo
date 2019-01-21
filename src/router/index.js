@@ -1,15 +1,19 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Home from '@/views/Home';
-import Usuarios from '@/views/Usuarios';
-import Proyectos from '@/views/Proyectos';
-import NuevoProyecto from '@/components/Proyectos/Nuevo';
-import ListaProyectos from '@/components/Proyectos/Lista';
-import ShowProyecto from '@/components/Proyectos/Show';
+import Usuarios from '@/views/Usuarios/Index';
+import UsuariosMain from '@/views/Usuarios/Main';
+import LoginLogout from '@/views/Usuarios/LoginLogout';
+import Proyectos from '@/views/Proyectos/Index';
+import NuevoProyecto from '@/views/Proyectos/Nuevo';
+import ListaProyectos from '@/views/Proyectos/Lista';
+import ShowProyecto from '@/views/Proyectos/Show';
+
+import store from '@/store/index';
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   routes: [
     {
@@ -19,12 +23,26 @@ export default new Router({
     },
     {
       path: '/usuarios',
-      name: 'Usuarios',
       component: Usuarios,
+      children: [
+        {
+          path: '',
+          name: 'Usuarios',
+          component: UsuariosMain,
+        },
+        {
+          path: 'session',
+          name: 'Login',
+          component: LoginLogout,
+        },
+      ],
     },
     {
       path: '/proyectos',
       component: Proyectos,
+      meta: {
+        requiresLogin: true,
+      },
       children: [
         {
           path: '',
@@ -46,3 +64,19 @@ export default new Router({
     { path: '*', redirect: '/' },
   ],
 });
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresLogin)) {
+    if (!store.state.usuarios.loggedIn) {
+      next({
+        path: '/usuarios/session',
+      });
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
+});
+
+export default router;

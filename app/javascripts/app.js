@@ -77,7 +77,7 @@ window.App = {
   },
 
   submitTransactionEther: function () {
-    var _amount = parseInt(document.getElementById('monto_ether').value)
+    var _amount = parseFloat(document.getElementById('monto_ether').value)
     var userId = parseInt(document.getElementById('user_id').value)
 
     ContratoSAS.deployed()

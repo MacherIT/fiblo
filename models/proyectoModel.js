@@ -20,7 +20,8 @@ var proyectoSchema = sequelize.define('proyecto', {
     },
     allowNull: false,
   },
-  hash: {
+  // Address of the Fiblo Contract on the Blockchain
+  address: {
     type: STRING,
     allowNull: false,
     default: '-',

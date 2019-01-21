@@ -1,11 +1,8 @@
 <template lang="pug">
-  section.page-usuarios
-    h1 Usuarios
+  section.page-index-usuarios
     UsuariosFormNew
     UsuariosFormPassRecovery
     UsuariosFormChangePass(:token="token")
-    UsuariosFormLogin(v-if="!loggedIn")
-    UsuariosButtonLogout(v-if="loggedIn")
 </template>
 
 <script>
@@ -14,8 +11,6 @@ import { mapState } from 'vuex';
 import UsuariosFormNew from '@/components/Usuarios/FormNew';
 import UsuariosFormPassRecovery from '@/components/Usuarios/FormPassRecovery';
 import UsuariosFormChangePass from '@/components/Usuarios/FormChangePass';
-import UsuariosFormLogin from '@/components/Usuarios/FormLogin';
-import UsuariosButtonLogout from '@/components/Usuarios/ButtonLogout';
 
 export default {
   name: 'Usuarios',
@@ -32,8 +27,6 @@ export default {
     UsuariosFormNew,
     UsuariosFormPassRecovery,
     UsuariosFormChangePass,
-    UsuariosFormLogin,
-    UsuariosButtonLogout,
   },
 };
 </script>
