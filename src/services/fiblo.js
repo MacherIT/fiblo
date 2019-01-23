@@ -2,71 +2,76 @@ import Web3 from 'web3';
 import baseJSON from '../../build/contracts/ContratoSAS.json';
 import { default as contract } from 'truffle-contract';
 
+let ContratoSAS;
+
 export default {
   init() {
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
     if (typeof window.web3 !== 'undefined') {
-      //
-      // This will not be used on the server
-      // COMBAK: does web3 hold anything????
-      //
-      console.warn(
-        "Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask",
-      );
       // Use Mist/MetaMask's provider
       window.web3 = new Web3(window.web3.currentProvider);
     } else {
-      console.warn(
-        "No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask",
-      );
-      // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-      // window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'))
-      window.web3 = new Web3(new Web3.providers.HttpProvider('/testrpc'));
+      window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
     }
-
-    // Setear el account default
-    window.web3.eth.defaultAccount = window.web3.eth.accounts[0];
-
-    // Desbloquear el account default
-    window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '');
-
-    const ContratoSAS = contract({ abi: baseJSON.abi, unlinked_binary: baseJSON.bytecode });
-
+    ContratoSAS = contract(baseJSON);
     ContratoSAS.setProvider(window.web3.currentProvider);
+  },
+  receiveFunds(userId, monto, callback) {
+    window.web3.eth.getAccounts((error, accounts) => {
+      if (error) {
+        callback(error, null);
+      }
+      const account = accounts[1];
+      ContratoSAS.deployed().then(instance => {
+        instance
+          .receiveFunds(userId, {
+            value: window.web3.toWei(parseFloat(monto), 'ether'),
+            from: account,
+            address: instance.address,
+            gas: 6721975,
+          })
+          .then(
+            tx => {
+              callback(null, tx);
+            },
+            error => {
+              console.error(error);
+            },
+          );
+      });
+    });
+  },
+  getMontoRecaudado(callback) {
+    ContratoSAS.deployed().then(instance => {
+      // Different option, same result, a fraction of a second faster (depending on the event count)
 
-    console.log(ContratoSAS.new({ from: window.web3.eth.defaultAccount }));
+      window.web3.eth.getBalance(instance.address, (error, balance) => {
+        if (error) {
+          callback(error, null);
+        }
+        callback(null, window.web3.fromWei(balance).toNumber());
+      });
 
-    // console.log(ContratoSAS.deployed());
-
-    // ContratoSAS.new({}).then(
-    //   res => {
-    //     console.log(res);
-    //   },
-    //   error => {
-    //     console.log(ContratoSAS.deployed());
-    //     // console.log(Object.keys(error);
-    //   },
-    // );
-
-    // ContratoSAS.deployed().then(() => {
-    //   console.log('aca');
-    // });
-
-    //
-    // // Obtener JSON
-    // const contratoJSON = baseJSON;
-    //
-    // // Obtener abi
-    // const abi = contratoJSON.abi;
-    //
-    // // Obtener bytecode
-    // const bytecode = contratoJSON.bytecode;
-    //
-    // // Crear proxy
-    // const proxy = window.web3.eth.contract(abi);
-    //
-    // // A partir de acá usar proxy.at('<address>') para acceder a contratos ya deployados
-    //
-    // return proxy;
+      // instance
+      //   .receivedFunds(
+      //     {},
+      //     {
+      //       fromBlock: 0,
+      //       toBlock: 'latest',
+      //     },
+      //   )
+      //   .get((error, events) => {
+      //     if (error) {
+      //       callback(error, null);
+      //     }
+      //     callback(
+      //       null,
+      //       events.reduce(
+      //         (acumulador, ev) => (acumulador += window.web3.fromWei(ev.args._amount).toNumber()),
+      //         0,
+      //       ),
+      //     );
+      //   });
+    });
   },
 };

@@ -22,9 +22,8 @@ Vue.use(VueResource);
 Vue.use(VeeValidate);
 Vue.use(FormPlugin);
 
-Vue.filter(
-  'formatDate',
-  (val, format) => (val ? (format ? moment(String(val)).format(format) : val) : ''),
+Vue.filter('formatDate', (val, format) =>
+  (val ? (format ? moment(String(val)).format(format) : val) : ''),
 );
 
 Vue.config.productionTip = false;

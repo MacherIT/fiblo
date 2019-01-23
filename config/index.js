@@ -14,7 +14,7 @@ module.exports = {
         target: 'http://localhost:3000',
       },
       '/testrpc': {
-        target: 'http://192.168.0.110:7545',
+        target: 'http://localhost:7545',
       },
     },
 
