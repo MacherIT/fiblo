@@ -30,6 +30,7 @@ window.App = {
   start: function () {
     var self = this
 
+
     // Bootstrap the MetaCoin abstraction for Use.
     ContratoSAS.setProvider(web3.currentProvider)
 

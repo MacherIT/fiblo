@@ -12,6 +12,7 @@ import moment from 'moment';
 import App from '@/App';
 import router from '@/router';
 import store from '@/store/index';
+import FormPlugin from '@/plugins/FormPlugin';
 
 library.add(faCoffee, faSolid, faBrands);
 
@@ -19,6 +20,7 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.use(VueResource);
 Vue.use(VeeValidate);
+Vue.use(FormPlugin);
 
 Vue.filter(
   'formatDate',

@@ -5,6 +5,16 @@ export default {
   state: localStorage.getItem('@fibloST:usuario')
     ? { loggedIn: true, token: localStorage.getItem('@fibloST:usuario') }
     : { loggedIn: false, token: null },
+  getters: {
+    usuario(state) {
+      let outObj = false;
+      if (state.loggedIn) {
+        const usuario = JSON.parse(window.atob(state.token.split('.')[1]));
+        outObj = { id: usuario.id, email: usuario.email };
+      }
+      return outObj;
+    },
+  },
   actions: {
     login({ commit }, { email, password }) {
       usuarioService
