@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Home from '@/views/Home';
 import Usuarios from '@/views/Usuarios/Index';
+import Wallet from '@/views/Wallet/Index';
 import UsuariosMain from '@/views/Usuarios/Main';
 import LoginLogout from '@/views/Usuarios/LoginLogout';
 import Proyectos from '@/views/Proyectos/Index';
@@ -36,6 +37,11 @@ const router = new Router({
           component: LoginLogout,
         },
       ],
+    },
+    {
+      path: '/wallet',
+      name: 'Wallet',
+      component: Wallet,
     },
     {
       path: '/proyectos',

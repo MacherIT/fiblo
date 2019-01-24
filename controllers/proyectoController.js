@@ -71,7 +71,7 @@ module.exports = {
    * proyectoController.create()
    */
   create: function(req, res) {
-    if (req.payload && req.payload.id) {
+    if (req.payload && req.payload.id && req.body.wallet_address) {
       var proyecto = proyectoModel.build({
         categoria_id: req.body.categoria_id,
         usuario_id: req.payload.id,
@@ -90,12 +90,13 @@ module.exports = {
       proyecto.save().then(
         proyecto => {
           // Proyecto creado, ahora, vamos a deployarlo en la Blockchain
-
-          create(proyecto, address => {
+          console.log('Starts migration');
+          create(proyecto, req.body.wallet_address, address => {
             proyecto.address = address;
             proyecto.save().then(
               proyecto => {
                 // Contrato fiblo creado :D
+                console.log('End migration');
                 return res.status(201).json(proyecto);
               },
               error => {

@@ -188,6 +188,40 @@ module.exports = {
       },
     );
   },
+
+  set_address: function(req, res) {
+    var id = req.payload.id;
+    usuarioModel.findOne({ where: { id: id } }).then(
+      usuario => {
+        if (!usuario) {
+          return res.status(404).json({
+            message: 'No such usuario',
+          });
+        }
+
+        usuario.address = req.body.address ? req.body.address : usuario.address;
+
+        usuario.save().then(
+          usuario => {
+            return res.json(usuario);
+          },
+          error => {
+            return res.status(500).json({
+              message: 'Error when updating usuario.',
+              error: error,
+            });
+          },
+        );
+      },
+      error => {
+        return res.status(500).json({
+          message: 'Error when getting usuario',
+          error: error,
+        });
+      },
+    );
+  },
+
   // /////////////
   ch_pass: function(req, res) {
     if (req.body.password) {

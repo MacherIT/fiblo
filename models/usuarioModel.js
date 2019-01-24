@@ -10,6 +10,7 @@ const usuarioSchema = sequelize.define('usuario', {
     allowNull: false,
   },
   nombre: { type: STRING, allowNull: false },
+  address: { type: STRING },
   role: STRING,
   activation: STRING,
   hash: STRING,

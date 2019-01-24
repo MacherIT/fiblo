@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { Validator } from 'vee-validate';
 import mixins from '@/mixins/mixins';
 import provincias from '@/assets/data/ciudades-argentinas.json';
@@ -140,6 +140,7 @@ export default {
   },
   computed: {
     ...mapState('usuarios', ['token']),
+    ...mapGetters('usuarios', ['usuario']),
     categoriasVisibles() {
       return this.selectedCategoria
         ? this.categorias.filter(categ => categ.nombre.indexOf(this.selectedCategoria) >= 0)
@@ -231,20 +232,39 @@ export default {
     },
     _saveProyecto(categoria) {
       this.proyecto.categoria_id = categoria.id;
+      this.getWalletAddress(wallet_address => {
+        this.proyecto.wallet_address = wallet_address;
+        this.$http({
+          method: 'POST',
+          url: '/api/proyectos',
+          body: this.proyecto,
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        }).then(
+          ({ status }) => {
+            this.sent = false;
+            console.log(status);
+          },
+          error => {
+            this.sent = false;
+            console.error(error);
+          },
+        );
+      });
+    },
+    getWalletAddress(callback) {
       this.$http({
-        method: 'POST',
-        url: '/api/proyectos',
-        body: this.proyecto,
+        method: 'GET',
+        url: `/api/usuarios/${this.usuario.id}`,
         headers: {
           Authorization: `Bearer ${this.token}`,
         },
       }).then(
-        ({ status }) => {
-          this.sent = false;
-          console.log(status);
+        ({ data }) => {
+          callback(data.address);
         },
         error => {
-          this.sent = false;
           console.error(error);
         },
       );

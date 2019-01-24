@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import fiblo from '@/services/fiblo';
 
 export default {
@@ -56,6 +56,7 @@ export default {
     };
   },
   computed: {
+    ...mapState('usuarios', ['token']),
     ...mapGetters('usuarios', ['usuario']),
     ciudad() {
       return this.proyecto && this.proyecto.ciudad ? JSON.parse(this.proyecto.ciudad) : '';
@@ -94,20 +95,41 @@ export default {
     comprarAccion() {
       if (this.dirtyForm && this.validForm) {
         this.sent = true;
-        fiblo.receiveFunds(this.usuario.id, this.montoAccion, (error, tx) => {
-          if (error) {
-            console.error(error);
-          } else {
-            this.getMontoRecaudado();
-            this.sent = false;
-          }
+        this.getWalletAddress(wallet_address => {
+          fiblo.receiveFunds(this.usuario.id, wallet_address, this.montoAccion, (error, tx) => {
+            if (error) {
+              console.error(error);
+            } else {
+              this.getMontoRecaudado();
+              this.sent = false;
+            }
+          });
         });
       } else {
         this.$validator.validateAll();
       }
     },
+    getWalletAddress(callback) {
+      this.$http({
+        method: 'GET',
+        url: `/api/usuarios/${this.usuario.id}`,
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      }).then(
+        ({ data }) => {
+          callback(data.address);
+        },
+        error => {
+          console.error(error);
+        },
+      );
+    },
     getMontoRecaudado() {
       fiblo.getMontoRecaudado((error, monto) => {
+        if (error) {
+          console.error(error);
+        }
         this.montoRecaudado = monto;
       });
     },
@@ -121,6 +143,7 @@ export default {
   margin: 15px;
   display: flex;
   flex-direction: column;
+  @include default-form;
   .share-buying {
     margin-top: 20px;
     padding-top: 20px;

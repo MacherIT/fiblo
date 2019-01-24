@@ -16,29 +16,29 @@ export default {
     ContratoSAS = contract(baseJSON);
     ContratoSAS.setProvider(window.web3.currentProvider);
   },
-  receiveFunds(userId, monto, callback) {
-    window.web3.eth.getAccounts((error, accounts) => {
-      if (error) {
-        callback(error, null);
-      }
-      const account = accounts[1];
-      ContratoSAS.deployed().then(instance => {
-        instance
-          .receiveFunds(userId, {
-            value: window.web3.toWei(parseFloat(monto), 'ether'),
-            from: account,
-            address: instance.address,
-            gas: 6721975,
-          })
-          .then(
-            tx => {
-              callback(null, tx);
-            },
-            error => {
-              console.error(error);
-            },
-          );
-      });
+  receiveFunds(userId, wallet_address, monto, callback) {
+    // window.web3.eth.getAccounts((error, accounts) => {
+    //   if (error) {
+    //     callback(error, null);
+    //   }
+    //   const account = accounts[1];
+    ContratoSAS.deployed().then(instance => {
+      instance
+        .receiveFunds(userId, {
+          value: window.web3.toWei(parseFloat(monto), 'ether'),
+          from: wallet_address,
+          address: instance.address,
+          gas: 6721975,
+        })
+        .then(
+          tx => {
+            callback(null, tx);
+          },
+          error => {
+            callback(error, null);
+          },
+        );
+      // });
     });
   },
   getMontoRecaudado(callback) {
