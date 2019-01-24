@@ -12,14 +12,11 @@ const web3Init = () => {
   } else {
     window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
   }
+  ContratoSAS = contract(baseJSON);
+  ContratoSAS.setProvider(window.web3.currentProvider);
 };
 
 export default {
-  init() {
-    web3Init();
-    ContratoSAS = contract(baseJSON);
-    ContratoSAS.setProvider(window.web3.currentProvider);
-  },
   getDefaultAccount(callback) {
     web3Init();
     window.web3.eth.getAccounts((error, accounts) => {
@@ -58,35 +55,37 @@ export default {
   getMontoRecaudado(callback) {
     web3Init();
     ContratoSAS.deployed().then(instance => {
-      // Different option, same result, a fraction of a second faster (depending on the event count)
-
       window.web3.eth.getBalance(instance.address, (error, balance) => {
         if (error) {
           callback(error, null);
         }
         callback(null, window.web3.fromWei(balance).toNumber());
       });
-
-      // instance
-      //   .receivedFunds(
-      //     {},
-      //     {
-      //       fromBlock: 0,
-      //       toBlock: 'latest',
-      //     },
-      //   )
-      //   .get((error, events) => {
-      //     if (error) {
-      //       callback(error, null);
-      //     }
-      //     callback(
-      //       null,
-      //       events.reduce(
-      //         (acumulador, ev) => (acumulador += window.web3.fromWei(ev.args._amount).toNumber()),
-      //         0,
-      //       ),
-      //     );
-      //   });
+    });
+  },
+  getContribuciones(callback) {
+    web3Init();
+    ContratoSAS.deployed().then(instance => {
+      instance
+        .contributionFiled(
+          {},
+          {
+            fromBlock: 0,
+            toBlock: 'latest',
+          },
+        )
+        .get((error, events) => {
+          if (error) {
+            callback(error, null);
+          }
+          callback(
+            null,
+            events.map(ev => ({
+              uid: ev.args.uid.toNumber(),
+              monto: window.web3.fromWei(ev.args.amount).toNumber(),
+            })),
+          );
+        });
     });
   },
 };

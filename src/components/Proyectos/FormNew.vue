@@ -103,8 +103,10 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { Validator } from 'vee-validate';
+
 import mixins from '@/mixins/mixins';
 import provincias from '@/assets/data/ciudades-argentinas.json';
+import fiblo from '@/services/fiblo';
 
 Validator.extend('valorMax', {
   getMessage: () => 'El valor de supersuscripción debe ser mayor o igual que el monto esperado',
@@ -232,42 +234,30 @@ export default {
     },
     _saveProyecto(categoria) {
       this.proyecto.categoria_id = categoria.id;
-      this.getWalletAddress(wallet_address => {
-        this.proyecto.wallet_address = wallet_address;
-        this.$http({
-          method: 'POST',
-          url: '/api/proyectos',
-          body: this.proyecto,
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        }).then(
-          ({ status }) => {
-            this.sent = false;
-            console.log(status);
-          },
-          error => {
-            this.sent = false;
-            console.error(error);
-          },
-        );
-      });
-    },
-    getWalletAddress(callback) {
-      this.$http({
-        method: 'GET',
-        url: `/api/usuarios/${this.usuario.id}`,
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      }).then(
-        ({ data }) => {
-          callback(data.address);
-        },
-        error => {
+      fiblo.getDefaultAccount((error, wallet_address) => {
+        if (error) {
           console.error(error);
-        },
-      );
+        } else {
+          this.proyecto.wallet_address = wallet_address;
+          this.$http({
+            method: 'POST',
+            url: '/api/proyectos',
+            body: this.proyecto,
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          }).then(
+            ({ status }) => {
+              this.sent = false;
+              console.log(status);
+            },
+            error => {
+              this.sent = false;
+              console.error(error);
+            },
+          );
+        }
+      });
     },
   },
 };

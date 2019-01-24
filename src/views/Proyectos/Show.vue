@@ -37,6 +37,12 @@
           type="submit"
           value="¡Comprar!"
           :disabled="!validForm || sent")
+    .contribuciones
+      ul
+        li(
+          v-for="(contribucion, index) in contribuciones"
+          :key="index")
+          span {{contribucion}}
 </template>
 
 <script>
@@ -53,6 +59,7 @@ export default {
       montoAccion: '',
       montoRecaudado: 0,
       valorCambio: 1,
+      contribuciones: [],
     };
   },
   computed: {
@@ -76,7 +83,6 @@ export default {
         console.error(error);
       },
     );
-    fiblo.init();
 
     this.$http({
       method: 'GET',
@@ -91,40 +97,36 @@ export default {
         console.error(error);
       },
     );
+
+    fiblo.getContribuciones((error, contribuciones) => {
+      if (error) {
+        console.error(error);
+      } else {
+        this.contribuciones = contribuciones;
+      }
+    });
   },
   methods: {
     comprarAccion() {
       if (this.dirtyForm && this.validForm) {
         this.sent = true;
-        this.getWalletAddress(wallet_address => {
-          fiblo.receiveFunds(this.usuario.id, wallet_address, this.montoAccion, (error, tx) => {
-            if (error) {
-              console.error(error);
-            } else {
-              this.getMontoRecaudado();
-              this.sent = false;
-            }
-          });
+        fiblo.getDefaultAccount((error, wallet_address) => {
+          if (error) {
+            console.error(error);
+          } else {
+            fiblo.receiveFunds(this.usuario.id, wallet_address, this.montoAccion, (error, tx) => {
+              if (error) {
+                console.error(error);
+              } else {
+                this.getMontoRecaudado();
+                this.sent = false;
+              }
+            });
+          }
         });
       } else {
         this.$validator.validateAll();
       }
-    },
-    getWalletAddress(callback) {
-      this.$http({
-        method: 'GET',
-        url: `/api/usuarios/${this.usuario.id}`,
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      }).then(
-        ({ data }) => {
-          callback(data.address);
-        },
-        error => {
-          console.error(error);
-        },
-      );
     },
     getMontoRecaudado() {
       fiblo.getMontoRecaudado((error, monto) => {
