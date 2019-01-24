@@ -1,11 +1,12 @@
 <template lang="pug">
   .wallet
-    form(@submit.prevent="setAddres", novalidate)
+    form(@submit.prevent="setAddress", novalidate)
       input(
         type="text"
         placeholder="Wallet address"
         v-validate="'required'"
-        v-model="address")
+        v-model="address"
+        readonly)
       input(
         type="submit"
         value="Guardar"
@@ -16,6 +17,8 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+
+import fiblo from '@/services/fiblo';
 
 export default {
   data() {
@@ -45,10 +48,19 @@ export default {
         console.error(error);
       },
     );
+
+    fiblo.getDefaultAccount((error, account) => {
+      if (error) {
+        console.error(error);
+      } else if (account && this.address !== account) {
+        this.address = account;
+        this.setAddress(true);
+      }
+    });
   },
   methods: {
-    setAddres() {
-      if (this.dirtyForm && this.validForm) {
+    setAddress(manual = false) {
+      if (manual || (this.dirtyForm && this.validForm)) {
         this.sent = true;
         this.$http({
           method: 'PUT',
@@ -78,5 +90,8 @@ export default {
 @import '~Styles/_config.scss';
 .wallet {
   @include default-form;
+  input[readonly] {
+    background-color: #ddd;
+  }
 }
 </style>

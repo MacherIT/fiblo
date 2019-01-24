@@ -4,19 +4,33 @@ import { default as contract } from 'truffle-contract';
 
 let ContratoSAS;
 
+const web3Init = () => {
+  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+  if (typeof window.web3 !== 'undefined') {
+    // Use Mist/MetaMask's provider
+    window.web3 = new Web3(window.web3.currentProvider);
+  } else {
+    window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
+  }
+};
+
 export default {
   init() {
-    // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-    if (typeof window.web3 !== 'undefined') {
-      // Use Mist/MetaMask's provider
-      window.web3 = new Web3(window.web3.currentProvider);
-    } else {
-      window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
-    }
+    web3Init();
     ContratoSAS = contract(baseJSON);
     ContratoSAS.setProvider(window.web3.currentProvider);
   },
+  getDefaultAccount(callback) {
+    web3Init();
+    window.web3.eth.getAccounts((error, accounts) => {
+      if (error) {
+        callback(error, null);
+      }
+      callback(null, accounts[0]);
+    });
+  },
   receiveFunds(userId, wallet_address, monto, callback) {
+    web3Init();
     // window.web3.eth.getAccounts((error, accounts) => {
     //   if (error) {
     //     callback(error, null);
@@ -42,6 +56,7 @@ export default {
     });
   },
   getMontoRecaudado(callback) {
+    web3Init();
     ContratoSAS.deployed().then(instance => {
       // Different option, same result, a fraction of a second faster (depending on the event count)
 

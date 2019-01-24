@@ -59,7 +59,8 @@ export default {
     ...mapState('usuarios', ['token']),
     ...mapGetters('usuarios', ['usuario']),
     ciudad() {
-      return this.proyecto && this.proyecto.ciudad ? JSON.parse(this.proyecto.ciudad) : '';
+      // return this.proyecto && this.proyecto.ciudad ? JSON.parse(this.proyecto.ciudad) : '';
+      return '';
     },
   },
   mounted() {

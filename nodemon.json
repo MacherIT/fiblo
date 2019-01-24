@@ -6,5 +6,6 @@
       "DB_USERNAME": "ivan",
       "DB_PASSWORD": "eidel"
     }
-  }
+  },
+  "ignore": ["build/contracts"]
 }
