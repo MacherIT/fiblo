@@ -98,11 +98,14 @@ export default {
       },
     );
 
-    fiblo.getContribuciones((error, contribuciones) => {
+    fiblo.getContribuciones((error, contribucion) => {
       if (error) {
         console.error(error);
       } else {
-        this.contribuciones = contribuciones;
+        this.contribuciones.push({
+          uid: contribucion.args.uid.toNumber(),
+          monto: window.web3.fromWei(contribucion.args.amount).toNumber(),
+        });
       }
     });
   },

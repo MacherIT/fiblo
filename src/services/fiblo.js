@@ -74,17 +74,12 @@ export default {
             toBlock: 'latest',
           },
         )
-        .get((error, events) => {
+        .watch((error, event) => {
           if (error) {
             callback(error, null);
           }
-          callback(
-            null,
-            events.map(ev => ({
-              uid: ev.args.uid.toNumber(),
-              monto: window.web3.fromWei(ev.args.amount).toNumber(),
-            })),
-          );
+          callback(null, event);
+
         });
     });
   },
