@@ -1,5 +1,6 @@
 <template lang="pug">
   .proyectos-form-new
+    button(@click="isContratoValid") Dale
     p Crear un nuevo proyecto
     form(@submit.prevent="crearProyecto", novalidate)
       .secciones
@@ -233,12 +234,13 @@ export default {
       }
     },
     _saveProyecto(categoria) {
-      this.proyecto.categoria_id = categoria.id;
-      fiblo.getDefaultAccount((error, wallet_address) => {
+      fiblo.deployProyecto(this.proyecto, (error, instance) => {
         if (error) {
           console.error(error);
-        } else {
-          this.proyecto.wallet_address = wallet_address;
+          this.sent = false;
+        } else if (instance.address) {
+          this.proyecto.categoria_id = categoria.id;
+          this.proyecto.address = instance.address;
           this.$http({
             method: 'POST',
             url: '/api/proyectos',
@@ -257,6 +259,11 @@ export default {
             },
           );
         }
+      });
+    },
+    isContratoValid() {
+      fiblo.isContratoValid(this.proyecto.address, (error, res) => {
+        console.log(res);
       });
     },
   },

@@ -71,11 +71,11 @@ module.exports = {
    * proyectoController.create()
    */
   create: function(req, res) {
-    if (req.payload && req.payload.id && req.body.wallet_address) {
+    if (req.payload && req.payload.id) {
       var proyecto = proyectoModel.build({
         categoria_id: req.body.categoria_id,
         usuario_id: req.payload.id,
-        address: '-',
+        address: req.body.address,
         ciudad: req.body.ciudad,
         nombre: req.body.nombre,
         domicilio: req.body.domicilio,
@@ -89,25 +89,7 @@ module.exports = {
 
       proyecto.save().then(
         proyecto => {
-          // Proyecto creado, ahora, vamos a deployarlo en la Blockchain
-          console.log('Starts migration');
-          create(proyecto, req.body.wallet_address, address => {
-            proyecto.address = address;
-            proyecto.save().then(
-              proyecto => {
-                // Contrato fiblo creado :D
-                console.log('End migration');
-                return res.status(201).json(proyecto);
-              },
-              error => {
-                console.log(error);
-                return res.status(500).json({
-                  message: 'Error when creating proyecto',
-                  error: error,
-                });
-              },
-            );
-          });
+          return res.status(201).json(proyecto);
         },
         error => {
           console.log(error);

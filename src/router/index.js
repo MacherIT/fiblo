@@ -6,6 +6,7 @@ import Usuarios from '@/views/Usuarios/Index';
 import UsuariosMain from '@/views/Usuarios/Main';
 import LoginLogout from '@/views/Usuarios/LoginLogout';
 import Proyectos from '@/views/Proyectos/Index';
+import CNV from '@/views/Proyectos/CNV';
 import NuevoProyecto from '@/views/Proyectos/Nuevo';
 import ListaProyectos from '@/views/Proyectos/Lista';
 import ShowProyecto from '@/views/Proyectos/Show';
@@ -43,6 +44,13 @@ const router = new Router({
     //   name: 'Wallet',
     //   component: Wallet,
     // },
+    {
+      path: '/cnv',
+      component: CNV,
+      meta: {
+        requiresLogin: true,
+      },
+    },
     {
       path: '/proyectos',
       component: Proyectos,

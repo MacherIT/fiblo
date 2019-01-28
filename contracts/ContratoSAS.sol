@@ -1,8 +1,12 @@
 pragma solidity ^0.4.17;
 
 import './mortal.sol';
+import './CNV.sol';
 
 contract ContratoSAS is mortal {
+
+    CNV cnv;
+
     /* Events */
     event contributionFiled(address indexed from, uint256 indexed uid, uint256 amount);
     event receivedFunds(address _from, uint256 _amount);
@@ -31,9 +35,30 @@ contract ContratoSAS is mortal {
     string public  m_fecha;
     string public  m_descripcion;
     uint public    m_cuit;
+    bool public    m_project_valid;
+    bool public    m_owner_valid;
     /* uint public    m_uid; */
 
     mapping(uint => Contribution) m_contributions;
+
+    constructor() public {
+      contribution_counter = 0;
+      m_project_valid = false;
+      m_owner_valid = false;
+    }
+    /* constructor(address beneficiario, string url, string nombre, uint256 monto, uint256 monto_max, string fecha, string descripcion, uint cuit) public {
+      contribution_counter = 0;
+      m_beneficiario = beneficiario;
+      m_url = url;
+      m_nombre = nombre;
+      m_monto = monto;
+      m_monto_max = monto_max;
+      m_fecha = fecha;
+      m_descripcion = descripcion;
+      m_cuit = cuit;
+      m_project_valid = false;
+      m_owner_valid = false;
+    } */
 
     function receiveFunds(uint uid) payable public {
         /* Receive amount */
@@ -100,6 +125,14 @@ contract ContratoSAS is mortal {
         emit cuitSet(m_cuit);
     }
 
+    function setCNVAddress(address cnv_addr) onlyowner public {
+      cnv = CNV(cnv_addr);
+    }
+
+    function setProjectValidity() onlyowner public {
+      m_project_valid = cnv.isProjectValid(address(this));
+    }
+
     /* Setea el uid de la SAS/proyecto */
     /* function setUid(uint uid) onlyowner public {
         m_uid = uid;
@@ -111,4 +144,5 @@ contract ContratoSAS is mortal {
         return 1;
     }*/
 
+    /* m_project_valid = cnv_addr.call(bytes4(keccak256("isProjectValid(address)")), address(this)); */
 }
