@@ -1,5 +1,7 @@
 <template lang="pug">
   .proyecto-show
+    span projectValidity: {{projectValidity}}
+    span beneficiaryValidity: {{beneficiaryValidity}}
     .sets
       button(@click="setProjectValidity") Set project validity
       button(@click="setBeneficiaryValidity") Set beneficiary validity
@@ -37,11 +39,13 @@
           type="number"
           placeholder="ETH"
           v-validate="'required'"
-          v-model="montoAccion")
+          v-model="montoAccion"
+          :disabled="!projectValidity || !beneficiaryValidity")
         input(
           type="submit"
           value="¡Comprar!"
           :disabled="!validForm || sent")
+        span(v-if="!projectValidity || !beneficiaryValidity") Proyecto todavía inválido
     .contribuciones
       ul
         li(
@@ -60,6 +64,8 @@ export default {
     return {
       proyecto: {},
       contrato: {},
+      projectValidity: false,
+      beneficiaryValidity: false,
       sent: false,
       montoAccion: '',
       montoRecaudado: 0,
@@ -84,6 +90,20 @@ export default {
         this.proyecto = data;
         this.getContribuciones(this.proyecto.address);
         this.getMontoRecaudado(this.proyecto.address);
+        fiblo.projectValiditySet(this.proyecto.address, (error, res) => {
+          if (error) {
+            console.error(error);
+          } else {
+            this.projectValidity = res;
+          }
+        });
+        fiblo.beneficiaryValiditySet(this.proyecto.address, (error, res) => {
+          if (error) {
+            console.error(error);
+          } else {
+            this.beneficiaryValidity = res;
+          }
+        });
       },
       error => {
         console.error(error);
@@ -120,20 +140,19 @@ export default {
     comprarAccion() {
       if (this.dirtyForm && this.validForm) {
         this.sent = true;
-        fiblo.getDefaultAccount((error, wallet_address) => {
-          if (error) {
-            console.error(error);
-          } else {
-            fiblo.receiveFunds(this.usuario.id, wallet_address, this.montoAccion, (error, tx) => {
-              if (error) {
-                console.error(error);
-              } else {
-                this.getMontoRecaudado();
-                this.sent = false;
-              }
-            });
-          }
-        });
+        fiblo.receiveFunds(
+          this.proyecto.address,
+          this.usuario.id,
+          this.montoAccion,
+          (error, tx) => {
+            if (error) {
+              console.error(error);
+            } else {
+              this.getMontoRecaudado(this.proyecto.address);
+              this.sent = false;
+            }
+          },
+        );
       } else {
         this.$validator.validateAll();
       }

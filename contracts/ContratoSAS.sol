@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.22;
 
 import './mortal.sol';
 import './CNV.sol';
@@ -61,6 +61,7 @@ contract ContratoSAS is mortal {
     } */
 
     function receiveFunds(uint uid) payable public {
+      require(m_project_valid && m_beneficiary_valid, "Both contract and beneficiary must be validated by the NVC");
         /* Receive amount */
         if(msg.value > 0) {
             emit receivedFunds(msg.sender, msg.value);
@@ -69,8 +70,6 @@ contract ContratoSAS is mortal {
         contribution_counter++;
         m_contributions[contribution_counter] = Contribution(msg.sender, uid, msg.value);
         emit contributionFiled(msg.sender, uid, msg.value);
-
-        m_nombre = 'Pepe';
     }
 
     /*function getNombre() public returns (string) {

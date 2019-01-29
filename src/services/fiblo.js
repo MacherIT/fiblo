@@ -35,30 +35,69 @@ export default {
       callback(null, accounts[0]);
     });
   },
-  receiveFunds(userId, wallet_address, monto, callback) {
-    web3Init();
-    // window.web3.eth.getAccounts((error, accounts) => {
-    //   if (error) {
-    //     callback(error, null);
-    //   }
-    //   const account = accounts[1];
-    ContratoSAS.deployed().then(instance => {
-      instance
-        .receiveFunds(userId, {
-          value: window.web3.toWei(parseFloat(monto), 'ether'),
-          from: wallet_address,
-          address: instance.address,
-          gas: 6721975,
-        })
-        .then(
-          tx => {
-            callback(null, tx);
-          },
-          error => {
-            callback(error, null);
-          },
-        );
-      // });
+  receiveFunds(project_address, userId, monto, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+
+          proyecto.receiveFunds(
+            userId,
+            {
+              value: window.web3.toWei(parseFloat(monto), 'ether'),
+            },
+            (error, tx) => {
+              if (error) {
+                callback(error, null);
+              } else {
+                callback(null, tx);
+              }
+            },
+          );
+        });
+      }
+    });
+  },
+  projectValiditySet(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto.m_project_valid((err, res) => {
+            if (err) {
+              callback(err, null);
+            }
+            callback(null, res);
+          });
+        });
+      }
+    });
+  },
+  beneficiaryValiditySet(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto.m_beneficiary_valid((err, res) => {
+            if (err) {
+              callback(err, null);
+            }
+            callback(null, res);
+          });
+        });
+      }
     });
   },
   getMontoRecaudado(project_address, callback) {
@@ -70,12 +109,6 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
-          proyecto.m_project_valid((err, res) => {
-            console.log(`Project valid: ${res}`);
-          });
-          proyecto.m_beneficiary_valid((err, res) => {
-            console.log(`Beneficiary valid: ${res}`);
-          });
           const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
           const cnv = proxyCNV.at(CNV_ADDRESS);
           cnv

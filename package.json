@@ -4,7 +4,7 @@
   "description": "Blockchain-powered SAS crowdfunding",
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --host 0.0.0.0 --inline --progress --config build/webpack.dev.conf.js",
     "old-dev": "webpack-dev-server",
     "lint": "eslint --ext .js,.vue src",
     "build": "node build/build.js"
