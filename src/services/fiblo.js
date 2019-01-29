@@ -61,37 +61,76 @@ export default {
       // });
     });
   },
-  getMontoRecaudado(callback) {
-    web3Init();
-    ContratoSAS.deployed().then(instance => {
-      window.web3.eth.getBalance(instance.address, (error, balance) => {
-        if (error) {
-          callback(error, null);
-        }
-        callback(null, window.web3.fromWei(balance).toNumber());
-      });
-    });
-  },
-  getContribuciones(callback) {
-    web3Init();
-    ContratoSAS.deployed().then(instance => {
-      instance
-        .contributionFiled(
-          {},
-          {
-            fromBlock: 0,
-            toBlock: 'latest',
-          },
-        )
-        .watch((error, event) => {
-          if (error) {
-            callback(error, null);
-          }
-          callback(null, event);
+  getMontoRecaudado(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto.m_project_valid((err, res) => {
+            console.log(`Project valid: ${res}`);
+          });
+          proyecto.m_beneficiary_valid((err, res) => {
+            console.log(`Beneficiary valid: ${res}`);
+          });
+          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+          const cnv = proxyCNV.at(CNV_ADDRESS);
+          cnv
+            .beneficiaryAdded(
+              {},
+              {
+                fromBlock: 0,
+                toBlock: 'latest',
+              },
+            )
+            .watch((error, event) => {
+              if (error) {
+                // callback(error, null);
+              }
+              console.log(event.args);
+            });
+          window.web3.eth.getBalance(proyecto.address, (error, balance) => {
+            if (error) {
+              callback(error, null);
+            }
+            callback(null, window.web3.fromWei(balance).toNumber());
+          });
         });
+      }
     });
   },
-  deployProyecto(proyecto, callback) {
+  getContribuciones(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+
+          proyecto
+            .contributionFiled(
+              {},
+              {
+                fromBlock: 0,
+                toBlock: 'latest',
+              },
+            )
+            .watch((error, event) => {
+              if (error) {
+                callback(error, null);
+              }
+              callback(null, event);
+            });
+        });
+      }
+    });
+  },
+  deployProyecto(proyecto, beneficiary_address, callback) {
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
@@ -104,14 +143,26 @@ export default {
               callback(err, null);
             }
             if (instance.address) {
-              callback(null, instance);
+              instance.setCNVAddress(CNV_ADDRESS, (err, res) => {
+                if (err) {
+                  callback(err, null);
+                } else {
+                  instance.setBeneficiario(beneficiary_address, (err, res) => {
+                    if (err) {
+                      callback(err, null);
+                    } else {
+                      callback(null, instance);
+                    }
+                  });
+                }
+              });
             }
           });
         });
       }
     });
   },
-  isContratoValid(project_address, callback) {
+  setProjectValidity(project_address, callback) {
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
@@ -121,14 +172,6 @@ export default {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
 
-          // proyecto.m_project_valid((error, res) => {
-          //   console.log(res);
-          // });
-
-          // proyecto.setCNVAddress(CNV_ADDRESS, (error, res) => {
-          //   console.log(res);
-          // });
-
           proyecto.setProjectValidity((error, res) => {
             console.log(res);
           });
@@ -136,21 +179,19 @@ export default {
       }
     });
   },
-  isProjectValid(project_address, callback) {
+  setBeneficiaryValidity(project_address, callback) {
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-        const cnv = proxyCNV.at(CNV_ADDRESS);
-        cnv.isProjectValid(project_address, (error, res) => {
-          if (error) {
-            callback(error, null);
-          } else {
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+
+          proyecto.setBeneficiaryValidity((error, res) => {
             console.log(res);
-            callback(null, res);
-          }
+          });
         });
       }
     });
@@ -177,7 +218,6 @@ export default {
                 callback(error, null);
               }
               console.log(`${event.args.project} added`);
-              // console.log(event);
               callback(null, event);
             });
         });
@@ -206,9 +246,27 @@ export default {
                 callback(error, null);
               }
               console.log(`${event.args.project} removed`);
-              // console.log(event);
               callback(null, event);
             });
+        });
+      }
+    });
+  },
+  isProjectValid(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+        const cnv = proxyCNV.at(CNV_ADDRESS);
+        cnv.isProjectValid(project_address, (error, res) => {
+          if (error) {
+            callback(error, null);
+          } else {
+            console.log(res);
+            callback(null, res);
+          }
         });
       }
     });
@@ -243,6 +301,65 @@ export default {
           const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
           const cnv = proxyCNV.at(CNV_ADDRESS);
           cnv.removeProject(project_address, (error, res) => {
+            if (error) {
+              callback(error, null);
+            } else {
+              callback(null, res);
+            }
+          });
+        });
+      }
+    });
+  },
+  isBeneficiaryValid(beneficiary_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+        const cnv = proxyCNV.at(CNV_ADDRESS);
+        cnv.isBeneficiaryValid(beneficiary_address, (error, res) => {
+          if (error) {
+            callback(error, null);
+          } else {
+            console.log(res);
+            callback(null, res);
+          }
+        });
+      }
+    });
+  },
+  addBeneficiary(beneficiary_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+          const cnv = proxyCNV.at(CNV_ADDRESS);
+          cnv.addBeneficiary(beneficiary_address, (error, res) => {
+            if (error) {
+              callback(error, null);
+            } else {
+              callback(null, res);
+            }
+          });
+        });
+      }
+    });
+  },
+  removeBeneficiary(beneficiary_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+          const cnv = proxyCNV.at(CNV_ADDRESS);
+          cnv.removeBeneficiary(beneficiary_address, (error, res) => {
             if (error) {
               callback(error, null);
             } else {

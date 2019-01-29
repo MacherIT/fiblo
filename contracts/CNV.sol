@@ -6,13 +6,13 @@ contract CNV is mortal {
 
   event projectAdded(address indexed project);
   event projectRemoved(address project);
-  event ownerAdded(address indexed owner);
-  event ownerRemoved(address owner);
+  event beneficiaryAdded(address indexed beneficiary);
+  event beneficiaryRemoved(address beneficiary);
   event holderAdded(address indexed holder);
   event holderRemoved(address holder);
 
   mapping(address => bool) projects;
-  mapping(address => bool) owners;
+  mapping(address => bool) beneficiaries;
   mapping(address => bool) holders;
 
   //////
@@ -33,30 +33,30 @@ contract CNV is mortal {
 
   //////
 
-  function addOwner(address owner) onlyowner public {
-    owners[owner] = true;
-    emit ownerAdded(owner);
+  function addBeneficiary(address beneficiary) onlyowner public {
+    beneficiaries[beneficiary] = true;
+    emit beneficiaryAdded(beneficiary);
   }
 
-  function removeOwner(address owner) onlyowner public {
-    owners[owner] = false;
-    emit ownerRemoved(owner);
+  function removeBeneficiary(address beneficiary) onlyowner public {
+    beneficiaries[beneficiary] = false;
+    emit beneficiaryRemoved(beneficiary);
   }
 
-  function isOwnerValid(address owner) public view returns(bool isValid) {
-    return owners[owner];
+  function isBeneficiaryValid(address beneficiary) public view returns(bool isValid) {
+    return beneficiaries[beneficiary];
   }
 
   //////
 
   function addHolder(address holder) onlyowner public {
     holders[holder] = true;
-    emit ownerAdded(holder);
+    emit holderAdded(holder);
   }
 
   function removeHolder(address holder) onlyowner public {
     holders[holder] = false;
-    emit ownerRemoved(holder);
+    emit holderRemoved(holder);
   }
 
   function isHolderValid(address holder) public view returns(bool isValid) {

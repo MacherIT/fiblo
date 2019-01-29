@@ -1,7 +1,23 @@
 <template lang="pug">
   .cnv
-    //- span {{validProjects}}
+    .beneficiaries
+      .titulo
+        span Beneficiarios
+      .beneficiary(
+        v-for="beneficiary in beneficiaries"
+        :key="beneficiary.id"
+        v-if="beneficiary.address")
+        .nombre
+          span {{beneficiary.nombre}}
+        .validar
+          button(@click="validarBeneficiary(beneficiary)") Validar
+        .invalidar
+          button(@click="invalidarBeneficiary(beneficiary)") Invalidar
+        .state
+          button(@click="isBeneficiaryValid(beneficiary)") Check
     .proyectos
+      .titulo
+        span Proyectos
       .proyecto(
         v-for="project in projects"
         :key="project.id"
@@ -9,12 +25,11 @@
         .nombre
           span {{project.nombre}}
         .validar
-          button(@click="validar(project)") Validar
+          button(@click="validarProyecto(project)") Validar
         .invalidar
-          button(@click="invalidar(project)") Invalidar
+          button(@click="invalidarProyecto(project)") Invalidar
         .state
           button(@click="isProjectValid(project)") Check
-          //- span {{project}}
 </template>
 
 <script>
@@ -24,7 +39,7 @@ export default {
   data() {
     return {
       projects: [],
-      validProjects: [],
+      beneficiaries: [],
     };
   },
   mounted() {
@@ -34,13 +49,17 @@ export default {
     }).then(
       ({ data }) => {
         this.projects = data;
-        this.getProjectsValidation();
-        this.getProjectsInvalidation();
-        // this.projects.map(p => {
-        //   if (p.address) {
-        //     this.isProjectValid(p);
-        //   }
-        // });
+      },
+      error => {
+        console.error(error);
+      },
+    );
+    this.$http({
+      method: 'GET',
+      url: '/api/usuarios',
+    }).then(
+      ({ data }) => {
+        this.beneficiaries = data;
       },
       error => {
         console.error(error);
@@ -48,50 +67,53 @@ export default {
     );
   },
   methods: {
-    // isValid(address) {
-    //   const p = this.validProjects.find(p => p.project === address && p.valid);
-    //   return p && p.valid;
-    // },
-    getProjectsValidation() {
-      fiblo.isProjectValidWatch((error, event) => {
-        // if (this.validProjects.indexOf(event.args.project) < 0) {
-        //   this.validProjects.push(event.args.project);
-        // }
-      });
-    },
-    getProjectsInvalidation() {
-      fiblo.isProjectInvalidWatch((error, event) => {
-        // if (this.validProjects.indexOf(event.args.project) >= 0) {
-        //   this.validProjects.splice(this.validProjects.indexOf(event.args.project), 1);
-        // }
-      });
-    },
     isProjectValid(project) {
       fiblo.isProjectValid(project.address, (error, resp) => {
         if (error) {
           console.error(error);
         } else {
           project.valid = resp;
-          // console.log(resp);
         }
       });
     },
-    validar(project) {
+    validarProyecto(project) {
       fiblo.addProject(project.address, (error, resp) => {
         if (error) {
           console.error(error);
         } else {
-          // this.isProjectValid(project);
         }
       });
     },
-    invalidar(project) {
+    invalidarProyecto(project) {
       fiblo.removeProject(project.address, (error, resp) => {
         if (error) {
           console.error(error);
         } else {
-          // console.log(resp);
-          // this.isProjectValid(project);
+        }
+      });
+    },
+    isBeneficiaryValid(beneficiary) {
+      fiblo.isBeneficiaryValid(beneficiary.address, (error, resp) => {
+        if (error) {
+          console.error(error);
+        } else {
+          beneficiary.valid = resp;
+        }
+      });
+    },
+    validarBeneficiary(beneficiary) {
+      fiblo.addBeneficiary(beneficiary.address, (error, resp) => {
+        if (error) {
+          console.error(error);
+        } else {
+        }
+      });
+    },
+    invalidarBeneficiary(beneficiary) {
+      fiblo.removeBeneficiary(beneficiary.address, (error, resp) => {
+        if (error) {
+          console.error(error);
+        } else {
         }
       });
     },
@@ -102,6 +124,17 @@ export default {
 <style lang="scss" scoped>
 @import '~Styles/_config.scss';
 .cnv {
+  .beneficiaries {
+    margin-bottom: 20px;
+    .beneficiary {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      & > * {
+        margin-right: 10px;
+      }
+    }
+  }
   .proyectos {
     .proyecto {
       display: flex;

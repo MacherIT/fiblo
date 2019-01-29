@@ -1,6 +1,5 @@
 <template lang="pug">
   .proyectos-form-new
-    button(@click="isContratoValid") Dale
     p Crear un nuevo proyecto
     form(@submit.prevent="crearProyecto", novalidate)
       .secciones
@@ -73,6 +72,12 @@
             v-validate="{required: true, decimal: 2, valorMax: proyecto.monto}"
             name="monto"
             v-model="proyecto.montoSuperaMax")
+          input(
+            type="text"
+            placeholder="Beneficiary address"
+            :value="beneficiary_address"
+            readonly
+            disabled)
           span {{proyecto.montoSuperaMax ? errors.first('monto') : ''}}
         .emprendedores
           .titulo
@@ -127,6 +132,7 @@ export default {
       provincias,
       provincia: '',
       selectedCategoria: '',
+      beneficiary_address: '',
       proyecto: {
         ciudad: '',
         categoria_id: '',
@@ -157,6 +163,20 @@ export default {
     }).then(
       ({ data }) => {
         this.categorias = data;
+      },
+      error => {
+        console.error(error);
+      },
+    );
+    this.$http({
+      method: 'GET',
+      url: `/api/usuarios/${this.usuario.id}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    }).then(
+      ({ data }) => {
+        this.beneficiary_address = data.address;
       },
       error => {
         console.error(error);
@@ -234,7 +254,7 @@ export default {
       }
     },
     _saveProyecto(categoria) {
-      fiblo.deployProyecto(this.proyecto, (error, instance) => {
+      fiblo.deployProyecto(this.proyecto, this.beneficiary_address, (error, instance) => {
         if (error) {
           console.error(error);
           this.sent = false;
@@ -259,11 +279,6 @@ export default {
             },
           );
         }
-      });
-    },
-    isContratoValid() {
-      fiblo.isContratoValid(this.proyecto.address, (error, res) => {
-        console.log(res);
       });
     },
   },

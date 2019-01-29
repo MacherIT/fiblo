@@ -7,7 +7,7 @@
     //- li(v-if="loggedIn")
     //-   router-link(:to="{ name: 'Wallet', path: '/wallet' }") Wallet
     li(v-if="loggedIn")
-      router-link(:to="{ name: 'CNV', path: '/cnv' }") CNV
+      router-link(to="/cnv") CNV
     li
       router-link(:to="{ name: 'Proyectos', path: 'proyectos' }") Proyectos
 </template>

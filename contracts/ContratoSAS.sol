@@ -36,7 +36,7 @@ contract ContratoSAS is mortal {
     string public  m_descripcion;
     uint public    m_cuit;
     bool public    m_project_valid;
-    bool public    m_owner_valid;
+    bool public    m_beneficiary_valid;
     /* uint public    m_uid; */
 
     mapping(uint => Contribution) m_contributions;
@@ -44,7 +44,7 @@ contract ContratoSAS is mortal {
     constructor() public {
       contribution_counter = 0;
       m_project_valid = false;
-      m_owner_valid = false;
+      m_beneficiary_valid = false;
     }
     /* constructor(address beneficiario, string url, string nombre, uint256 monto, uint256 monto_max, string fecha, string descripcion, uint cuit) public {
       contribution_counter = 0;
@@ -57,7 +57,7 @@ contract ContratoSAS is mortal {
       m_descripcion = descripcion;
       m_cuit = cuit;
       m_project_valid = false;
-      m_owner_valid = false;
+      m_beneficiary_valid = false;
     } */
 
     function receiveFunds(uint uid) payable public {
@@ -131,6 +131,10 @@ contract ContratoSAS is mortal {
 
     function setProjectValidity() onlyowner public {
       m_project_valid = cnv.isProjectValid(address(this));
+    }
+
+    function setBeneficiaryValidity() onlyowner public {
+      m_beneficiary_valid = cnv.isBeneficiaryValid(m_beneficiario);
     }
 
     /* Setea el uid de la SAS/proyecto */

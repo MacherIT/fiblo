@@ -1,5 +1,8 @@
 <template lang="pug">
   .proyecto-show
+    .sets
+      button(@click="setProjectValidity") Set project validity
+      button(@click="setBeneficiaryValidity") Set beneficiary validity
     .categoria
       span(v-if="proyecto.categoria") CATEGORÍA: {{proyecto.categoria.nombre}}
     .ciudad
@@ -9,9 +12,11 @@
     .nombre
       span NOMBRE: {{proyecto.nombre}}
     .monto
-      span MONTO: ${{proyecto.monto}} --> {{proyecto.monto / valorCambio}} ETH
+      //- span MONTO: ${{proyecto.monto}} --> {{proyecto.monto / valorCambio}} ETH
+      span MONTO: {{proyecto.monto}} ETH
     .monto-supera-max
-      span MONTO-SUPERA-MAX: ${{proyecto.montoSuperaMax}} --> {{proyecto.montoSuperaMax / valorCambio}} ETH
+      //- span MONTO-SUPERA-MAX: ${{proyecto.montoSuperaMax}} --> {{proyecto.montoSuperaMax / valorCambio}} ETH
+      span MONTO-SUPERA-MAX: {{proyecto.montoSuperaMax}} ETH
     .monto-recaudado
       span MONTO RECAUDADO: {{montoRecaudado}} ETH --> ${{montoRecaudado * valorCambio}}
     .sector
@@ -77,7 +82,8 @@ export default {
     }).then(
       ({ data }) => {
         this.proyecto = data;
-        this.getMontoRecaudado();
+        this.getContribuciones(this.proyecto.address);
+        this.getMontoRecaudado(this.proyecto.address);
       },
       error => {
         console.error(error);
@@ -97,19 +103,20 @@ export default {
         console.error(error);
       },
     );
-
-    fiblo.getContribuciones((error, contribucion) => {
-      if (error) {
-        console.error(error);
-      } else {
-        this.contribuciones.push({
-          uid: contribucion.args.uid.toNumber(),
-          monto: window.web3.fromWei(contribucion.args.amount).toNumber(),
-        });
-      }
-    });
   },
   methods: {
+    getContribuciones(project_address) {
+      fiblo.getContribuciones(project_address, (error, contribucion) => {
+        if (error) {
+          console.error(error);
+        } else {
+          this.contribuciones.push({
+            uid: contribucion.args.uid.toNumber(),
+            monto: window.web3.fromWei(contribucion.args.amount).toNumber(),
+          });
+        }
+      });
+    },
     comprarAccion() {
       if (this.dirtyForm && this.validForm) {
         this.sent = true;
@@ -131,12 +138,22 @@ export default {
         this.$validator.validateAll();
       }
     },
-    getMontoRecaudado() {
-      fiblo.getMontoRecaudado((error, monto) => {
+    getMontoRecaudado(project_address) {
+      fiblo.getMontoRecaudado(project_address, (error, monto) => {
         if (error) {
           console.error(error);
         }
         this.montoRecaudado = monto;
+      });
+    },
+    setProjectValidity() {
+      fiblo.setProjectValidity(this.proyecto.address, (error, res) => {
+        console.log(res);
+      });
+    },
+    setBeneficiaryValidity() {
+      fiblo.setBeneficiaryValidity(this.proyecto.address, (error, res) => {
+        console.log(res);
       });
     },
   },
@@ -150,6 +167,13 @@ export default {
   display: flex;
   flex-direction: column;
   @include default-form;
+  .sets {
+    margin-bottom: 20px;
+    button {
+      display: block;
+      margin-bottom: 7px;
+    }
+  }
   .share-buying {
     margin-top: 20px;
     padding-top: 20px;
