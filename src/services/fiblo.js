@@ -1,11 +1,11 @@
 import Web3 from 'web3';
+// import baseJSONFactory from '../../build/contracts/SASFactory.json';
 import baseJSON from '../../build/contracts/ContratoSAS.json';
 import baseJSONCNV from '../../build/contracts/CNV.json';
 import { default as contract } from 'truffle-contract';
 
-const CNV_ADDRESS = '0x7522C726300e1911Bcf8908f68Ef52aC4750E84B';
-
-let ContratoSAS;
+const CNV_ADDRESS = baseJSONCNV.networks['5777'].address;
+// const FACTORY_ADDRESS = baseJSONFactory.networks['5777'].address;
 
 const web3Init = callback => {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
@@ -15,8 +15,6 @@ const web3Init = callback => {
   } else {
     window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
   }
-  // ContratoSAS = contract(baseJSON);
-  // ContratoSAS.setProvider(window.web3.currentProvider);
   window.web3.eth.getAccounts((error, accounts) => {
     if (error) {
       callback(error, null);
@@ -71,9 +69,9 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
-          proyecto.m_project_valid((err, res) => {
-            if (err) {
-              callback(err, null);
+          proyecto.m_project_valid((error, res) => {
+            if (error) {
+              callback(error, null);
             }
             callback(null, res);
           });
@@ -90,9 +88,9 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
-          proyecto.m_beneficiary_valid((err, res) => {
-            if (err) {
-              callback(err, null);
+          proyecto.m_beneficiary_valid((error, res) => {
+            if (error) {
+              callback(error, null);
             }
             callback(null, res);
           });
@@ -170,19 +168,51 @@ export default {
       } else {
         window.web3.eth.defaultAccount = accounts[0];
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          // const sasFactoryProxy = window.web3.eth.contract(baseJSONFactory.abi);
+          // const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          // const sasFactory = sasFactoryProxy.at(FACTORY_ADDRESS);
+          //
+          // sasFactory.createContrato((error, address) => {
+          //   if (error) {
+          //     callback(error, null);
+          //   }
+          //   if (address) {
+          //     const proyecto = proxySAS.at(address);
+          //     console.log(proyecto);
+          //     proyecto.setCNVAddress(CNV_ADDRESS, (error, res) => {
+          //       if (error) {
+          //         callback(error, null);
+          //       } else {
+          //         proyecto.setBeneficiario(beneficiary_address, (error, res) => {
+          //           if (error) {
+          //             callback(error, null);
+          //           } else {
+          //             callback(null, proyecto);
+          //           }
+          //         });
+          //       }
+          //     });
+          //   }
+          // });
+
+          /* COMBAK:
+          PARA PODER USAR UN FACTORY, HAY QUE REVISAR EL MODELO DE 'ONLYOWNER',
+          POR ENDE, POR AHORA, LO DEJO COMO ESTABA
+          */
+
           const proxy = window.web3.eth.contract(baseJSON.abi);
-          proxy.new({ data: baseJSON.bytecode }, (err, instance) => {
-            if (err) {
-              callback(err, null);
+          proxy.new({ data: baseJSON.bytecode }, (error, instance) => {
+            if (error) {
+              callback(error, null);
             }
             if (instance.address) {
-              instance.setCNVAddress(CNV_ADDRESS, (err, res) => {
-                if (err) {
-                  callback(err, null);
+              instance.setCNVAddress(CNV_ADDRESS, (error, res) => {
+                if (error) {
+                  callback(error, null);
                 } else {
-                  instance.setBeneficiario(beneficiary_address, (err, res) => {
-                    if (err) {
-                      callback(err, null);
+                  instance.setBeneficiario(beneficiary_address, (error, res) => {
+                    if (error) {
+                      callback(error, null);
                     } else {
                       callback(null, instance);
                     }
