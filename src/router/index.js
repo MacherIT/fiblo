@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Home from '@/views/Home';
-import Usuarios from '@/views/Usuarios/Index';
+// import Usuarios from '@/views/Usuarios/Index';
 // import Wallet from '@/views/Wallet/Index';
-import UsuariosMain from '@/views/Usuarios/Main';
+import UsuariosSignUp from '@/components/Usuarios/FormNew';
 import LoginLogout from '@/views/Usuarios/LoginLogout';
 import Proyectos from '@/views/Proyectos/Index';
 import Cnv from '@/views/Proyectos/CNV';
@@ -23,22 +23,22 @@ const router = new Router({
       name: 'Home',
       component: Home,
     },
+    // {
+    //   path: '/usuarios',
+    //   component: Usuarios,
+    //   children: [
     {
       path: '/usuarios',
-      component: Usuarios,
-      children: [
-        {
-          path: '',
-          name: 'Usuarios',
-          component: UsuariosMain,
-        },
-        {
-          path: 'session',
-          name: 'Login',
-          component: LoginLogout,
-        },
-      ],
+      name: 'Login',
+      component: LoginLogout,
     },
+    {
+      path: '/usuarios/crear-cuenta',
+      name: 'Usuarios',
+      component: UsuariosSignUp,
+    },
+    //   ],
+    // },
     // {
     //   path: '/wallet',
     //   name: 'Wallet',
@@ -53,27 +53,18 @@ const router = new Router({
     },
     {
       path: '/proyectos',
-      component: Proyectos,
-      meta: {
-        requiresLogin: true,
-      },
-      children: [
-        {
-          path: '',
-          name: 'Proyectos',
-          component: ListaProyectos,
-        },
-        {
-          path: 'new',
-          name: 'Nuevo proyecto',
-          component: NuevoProyecto,
-        },
-        {
-          path: ':id',
-          name: 'Show proyecto',
-          component: ShowProyecto,
-        },
-      ],
+      name: 'Proyectos',
+      component: ListaProyectos,
+    },
+    {
+      path: '/proyectos/new',
+      name: 'Nuevo proyecto',
+      component: NuevoProyecto,
+    },
+    {
+      path: '/proyectos/:id',
+      name: 'Show proyecto',
+      component: ShowProyecto,
     },
     { path: '*', redirect: '/' },
   ],

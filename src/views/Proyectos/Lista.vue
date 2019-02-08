@@ -1,85 +1,88 @@
 <template lang="pug">
   .proyectos
     .seccion-filtros
-      .titulo
-        span Filtros
-      .filtros
-        .campo-ciudades
-          select(v-model="provincia")
-            option(selected, value="") -- Provincia --
-            option(
-              v-for="provincia in provincias"
-              :key="provincia.id"
-              :value="provincia") {{provincia.nombre}}
-          select(v-model="filters.ciudad.val", :disabled="!provincia")
-            option(selected, value="") -- Ciudad --
-            option(
-              v-for="ciudad in provincia.ciudades"
-              :key="ciudad.id"
-              :value="ciudad.id")
-                | {{ciudad.nombre}}
-        .categoria
-          select(v-model="filters.categoria.val")
-            option(selected, value="") -- Categoria --
-            option(
-              v-for="categoria in categorias"
-              :key="categoria.id"
-              :value="categoria.id") {{categoria.nombre}}
-        .nombre
-          input(
-            type="text"
-            placeholder="NOMBRE / EMPRENDEDORES"
-            v-model="filters.nombreEmp.val")
-        .monto
-          input(
-            type="number"
-            placeholder="MONTO MINIMO"
-            v-model="filters.monto.val")
-        .monto-supera-max
-          input(
-            type="number"
-            placeholder="MONTO MÁXIMO"
-            v-model="filters.montoSuperaMax.val")
-        //- .pubdate
-        //-   input(type="date", placeholder="FECHA DE PUBLICACIÓN")
+      .filtro.nombre
+        input(
+          type="text"
+          placeholder="NOMBRE / EMPRENDEDORES"
+          v-model="filters.nombreEmp.val")
+      .filtro.provincia
+        select(v-model="provincia")
+          option(selected, value="") -- Provincia --
+          option(
+            v-for="provincia in provincias"
+            :key="provincia.id"
+            :value="provincia") {{provincia.nombre}}
+      .filtro.ciudad
+        select(v-model="filters.ciudad.val", :disabled="!provincia")
+          option(selected, value="") -- Ciudad --
+          option(
+            v-for="ciudad in provincia.ciudades"
+            :key="ciudad.id"
+            :value="ciudad.id")
+              | {{ciudad.nombre}}
+      .filtro.categoria
+        select(v-model="filters.categoria.val")
+          option(selected, value="") -- Categoria --
+          option(
+            v-for="categoria in categorias"
+            :key="categoria.id"
+            :value="categoria.id") {{categoria.nombre}}
+      .filtro.monto
+        input(
+          type="number"
+          placeholder="MONTO MINIMO"
+          v-model="filters.monto.val")
+      .filtro.monto-supera-max
+        input(
+          type="number"
+          placeholder="MONTO MÁXIMO"
+          v-model="filters.montoSuperaMax.val")
+      //- .pubdate
+      //-   input(type="date", placeholder="FECHA DE PUBLICACIÓN")
     .seccion-lista
-      .titulo
-        span Proyectos
-      .lista
-        .proyecto
-          .nombre
-            strong CATEGORÍA
-          .nombre
-            strong NOMBRE
-          .monto
-            strong MONTO MINIMO
-          .monto-supera-max
-            strong MONTO MÁXIMO
-          .pubdate
-            strong FECHA DE PUBLICACIÓN
-        router-link.proyecto(
-          :to="{path: '/proyectos/' + proyecto.id}"
-          v-for="proyecto in proyectosVisibles"
-          :key="proyecto.id")
-          .categoria
-            span {{proyecto.categoria.nombre}}
+      router-link.proyecto(
+        :to="'/proyectos/' + proyecto.id"
+        v-for="proyecto in proyectosVisibles"
+        :key="proyecto.id")
+        .logo-ciudad
+          .logo
+            font-awesome-icon(
+              v-if="!proyecto.logo"
+              icon="rocket")
+              //- Logo fiblo
+            img(
+              v-if="proyecto.logo"
+              :src="proyecto.logo")
+          .ciudad
+            span {{proyecto.ciudad.ciudad.nombre}}
+          .provincia
+            span {{proyecto.ciudad.provincia.nombre}}
+        .datos
           .nombre
             span {{proyecto.nombre}}
+          .descripcion
+            span "{{'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' | limitStr(30)}}"
           .monto
-            span ${{proyecto.monto}}
-          .monto-supera-max
-            span ${{proyecto.montoSuperaMax}}
-          .pubdate
-            span {{proyecto.createdAt | formatDate('DD/MM/YYYY hh:mm')}}
+            span {{proyecto.montoRecaudado * 100 / proyecto.monto}}%
+            span.de de
+            span ${{(valorCambio * proyecto.monto).toFixed(2)}}
+        .categoria
+          span {{proyecto.categoria.nombre}}
+    router-link.new-project(to="/proyectos/new")
+      font-awesome-icon(icon="plus")
 </template>
 
 <script>
 import provincias from '@/assets/data/ciudades-argentinas.json';
 
+import fiblo from '@/services/fiblo';
+
 export default {
   name: 'ListaProyectos',
   data() {
     return {
+      valorCambio: 0,
       provincia: '',
       provincias,
       proyectos: [],
@@ -124,8 +127,8 @@ export default {
   computed: {
     proyectosVisibles() {
       return this.proyectos.filter(proyecto =>
-        Object.keys(this.filters).every(
-          k => (this.filters[k].val ? this.filters[k].fun(proyecto) : true),
+        Object.keys(this.filters).every(k =>
+          this.filters[k].val ? this.filters[k].fun(proyecto) : true,
         ),
       );
     },
@@ -136,7 +139,17 @@ export default {
       url: '/api/proyectos',
     }).then(
       ({ data }) => {
-        this.proyectos = data;
+        this.proyectos = data.map(p => {
+          p.montoRecaudado = 0;
+          fiblo.getMontoRecaudado(p.address, (error, monto) => {
+            if (error) {
+              console.error(error);
+            } else {
+              p.montoRecaudado = monto;
+            }
+          });
+          return p;
+        });
       },
       error => {
         console.error(error);
@@ -153,6 +166,19 @@ export default {
         console.error(error);
       },
     );
+    this.$http({
+      method: 'GET',
+      url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=ARS',
+    }).then(
+      ({ data }) => {
+        if (data && data[0] && data[0].price_ars) {
+          this.valorCambio = parseFloat(data[0].price_ars);
+        }
+      },
+      error => {
+        console.error(error);
+      },
+    );
   },
 };
 </script>
@@ -161,55 +187,181 @@ export default {
 @import '~Styles/_config.scss';
 .proyectos {
   display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  position: relative;
   .seccion-filtros {
     width: 30%;
-    padding: 0 15px;
-    margin-right: 15px;
-    border-right: 1px solid #ccc;
-    .filtros {
-      display: flex;
-      flex-direction: column;
+    min-width: 30%;
+    background-color: $colorGrisOscuro;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    @include sombra(0 0 10px 0 #000);
+    padding: 15px;
+    .filtro {
       width: 100%;
-      & > div {
-        width: 25%;
-        margin: 10px 0;
+      margin-bottom: 20px;
+      input,
+      select {
         width: 100%;
-        input,
-        select {
-          background-color: #fff;
-          border: 1px solid #ccc;
-          padding: 5px;
-          width: 100%;
-        }
+        height: 30px;
+        border: 0;
+        background-color: #fff;
+        padding: 0 7px;
       }
     }
   }
   .seccion-lista {
-    width: 70%;
-    .lista {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 15px;
+    .proyecto {
+      height: 150px;
+      min-height: 150px;
+      width: 100%;
       display: flex;
-      flex-direction: column;
-      .proyecto {
+      justify-content: flex-start;
+      align-items: center;
+      text-decoration: none;
+      border-bottom: 2px solid #fff;
+      position: relative;
+      @include ease-transition;
+      &:hover {
+        background-color: rgba($colorAzulClaro, 0.3);
+      }
+      .logo-ciudad {
+        width: 30%;
+        height: 70%;
         display: flex;
-        justify-content: space-around;
-        align-content: center;
-        padding: 8px 0;
-        width: 100%;
-        text-decoration: none;
-        color: #000;
-        text-transform: uppercase;
-        background-color: #fff;
-        @include ease-transition();
-        & > div {
-          width: 25%;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        margin-right: 10px;
+        padding-right: 10px;
+        border-right: 1px solid #fff;
+        .logo {
+          @include minmaxwh(60px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 50%;
+          background-color: $colorGrisBase;
+          @include sombra(0 0 2px 0 #222);
+          margin-bottom: 7px;
+          svg {
+            color: #666;
+            font-size: 150%;
+          }
+          img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+          }
         }
-        &:not(:last-of-type) {
-          border-bottom: 1px solid #ccc;
+        .ciudad {
+          span {
+            text-transform: uppercase;
+            font-size: 85%;
+            color: #fff;
+          }
         }
-        &:hover {
-          background-color: #ccc;
+        .provincia {
+          span {
+            text-transform: uppercase;
+            font-size: 85%;
+            color: #fff;
+          }
         }
       }
+      .datos {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 70%;
+        text-align: center;
+        .nombre {
+          span {
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 120%;
+            color: #fff;
+          }
+        }
+        .descripcion {
+          span {
+            font-size: 70%;
+            color: #ccc;
+          }
+        }
+        .monto {
+          margin-top: 15px;
+          span {
+            font-size: 150%;
+            color: #fff;
+            font-weight: bold;
+            margin: 0 4px;
+            &.de {
+              font-size: 110%;
+              text-transform: uppercase;
+              font-weight: lighter;
+            }
+          }
+        }
+      }
+      .categoria {
+        position: absolute;
+        right: -40px;
+        -webkit-transform: rotate(-90deg);
+        transform: rotate(-90deg);
+        background-color: #fff;
+        height: 20px;
+        width: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 7px 7px 0 0;
+        span {
+          height: 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-transform: uppercase;
+          font-size: 80%;
+          color: #000;
+        }
+      }
+    }
+  }
+  a.new-project {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    @include minmaxwh(40px);
+    background-color: $colorAzulClaro;
+    @include sombra(0 0 3px 0 #000);
+    z-index: 5;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.7;
+    @include ease-transition;
+    &:hover {
+      opacity: 1;
+    }
+    svg {
+      color: #fff;
     }
   }
 }

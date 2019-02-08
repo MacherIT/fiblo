@@ -26,6 +26,10 @@ Vue.filter('formatDate', (val, format) =>
   (val ? (format ? moment(String(val)).format(format) : val) : ''),
 );
 
+Vue.filter('limitStr', (str, maxSize = 30) =>
+  (str ? (str.length > maxSize ? `${str.substr(0, maxSize)}...` : str) : ''),
+);
+
 Vue.config.productionTip = false;
 
 /* eslint-disable no-new */

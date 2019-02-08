@@ -1,6 +1,6 @@
 <template lang="pug">
-  section.page-usuarios
-    h1 Login/Logout
+  .login-logout
+    //- h1 Login/Logout
     UsuariosFormLogin(v-if="!loggedIn")
     UsuariosButtonLogout(v-if="loggedIn")
 </template>
@@ -25,4 +25,8 @@ export default {
 
 <style lang="scss" scoped>
 @import '~Styles/_config.scss';
+.login-logout {
+  width: 100%;
+  height: 100%;
+}
 </style>

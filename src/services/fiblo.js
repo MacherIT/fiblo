@@ -107,22 +107,22 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
-          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-          const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv
-            .beneficiaryAdded(
-              {},
-              {
-                fromBlock: 0,
-                toBlock: 'latest',
-              },
-            )
-            .watch((error, event) => {
-              if (error) {
-                // callback(error, null);
-              }
-              console.log(event.args);
-            });
+          // const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+          // const cnv = proxyCNV.at(CNV_ADDRESS);
+          // cnv
+          //   .beneficiaryAdded(
+          //     {},
+          //     {
+          //       fromBlock: 0,
+          //       toBlock: 'latest',
+          //     },
+          //   )
+          //   .watch((error, event) => {
+          //     if (error) {
+          //       // callback(error, null);
+          //     }
+          //     console.log(event.args);
+          //   });
           window.web3.eth.getBalance(proyecto.address, (error, balance) => {
             if (error) {
               callback(error, null);

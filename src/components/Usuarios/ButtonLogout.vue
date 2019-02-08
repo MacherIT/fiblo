@@ -1,13 +1,18 @@
 <template lang="pug">
   .usuarios-button-logout
+    .usuario
+      span {{usuario.email}}
     button(@click="logout()") Cerrar sesión
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'UsuariosButtonLogout',
+  computed: {
+    ...mapGetters('usuarios', ['usuario']),
+  },
   methods: {
     ...mapActions('usuarios', ['logout']),
   },
@@ -19,21 +24,31 @@ export default {
 .usuarios-button-logout {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
+  .usuario {
+    margin-bottom: 20px;
+    span {
+      color: #fff;
+    }
+  }
   button {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 6px;
-    width: 100%;
-    margin-bottom: 10px;
-    margin: 0;
-    width: 100%;
-    background-color: #eee;
+    height: 20px;
+    padding: 0 30px;
+    border-radius: 3px;
     border: 0;
+    font-size: 90%;
+    background-color: $colorGrisBase;
+    text-transform: uppercase;
+    font-weight: bold;
+    @include ease-transition;
     cursor: pointer;
+    color: $colorBeigeBase;
+    opacity: 1;
     &:hover {
-      background-color: #999;
+      @include sombra(0 0 5px 0 #000);
     }
   }
 }

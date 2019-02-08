@@ -1,7 +1,8 @@
 <template lang="pug">
-  div(id="root-app")
+  #root-app
     MainMenu
-    router-view
+    .main-box
+      router-view
 </template>
 
 <script>
@@ -18,19 +19,40 @@ export default {
 <style lang="scss">
 @import '~Styles/config';
 
+* {
+  box-sizing: border-box !important;
+}
+
 body {
-  margin: 0;
+  background-position: top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url('./assets/images/fondo.jpg');
+  // background-color: $colorBeigeBase;
   padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100vh;
+  font-size: 14px;
+  font-family: monospace;
   #root-app {
-    display: block;
-    * {
-      font-size: 16px;
-      font-family: monospace;
-      box-sizing: border-box;
-      max-width: 100% !important;
-    }
-    input {
-      @include ease-transition();
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    .main-box {
+      width: 50vw;
+      height: 70vh;
+      background-color: $colorAzulBase;
+      border-radius: 10px;
+      @include sombra(0 0 5px 0 #000);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      overflow: hidden;
     }
   }
 }

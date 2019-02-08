@@ -1,8 +1,8 @@
 <template lang="pug">
   section.page-index-usuarios
     UsuariosFormNew
-    UsuariosFormPassRecovery
-    UsuariosFormChangePass(:token="token")
+    //- UsuariosFormPassRecovery
+    //- UsuariosFormChangePass(:token="token")
 </template>
 
 <script>

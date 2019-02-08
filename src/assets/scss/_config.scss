@@ -1,3 +1,22 @@
+$colorBeigeBase: #dcb75c;
+$colorGrisBase: #f1f1f1;
+$colorGrisOscuro: #e7e7e7;
+$colorAzulBase: #1f4355;
+$colorAzulMedio: #3d748b;
+$colorAzulOscuro: #001826;
+$colorAzulClaro: #006ba0;
+
+$colorPaletaC1: #004f7f;
+$colorPaletaC2: #07899e;
+$colorPaletaC3: #99c1ce;
+$colorPaletaC4: #00a69c;
+$colorPaletaC5: #005b52;
+$colorPaletaC6: #7c0600;
+$colorPaletaC7: #b70000;
+$colorPaletaC8: #cc6d6d;
+$colorPaletaC9: #826120;
+$colorPaletaC10: #f2d188;
+
 @mixin default-form {
   input[aria-required='true'],
   input.required {
