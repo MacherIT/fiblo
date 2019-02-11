@@ -6,6 +6,7 @@
           type="text"
           placeholder="NOMBRE / EMPRENDEDORES"
           v-model="filters.nombreEmp.val")
+        font-awesome-icon(icon="search")
       .filtro.provincia
         select(v-model="provincia")
           option(selected, value="") -- Provincia --
@@ -64,7 +65,7 @@
           .descripcion
             span "{{'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' | limitStr(30)}}"
           .monto
-            span {{proyecto.montoRecaudado * 100 / proyecto.monto}}%
+            span {{(proyecto.montoRecaudado * 100 / proyecto.monto).toFixed(2)}}%
             span.de de
             span ${{(valorCambio * proyecto.monto).toFixed(2)}}
         .categoria
@@ -206,6 +207,17 @@ export default {
     .filtro {
       width: 100%;
       margin-bottom: 20px;
+      &.nombre {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        svg {
+          position: absolute;
+          right: 5px;
+          opacity: 0.7;
+        }
+      }
       input,
       select {
         width: 100%;
@@ -213,6 +225,12 @@ export default {
         border: 0;
         background-color: #fff;
         padding: 0 7px;
+        text-transform: uppercase;
+        font-family: $fontUbuntuRegular;
+        font-size: 80%;
+        &::placeholder {
+          font-family: $fontUbuntuLight;
+        }
       }
     }
   }
@@ -226,8 +244,8 @@ export default {
     overflow: auto;
     padding: 15px;
     .proyecto {
-      height: 150px;
-      min-height: 150px;
+      height: 130px;
+      min-height: 130px;
       width: 100%;
       display: flex;
       justify-content: flex-start;
@@ -271,15 +289,17 @@ export default {
         .ciudad {
           span {
             text-transform: uppercase;
-            font-size: 85%;
+            font-size: 75%;
             color: #fff;
+            font-family: $fontKeepCalmMedium;
           }
         }
         .provincia {
           span {
             text-transform: uppercase;
-            font-size: 85%;
+            font-size: 75%;
             color: #fff;
+            font-family: $fontKeepCalmMedium;
           }
         }
       }
@@ -293,15 +313,17 @@ export default {
         .nombre {
           span {
             text-transform: uppercase;
-            font-weight: bold;
-            font-size: 120%;
+            font-size: 110%;
             color: #fff;
+            font-family: $fontKeepCalmMedium;
+            letter-spacing: 1px;
           }
         }
         .descripcion {
           span {
-            font-size: 70%;
+            font-size: 80%;
             color: #ccc;
+            text-transform: uppercase;
           }
         }
         .monto {
@@ -309,12 +331,13 @@ export default {
           span {
             font-size: 150%;
             color: #fff;
-            font-weight: bold;
             margin: 0 4px;
+            font-family: $fontKeepCalmMedium;
             &.de {
               font-size: 110%;
               text-transform: uppercase;
-              font-weight: lighter;
+              margin: 0 10px;
+              font-family: $fontUbuntuLight;
             }
           }
         }
@@ -347,7 +370,7 @@ export default {
     position: absolute;
     bottom: 15px;
     right: 15px;
-    @include minmaxwh(40px);
+    @include minmaxwh(50px);
     background-color: $colorAzulClaro;
     @include sombra(0 0 3px 0 #000);
     z-index: 5;

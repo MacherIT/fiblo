@@ -76,7 +76,7 @@
                   .address
                     span(v-for="(address, index) in contribucion.from") {{address | limitStr(10)}}{{index !== contribucion.from.length - 1 ? ' / ' : ''}}
                   .monto
-                    span ETH {{(contribucion.monto).toFixed(2)}} ≈ ARS {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ ACC {{(contribucion.monto / valorAccion).toFixed(2)}}
+                    span Ξ {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ ACC {{(contribucion.monto / valorAccion).toFixed(2)}}
         .tab.participar(v-if="tabActiva === 'participar'")
           .compra-acciones
             .mismo-usuario(v-if="proyecto.usuario_id === usuario.id")
@@ -85,15 +85,15 @@
               .campo
                 input(
                   type="number"
-                  placeholder="2 ETH"
+                  placeholder="2 Ξ"
                   v-model="montoAccionETH"
                   @change="adjustMontos('ETH')"
                   :disabled="!projectValidity || !beneficiaryValidity")
-                span ETH
+                span Ξ
               .campo
                 input(
                   type="number"
-                  placeholder="8.000 ARS"
+                  placeholder="8.000 $"
                   v-model="montoAccionARS"
                   @change="adjustMontos('ARS')"
                   :disabled="!projectValidity || !beneficiaryValidity")
@@ -390,10 +390,9 @@ export default {
       }
     }
     .ciudad {
-      margin-bottom: 7px;
       span {
         text-transform: uppercase;
-        font-size: 95%;
+        font-size: 70%;
         color: $colorAzulBase;
       }
     }
@@ -401,7 +400,7 @@ export default {
       margin-bottom: 20px;
       span {
         text-transform: uppercase;
-        font-size: 95%;
+        font-size: 70%;
         color: $colorAzulBase;
       }
     }
@@ -409,15 +408,16 @@ export default {
       margin-bottom: 20px;
       span {
         text-transform: uppercase;
-        font-weight: bold;
         font-size: 150%;
         color: $colorAzulOscuro;
+        font-family: $fontKeepCalmMedium;
       }
     }
     .descripcion {
       span {
-        font-size: 100%;
-        color: $colorAzulOscuro;
+        font-size: 85%;
+        color: $colorAzulMedio;
+        text-transform: uppercase;
       }
     }
     .monto {
@@ -427,12 +427,13 @@ export default {
       span {
         font-size: 200%;
         color: $colorAzulOscuro;
-        font-weight: bold;
+        font-family: $fontKeepCalmMedium;
         margin: 4px 0;
         &.de {
           font-size: 130%;
           text-transform: uppercase;
-          font-weight: lighter;
+          margin: 10px;
+          font-family: $fontUbuntuLight;
         }
       }
     }
@@ -456,10 +457,12 @@ export default {
           .titulo {
             margin: 15px 0;
             span {
-              font-size: 150%;
+              font-size: 125%;
               text-transform: uppercase;
               text-decoration: underline;
               color: #fff;
+              font-family: $fontKeepCalmMedium;
+              letter-spacing: 2px;
             }
           }
           .descripcion {
@@ -490,6 +493,10 @@ export default {
             .contenido {
               p {
                 color: #fff;
+                font-size: 85%;
+                letter-spacing: 1px;
+                font-family: $fontUbuntuLight;
+                line-height: 1.3;
               }
             }
           }
@@ -497,6 +504,10 @@ export default {
             .contenido {
               p {
                 color: #fff;
+                font-size: 85%;
+                letter-spacing: 1px;
+                font-family: $fontUbuntuLight;
+                line-height: 1.3;
               }
             }
           }
@@ -578,19 +589,24 @@ export default {
                     span {
                       color: #fff;
                       text-transform: uppercase;
-                      font-size: 130%;
+                      font-size: 110%;
+                      font-family: $fontKeepCalmMedium;
+                      letter-spacing: 1px;
                     }
                   }
                   .address {
                     span {
                       color: #fff;
+                      font-family: $fontUbuntuLight;
+                      letter-spacing: 2px;
                     }
                   }
                   .monto {
                     margin-top: 15px;
                     span {
                       color: #fff;
-                      font-size: 140%;
+                      font-size: 160%;
+                      font-family: $fontUbuntuLight;
                     }
                   }
                 }
@@ -728,8 +744,12 @@ export default {
           justify-content: center;
           align-items: center;
           color: #fff;
-          text-shadow: 1px 1px 0 #333;
+          text-shadow: 1px 1px 0 #444;
           text-transform: uppercase;
+          font-family: $fontUbuntuRegular;
+          font-weight: bold;
+          font-size: 90%;
+          letter-spacing: 1px;
         }
       }
       .separador {

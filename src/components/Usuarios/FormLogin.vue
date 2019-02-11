@@ -87,6 +87,8 @@ export default {
         margin-bottom: 10px;
         color: #fff;
         text-transform: uppercase;
+        font-family: $fontKeepCalmMedium;
+        letter-spacing: 1px;
       }
       input {
         width: 100%;
@@ -107,6 +109,9 @@ export default {
           color: #fff;
           text-decoration: none;
           letter-spacing: 2px;
+          text-transform: uppercase;
+          font-family: $fontKeepCalmMedium;
+          letter-spacing: 1px;
           &:hover {
             text-decoration: underline;
           }
@@ -138,7 +143,7 @@ export default {
           &:not(:disabled) {
             color: $colorBeigeBase;
             opacity: 1;
-            &:hover{
+            &:hover {
               @include sombra(0 0 5px 0 #000);
             }
           }

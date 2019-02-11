@@ -47,7 +47,7 @@ body {
   width: 100%;
   height: 100vh;
   font-size: 14px;
-  font-family: monospace;
+  font-family: $fontUbuntuRegular, monospace;
   #root-app {
     height: 100%;
     width: 100%;

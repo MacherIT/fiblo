@@ -113,6 +113,8 @@ export default {
         margin-bottom: 10px;
         color: #fff;
         text-transform: uppercase;
+        font-family: $fontKeepCalmMedium;
+        letter-spacing: 1px;
       }
       input {
         width: 100%;
@@ -133,6 +135,9 @@ export default {
           color: #fff;
           text-decoration: none;
           letter-spacing: 2px;
+          text-transform: uppercase;
+          font-family: $fontKeepCalmMedium;
+          letter-spacing: 1px;
           &:hover {
             text-decoration: underline;
           }

@@ -62,13 +62,13 @@
             v-model="proyecto.email")
           input(
             type="text"
-            placeholder="Monto esperado en ARS ($xx.xx)"
+            placeholder="Monto esperado en $ ($xx.xx)"
             v-validate="{required: true, decimal: 2}"
             name="monto"
             v-model="proyecto.monto")
           input(
             type="text"
-            placeholder="Monto maximo de supersuscripción en ARS ($xx.xx)"
+            placeholder="Monto maximo de supersuscripción en $ ($xx.xx)"
             v-validate="{required: true, decimal: 2, valorMax: proyecto.monto}"
             name="monto"
             v-model="proyecto.montoSuperaMax")
