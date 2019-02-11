@@ -60,6 +60,25 @@ module.exports = {
       },
     );
   },
+  simple_data: function(req, res) {
+    var id = req.params.id;
+    usuarioModel.findOne({ where: { id: id }, attributes: ['nombre'] }).then(
+      usuario => {
+        if (!usuario) {
+          return res.status(404).json({
+            message: 'No such usuario',
+          });
+        }
+        return res.json(usuario);
+      },
+      error => {
+        return res.status(500).json({
+          message: 'Error when getting usuario.',
+          error: error,
+        });
+      },
+    );
+  },
   // //////////////
   mail_pass_check: (req, res) => {
     if (req.body.email) {

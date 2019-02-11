@@ -12,6 +12,8 @@ router.get('/', usuarioController.list);
 
 router.get('/c_ac', guardian({ activationToken: true }), usuarioController.c_ac);
 
+router.get('/:id/simple_data', guardian({}), usuarioController.simple_data);
+
 router.get('/:id', guardian({}), usuarioController.show);
 
 /*

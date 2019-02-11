@@ -56,13 +56,27 @@
                   span {{emprendedor.nombre}}
         .tab.acciones(v-if="tabActiva === 'acciones'")
           .lista-acciones
-            .no-hay-contribuciones(v-if="contribuciones.length === 0")
+            .no-hay-contribuciones(v-if="Object.keys(contribuciones) === 0")
               span Todavía no hay contribuciones
-            ul(v-if="contribuciones.length > 0")
+            ul(v-if="Object.keys(contribuciones) > 0")
               li(
-                v-for="(contribucion, index) in contribuciones"
+                v-for="(contribucion, key, index) in contribuciones"
                 :key="index")
-                span {{contribucion}}
+                .avatar-section
+                  .avatar
+                    font-awesome-icon(
+                      icon="user"
+                      v-if="!contribucion.user.avatar")
+                    img(
+                      :src="contribucion.user.avatar"
+                      v-if="contribucion.user.avatar")
+                .datos
+                  .nombre
+                    span {{contribucion.user.nombre}}
+                  .address
+                    span(v-for="(address, index) in contribucion.from") {{address | limitStr(10)}}{{index !== contribucion.from.length - 1 ? ' / ' : ''}}
+                  .monto
+                    span ETH {{(contribucion.monto).toFixed(2)}} ≈ ARS {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ ACC {{(contribucion.monto / valorAccion).toFixed(2)}}
         .tab.participar(v-if="tabActiva === 'participar'")
           .compra-acciones
             .mismo-usuario(v-if="proyecto.usuario_id === usuario.id")
@@ -147,8 +161,9 @@ export default {
       montoAccionARS: '',
       montoAccionACC: '',
       valorCambio: 1,
-      contribuciones: [],
+      contribuciones: {},
       tabActiva: 'info',
+      valorAccion: VALOR_ACCION,
     };
   },
   computed: {
@@ -215,6 +230,26 @@ export default {
         this.montoAccionETH = (this.montoAccionACC * VALOR_ACCION) / this.valorCambio;
       }
     },
+    getUserData() {
+      Object.keys(this.contribuciones).map(uid => {
+        if (Object.keys(this.contribuciones[uid].user).length === 1) {
+          this.$http({
+            method: 'GET',
+            url: `/api/usuarios/${uid}/simple_data`,
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          }).then(
+            ({ data }) => {
+              this.contribuciones[uid].user = data;
+            },
+            error => {
+              console.error(error);
+            },
+          );
+        }
+      });
+    },
     setTabActiva(tab) {
       this.tabActiva = tab;
     },
@@ -223,10 +258,28 @@ export default {
         if (error) {
           console.error(error);
         } else {
-          this.contribuciones.push({
-            uid: contribucion.args.uid.toNumber(),
-            monto: window.web3.fromWei(contribucion.args.amount).toNumber(),
-          });
+          if (!this.contribuciones[`${contribucion.args.uid.toNumber()}`]) {
+            this.contribuciones[`${contribucion.args.uid.toNumber()}`] = {
+              user: {
+                id: contribucion.args.uid.toNumber(),
+              },
+              monto: 0,
+              from: [],
+            };
+          }
+          if (
+            this.contribuciones[`${contribucion.args.uid.toNumber()}`].from.indexOf(
+              contribucion.args.from,
+            ) < 0
+          ) {
+            this.contribuciones[`${contribucion.args.uid.toNumber()}`].from.push(
+              contribucion.args.from,
+            );
+          }
+          this.contribuciones[`${contribucion.args.uid.toNumber()}`].monto += window.web3
+            .fromWei(contribucion.args.amount)
+            .toNumber();
+          this.getUserData();
         }
       });
     },
@@ -471,8 +524,75 @@ export default {
               }
             }
             ul {
+              padding: 0;
+              margin: 0;
+              width: 100%;
+              display: flex;
+              justify-content: flex-start;
+              align-items: flex-start;
+              flex-direction: column;
               li {
-                span {
+                list-style: none;
+                width: 100%;
+                height: auto;
+                min-height: 100px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                &:not(:last-of-type) {
+                  margin-bottom: 15px;
+                  padding-bottom: 15px;
+                  border-bottom: 2px solid #ccc;
+                }
+                .avatar-section {
+                  height: 100%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  width: 25%;
+                  min-width: 25%;
+                  .avatar {
+                    @include minmaxwh(80px);
+                    background-color: $colorAzulClaro;
+                    @include sombra(1px 1px 2px 0 #000);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    svg {
+                      color: #fff;
+                      font-size: 500%;
+                    }
+                    img {
+                      width: 90%;
+                      height: 90%;
+                      object-fit: contain;
+                    }
+                  }
+                }
+                .datos {
+                  width: 73%;
+                  min-width: 73%;
+                  .nombre {
+                    span {
+                      color: #fff;
+                      text-transform: uppercase;
+                      font-size: 130%;
+                    }
+                  }
+                  .address {
+                    span {
+                      color: #fff;
+                    }
+                  }
+                  .monto {
+                    margin-top: 15px;
+                    span {
+                      color: #fff;
+                      font-size: 140%;
+                    }
+                  }
                 }
               }
             }

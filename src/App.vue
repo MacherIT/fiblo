@@ -19,6 +19,19 @@ export default {
 <style lang="scss">
 @import '~Styles/config';
 
+@font-face {
+  font-family: 'KeepCalm-Medium';
+  src: url('./assets/fonts/KeepCalm-Medium.ttf');
+}
+@font-face {
+  font-family: 'Ubuntu-Light';
+  src: url('./assets/fonts/Ubuntu-Light.ttf');
+}
+@font-face {
+  font-family: 'Ubuntu-Regular';
+  src: url('./assets/fonts/Ubuntu-Regular.ttf');
+}
+
 * {
   box-sizing: border-box !important;
 }

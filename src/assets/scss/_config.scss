@@ -17,6 +17,10 @@ $colorPaletaC8: #cc6d6d;
 $colorPaletaC9: #826120;
 $colorPaletaC10: #f2d188;
 
+$fontKeepCalmMedium: 'KeepCalm-Medium';
+$fontUbuntuLight: 'Ubuntu-Light';
+$fontUbuntuRegular: 'Ubuntu-Regular';
+
 @mixin default-form {
   input[aria-required='true'],
   input.required {
