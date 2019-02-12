@@ -29,18 +29,25 @@
             v-for="categoria in categorias"
             :key="categoria.id"
             :value="categoria.id") {{categoria.nombre}}
-      .filtro.monto
-        input(
-          type="number"
-          placeholder="MONTO MINIMO"
-          v-model="filters.monto.val")
-      .filtro.monto-supera-max
-        input(
-          type="number"
-          placeholder="MONTO MÁXIMO"
-          v-model="filters.montoSuperaMax.val")
-      //- .pubdate
-      //-   input(type="date", placeholder="FECHA DE PUBLICACIÓN")
+      .filtro.progreso
+        select(v-model="filters.progreso.val")
+          option(selected, value="") -- Progreso --
+          option(value="0,25") Entre 0% y 25%
+          option(value="25,50") Entre 25% y 50%
+          option(value="50,75") Entre 50% y 75%
+          option(value="75,100") Entre 75% y 100%
+      .montos
+        span Montos:
+        .filtro.monto
+          input(
+            type="number"
+            placeholder="MIN"
+            v-model="filters.monto.val")
+        .filtro.monto-supera-max
+          input(
+            type="number"
+            placeholder="MAX"
+            v-model="filters.montoSuperaMax.val")
     .seccion-lista
       router-link.proyecto(
         :to="'/proyectos/' + proyecto.id"
@@ -91,13 +98,22 @@ export default {
       filters: {
         ciudad: {
           fun(item) {
-            return item.ciudad && JSON.parse(item.ciudad).ciudad.id === this.val;
+            return item.ciudad && item.ciudad.ciudad.id === this.val;
           },
           val: '',
         },
         categoria: {
           fun(item) {
             return item.categoria_id === this.val;
+          },
+          val: '',
+        },
+        progreso: {
+          fun(item) {
+            return (
+              (item.montoRecaudado * 100) / item.monto >= this.val.split(',')[0] &&
+              (item.montoRecaudado * 100) / item.monto <= this.val.split(',')[1]
+            );
           },
           val: '',
         },
@@ -231,6 +247,18 @@ export default {
         &::placeholder {
           font-family: $fontUbuntuLight;
         }
+      }
+    }
+    .montos {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      & > span {
+        width: 100%;
+        margin-bottom: 7px;
+      }
+      .filtro {
+        width: 49%;
       }
     }
   }

@@ -15,7 +15,7 @@
         router-link(to="/proyectos")
           font-awesome-icon(icon="handshake")
       li
-        router-link(to="/mis-contribuciones")
+        router-link(to="/mis-participaciones")
           font-awesome-icon(icon="briefcase")
 </template>
 

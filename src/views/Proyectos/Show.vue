@@ -56,9 +56,9 @@
                   span {{emprendedor.nombre}}
         .tab.acciones(v-if="tabActiva === 'acciones'")
           .lista-acciones
-            .no-hay-contribuciones(v-if="Object.keys(contribuciones) === 0")
+            .no-hay-contribuciones(v-if="Object.keys(contribuciones).length === 0")
               span Todavía no hay contribuciones
-            ul(v-if="Object.keys(contribuciones) > 0")
+            ul(v-if="Object.keys(contribuciones).length > 0")
               li(
                 v-for="(contribucion, key, index) in contribuciones"
                 :key="index")

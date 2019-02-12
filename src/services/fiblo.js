@@ -142,7 +142,6 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
-
           proyecto
             .contributionFiled(
               {},

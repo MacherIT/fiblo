@@ -10,6 +10,7 @@ import Cnv from '@/views/Proyectos/CNV';
 import NuevoProyecto from '@/views/Proyectos/Nuevo';
 import ListaProyectos from '@/views/Proyectos/Lista';
 import ShowProyecto from '@/views/Proyectos/Show';
+import MisParticipaciones from '@/views/Usuarios/MisParticipaciones'
 
 import store from '@/store/index';
 
@@ -45,6 +46,14 @@ const router = new Router({
     //   component: Wallet,
     // },
     {
+      path: '/mis-participaciones',
+      name: 'Mis participaciones',
+      component: MisParticipaciones,
+      meta: {
+        requiresLogin: true,
+      },
+    },
+    {
       path: '/cnv',
       component: Cnv,
       meta: {
@@ -60,6 +69,9 @@ const router = new Router({
       path: '/proyectos/new',
       name: 'Nuevo proyecto',
       component: NuevoProyecto,
+      meta: {
+        requiresLogin: true,
+      },
     },
     {
       path: '/proyectos/:id',
@@ -74,7 +86,7 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresLogin)) {
     if (!store.state.usuarios.loggedIn) {
       next({
-        path: '/usuarios/session',
+        path: '/usuarios',
       });
     } else {
       next();
