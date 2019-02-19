@@ -47,7 +47,11 @@ export default {
       },
     };
   },
+  mounted() {
+    this.setPageTitle('Login');
+  },
   methods: {
+    ...mapActions('general', ['setPageTitle']),
     ...mapActions('usuarios', ['login']),
     iniciarSesion() {
       if (this.dirtyForm && this.validForm) {

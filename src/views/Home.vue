@@ -4,8 +4,16 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   name: 'Home',
+  mounted() {
+    this.setPageTitle('Home');
+  },
+  methods: {
+    ...mapActions('general', ['setPageTitle']),
+  },
 };
 </script>
 

@@ -1,17 +1,25 @@
 <template lang="pug">
   #root-app
     MainMenu
+    .page-title
+      .holder
+        span {{pageTitle}}
     .main-box
       router-view
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 import MainMenu from '@/components/General/MainMenu';
 
 export default {
   name: 'App',
   components: {
     MainMenu,
+  },
+  computed: {
+    ...mapState('general', ['pageTitle']),
   },
 };
 </script>
@@ -55,12 +63,38 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    .page-title {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      width: 60vw;
+      .holder {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 30%;
+        height: 45px;
+        // margin-bottom: 10px;
+        @include sombra(0 -1px 6px 0 #555);
+        background-color: $colorGrisBase;
+        border-radius: 10px 10px 0 0;
+        z-index: 5;
+        position: relative;
+        span {
+          color: $colorAzulBase;
+          font-family: $fontKeepCalmMedium;
+          text-transform: uppercase;
+          font-size: 90%;
+          margin-top: 3px;
+        }
+      }
+    }
     .main-box {
-      width: 50vw;
+      width: 60vw;
       height: 70vh;
       background-color: $colorAzulBase;
-      border-radius: 10px;
-      @include sombra(0 0 5px 0 #000);
+      border-radius: 0 10px 10px 10px;
+      @include sombra(0 0 5px 0 #555);
       display: flex;
       justify-content: center;
       align-items: center;

@@ -69,17 +69,24 @@
           input(
             type="text"
             placeholder="Monto maximo de supersuscripción en $ ($xx.xx)"
-            v-validate="{required: true, decimal: 2, valorMax: proyecto.monto}"
+            v-validate="{required: true, decimal: 2, valorMin: proyecto.monto}"
             name="monto"
             v-model="proyecto.montoSuperaMax")
+          span {{proyecto.montoSuperaMax ? errors.first('monto') : ''}}
+          input(
+            type="text"
+            placeholder="Cantidad de acciones"
+            v-validate="{required: true, max_value: Math.floor(proyecto.monto)}"
+            name="monto"
+            v-model="proyecto.cantAcciones")
+          span ${{proyecto.monto && proyecto.cantAcciones ? proyecto.monto / proyecto.cantAcciones : '--'}} x acc
+        .emprendedores
           input(
             type="text"
             placeholder="Beneficiary address"
             :value="beneficiary_address"
             readonly
             disabled)
-          span {{proyecto.montoSuperaMax ? errors.first('monto') : ''}}
-        .emprendedores
           .titulo
             span Lista de emprendedores
           input(
@@ -107,14 +114,14 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { Validator } from 'vee-validate';
 
 import mixins from '@/mixins/mixins';
 import provincias from '@/assets/data/ciudades-argentinas.json';
 import fiblo from '@/services/fiblo';
 
-Validator.extend('valorMax', {
+Validator.extend('valorMin', {
   getMessage: () => 'El valor de supersuscripción debe ser mayor o igual que el monto esperado',
   validate: (value, [monto]) => parseFloat(value, 10) >= parseFloat(monto, 10),
 });
@@ -142,6 +149,7 @@ export default {
         email: '',
         monto: '',
         montoSuperaMax: '',
+        cantAcciones: '',
         sector: '',
         emprendedores: [],
       },
@@ -182,8 +190,10 @@ export default {
         console.error(error);
       },
     );
+    this.setPageTitle('Nuevo proyecto');
   },
   methods: {
+    ...mapActions('general', ['setPageTitle']),
     setCatFocused() {
       this.catFocused = true;
     },
@@ -254,32 +264,49 @@ export default {
       }
     },
     _saveProyecto(categoria) {
-      fiblo.deployProyecto(this.proyecto, this.beneficiary_address, (error, instance) => {
-        if (error) {
-          console.error(error);
-          this.sent = false;
-        } else if (instance.address) {
-          this.proyecto.categoria_id = categoria.id;
-          this.proyecto.address = instance.address;
-          this.$http({
-            method: 'POST',
-            url: '/api/proyectos',
-            body: this.proyecto,
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          }).then(
-            ({ status }) => {
-              this.sent = false;
-              console.log(status);
-            },
-            error => {
-              this.sent = false;
-              console.error(error);
-            },
-          );
-        }
-      });
+      fiblo.deployProyecto(
+        this.proyecto,
+        this.beneficiary_address,
+        this.proyecto.cantAcciones,
+        this.proyecto.nombre
+          .toLowerCase()
+          .replace(/\s/g, '-')
+          .replace(/á/g, 'a')
+          .replace(/é/g, 'e')
+          .replace(/í/g, 'i')
+          .replace(/ó/g, 'o')
+          .replace(/ú/g, 'u')
+          .replace(/ñ/g, 'n')
+          .replace(/[^a-zA-Z0-9\.-_]/g, '')
+          .substr(0, 5)
+          .toUpperCase(),
+        (error, instance) => {
+          if (error) {
+            console.error(error);
+            this.sent = false;
+          } else if (instance.address) {
+            this.proyecto.categoria_id = categoria.id;
+            this.proyecto.address = instance.address;
+            this.$http({
+              method: 'POST',
+              url: '/api/proyectos',
+              body: this.proyecto,
+              headers: {
+                Authorization: `Bearer ${this.token}`,
+              },
+            }).then(
+              ({ status }) => {
+                this.sent = false;
+                console.log(status);
+              },
+              error => {
+                this.sent = false;
+                console.error(error);
+              },
+            );
+          }
+        },
+      );
     },
   },
 };

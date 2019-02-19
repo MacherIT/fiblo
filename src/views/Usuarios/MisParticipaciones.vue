@@ -6,7 +6,7 @@
       .total.ars
         span $ {{(totalParticipaciones * valorCambio).toFixed(2)}}
       .total.acc
-        span acc {{((totalParticipaciones * valorCambio) / valorAccion).toFixed(2)}}
+        span {{parseInt(totalCantAcciones)}} acc
       .total.de
         span de
       .total.proyectos
@@ -33,22 +33,21 @@
             .address
               span {{proyecto.address | limitStr(10)}}
             .monto
-              span Ξ {{(proyecto.totalMisParticipaciones).toFixed(2)}} ≈ $ {{(proyecto.totalMisParticipaciones * valorCambio).toFixed(2)}} ≈ ACC {{(proyecto.totalMisParticipaciones / valorAccion).toFixed(2)}}
+              span Ξ {{(proyecto.totalMisParticipaciones).toFixed(2)}} ≈ $ {{(proyecto.totalMisParticipaciones * valorCambio).toFixed(2)}} ≈ {{parseInt(proyecto.totalMisParticipaciones * valorCambio / proyecto.valorAccion)}} acc
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 import fiblo from '@/services/fiblo';
-
-const VALOR_ACCION = 50;
+import marketcap from '@/services/marketcap';
 
 export default {
   data() {
     return {
       proyectos: {},
       valorCambio: 0,
-      valorAccion: VALOR_ACCION,
+      totalCantAcciones: 0,
     };
   },
   computed: {
@@ -57,11 +56,12 @@ export default {
       return Object.keys(this.proyectos).reduce(
         (sumaProyectos, pid) =>
           sumaProyectos +
-          this.proyectos[pid].misParticipaciones.reduce(
-            (sumaLocal, participacion) =>
-              sumaLocal + window.web3.fromWei(participacion.amount).toNumber(),
-            0,
-          ),
+          this.proyectos[pid].misParticipaciones.reduce((sumaLocal, participacion) => {
+            this.totalCantAcciones +=
+              (window.web3.fromWei(participacion.amount).toNumber() * this.valorCambio) /
+              (this.proyectos[pid].monto / this.proyectos[pid].cantAcciones);
+            return sumaLocal + window.web3.fromWei(participacion.amount).toNumber();
+          }, 0),
         0,
       );
     },
@@ -72,17 +72,13 @@ export default {
     },
   },
   mounted() {
-    this.$http({
-      method: 'GET',
-      url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=ARS',
-    }).then(
-      ({ data }) => {
-        if (data && data[0] && data[0].price_ars) {
-          this.valorCambio = parseFloat(data[0].price_ars);
-        }
+    marketcap.getArs().then(
+      monto => {
+        this.valorCambio = monto;
       },
       error => {
         console.error(error);
+        this.valorCambio = 4000;
       },
     );
 
@@ -92,7 +88,12 @@ export default {
     }).then(
       ({ data }) => {
         this.proyectos = data.reduce((output, p) => {
-          output[p.id] = { ...p, misParticipaciones: [], totalMisParticipaciones: 0 };
+          output[p.id] = {
+            ...p,
+            misParticipaciones: [],
+            totalMisParticipaciones: 0,
+            valorAccion: p.monto / p.cantAcciones,
+          };
           return output;
         }, {});
         data.map(p => {
@@ -114,6 +115,10 @@ export default {
         console.error(error);
       },
     );
+    this.setPageTitle('Mis participaciones');
+  },
+  methods: {
+    ...mapActions('general', ['setPageTitle']),
   },
 };
 </script>

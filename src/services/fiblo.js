@@ -160,7 +160,7 @@ export default {
       }
     });
   },
-  deployProyecto(proyecto, beneficiary_address, callback) {
+  deployProyecto(proyecto, beneficiary_address, cant_acciones, symbol, callback) {
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
@@ -213,7 +213,19 @@ export default {
                     if (error) {
                       callback(error, null);
                     } else {
-                      callback(null, instance);
+                      instance.setCantAcciones(cant_acciones, (error, res) => {
+                        if (error) {
+                          callback(error, null);
+                        } else {
+                          instance.setSymbol(symbol, (error, res) => {
+                            if (error) {
+                              callback(error, null);
+                            } else {
+                              callback(null, instance);
+                            }
+                          });
+                        }
+                      });
                     }
                   });
                 }

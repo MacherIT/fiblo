@@ -100,8 +100,9 @@ export default {
     align-items: center;
     flex-direction: column;
     height: 100%;
-    width: 80%;
-    margin: auto;
+    width: 40%;
+    margin-left: auto;
+    margin-right: 40px;
     .campo {
       width: 100%;
       display: flex;
@@ -115,6 +116,7 @@ export default {
         text-transform: uppercase;
         font-family: $fontKeepCalmMedium;
         letter-spacing: 1px;
+        font-size: 80%;
       }
       input {
         width: 100%;

@@ -83,6 +83,7 @@ module.exports = {
         email: req.body.email,
         monto: req.body.monto,
         montoSuperaMax: req.body.montoSuperaMax,
+        cantAcciones: req.body.cantAcciones,
         sector: req.body.sector,
         emprendedores: req.body.emprendedores,
       });
@@ -131,6 +132,9 @@ module.exports = {
         proyecto.montoSuperaMax = req.body.montoSuperaMax
           ? req.body.montoSuperaMax
           : proyecto.montoSuperaMax;
+        proyecto.cantAcciones = req.body.cantAcciones
+          ? req.body.cantAcciones
+          : proyecto.cantAcciones;
         proyecto.sector = req.body.sector ? req.body.sector : proyecto.sector;
         proyecto.emprendedores = req.body.emprendedores
           ? req.body.emprendedores

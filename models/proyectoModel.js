@@ -55,6 +55,10 @@ var proyectoSchema = sequelize.define('proyecto', {
     type: DOUBLE,
     allowNull: false,
   },
+  cantAcciones: {
+    type: INTEGER,
+    allowNull: false,
+  },
   emprendedores: JSONB,
 });
 

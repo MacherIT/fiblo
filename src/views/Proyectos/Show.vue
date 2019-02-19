@@ -20,9 +20,9 @@
       .descripcion
         span "{{'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' | limitStr(30)}}"
       .monto
-        span {{(montoRecaudado * 100 / proyecto.monto).toFixed(2)}}%
+        span {{((montoRecaudado * valorCambio) * 100 / proyecto.monto).toFixed(2)}}%
         span.de de
-        span ${{(valorCambio * proyecto.monto).toFixed(2)}}
+        span ${{proyecto.monto.toFixed(2)}}
     .cuerpo
       .tabs
         .tab.info(v-if="tabActiva === 'info'")
@@ -61,7 +61,8 @@
             ul(v-if="Object.keys(contribuciones).length > 0")
               li(
                 v-for="(contribucion, key, index) in contribuciones"
-                :key="index")
+                :key="index"
+                :class="{propia: contribucion.user.id === usuario.id}")
                 .avatar-section
                   .avatar
                     font-awesome-icon(
@@ -76,7 +77,7 @@
                   .address
                     span(v-for="(address, index) in contribucion.from") {{address | limitStr(10)}}{{index !== contribucion.from.length - 1 ? ' / ' : ''}}
                   .monto
-                    span Ξ {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ ACC {{(contribucion.monto / valorAccion).toFixed(2)}}
+                    span Ξ {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ ACC {{parseInt(contribucion.monto * valorCambio / valorAccion)}}
         .tab.participar(v-if="tabActiva === 'participar'")
           .compra-acciones
             .mismo-usuario(v-if="proyecto.usuario_id === usuario.id")
@@ -111,6 +112,8 @@
                   type="submit"
                   :disabled="!montoAccionETH || montoAccionETH <= 0 || sent")
                   font-awesome-icon(icon="play")
+              .aclaracion-acciones(v-if="projectValidity && beneficiaryValidity")
+                span La cantidad de acciones real se computa una vez finalizada la ronda, el número indicado es estimativo y varía según la cotización del Ether.
               .proyecto-invalido
                 span(v-if="!projectValidity || !beneficiaryValidity") Proyecto todavía inválido
         .tab.dev(v-if="tabActiva === 'dev'")
@@ -142,10 +145,10 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
-import fiblo from '@/services/fiblo';
+import { mapState, mapGetters, mapActions } from 'vuex';
 
-const VALOR_ACCION = 50;
+import fiblo from '@/services/fiblo';
+import marketcap from '@/services/marketcap';
 
 export default {
   name: 'ShowProyecto',
@@ -163,7 +166,7 @@ export default {
       valorCambio: 1,
       contribuciones: {},
       tabActiva: 'info',
-      valorAccion: VALOR_ACCION,
+      valorAccion: 0,
     };
   },
   computed: {
@@ -181,6 +184,8 @@ export default {
     }).then(
       ({ data }) => {
         this.proyecto = data;
+        this.valorAccion = this.proyecto.monto / this.proyecto.cantAcciones;
+        this.setPageTitle(this.proyecto.nombre);
         this.getMontoRecaudado();
         this.getContribuciones(this.proyecto.address);
         fiblo.projectValiditySet(this.proyecto.address, (error, res) => {
@@ -202,32 +207,28 @@ export default {
         console.error(error);
       },
     );
-
-    this.$http({
-      method: 'GET',
-      url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=ARS',
-    }).then(
-      ({ data }) => {
-        if (data && data[0] && data[0].price_ars) {
-          this.valorCambio = parseFloat(data[0].price_ars);
-        }
+    marketcap.getArs().then(
+      monto => {
+        this.valorCambio = monto;
       },
       error => {
         console.error(error);
+        this.valorCambio = 4000;
       },
     );
   },
   methods: {
+    ...mapActions('general', ['setPageTitle']),
     adjustMontos(prop) {
       if (prop === 'ETH') {
         this.montoAccionARS = this.montoAccionETH * this.valorCambio;
-        this.montoAccionACC = (this.montoAccionETH * this.valorCambio) / VALOR_ACCION;
+        this.montoAccionACC = this.montoAccionARS / this.valorAccion;
       } else if (prop === 'ARS') {
         this.montoAccionETH = this.montoAccionARS / this.valorCambio;
-        this.montoAccionACC = this.montoAccionARS / this.valorCambio / VALOR_ACCION;
+        this.montoAccionACC = this.montoAccionARS / this.valorAccion;
       } else {
-        this.montoAccionARS = this.montoAccionACC * VALOR_ACCION;
-        this.montoAccionETH = (this.montoAccionACC * VALOR_ACCION) / this.valorCambio;
+        this.montoAccionARS = this.montoAccionACC * this.valorAccion;
+        this.montoAccionETH = this.montoAccionARS / this.valorCambio;
       }
     },
     getUserData() {
@@ -676,6 +677,7 @@ export default {
                   }
                 }
               }
+              .aclaracion-acciones,
               .proyecto-invalido {
                 span {
                   color: #ccc;

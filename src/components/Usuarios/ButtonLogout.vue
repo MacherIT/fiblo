@@ -10,11 +10,15 @@ import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'UsuariosButtonLogout',
+  mounted() {
+    this.setPageTitle('Perfil');
+  },
   computed: {
     ...mapGetters('usuarios', ['usuario']),
   },
   methods: {
     ...mapActions('usuarios', ['logout']),
+    ...mapActions('general', ['setPageTitle']),
   },
 };
 </script>

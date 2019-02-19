@@ -41,12 +41,12 @@
         .filtro.monto
           input(
             type="number"
-            placeholder="MIN"
+            placeholder="$ MIN"
             v-model="filters.monto.val")
         .filtro.monto-supera-max
           input(
             type="number"
-            placeholder="MAX"
+            placeholder="$ MAX"
             v-model="filters.montoSuperaMax.val")
     .seccion-lista
       router-link.proyecto(
@@ -72,9 +72,9 @@
           .descripcion
             span "{{'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' | limitStr(30)}}"
           .monto
-            span {{(proyecto.montoRecaudado * 100 / proyecto.monto).toFixed(2)}}%
+            span {{((proyecto.montoRecaudado * valorCambio) * 100 / proyecto.monto).toFixed(2)}}%
             span.de de
-            span ${{(valorCambio * proyecto.monto).toFixed(2)}}
+            span ${{proyecto.monto.toFixed(2)}}
         .categoria
           span {{proyecto.categoria.nombre}}
     router-link.new-project(to="/proyectos/new")
@@ -82,9 +82,13 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import provincias from '@/assets/data/ciudades-argentinas.json';
 
 import fiblo from '@/services/fiblo';
+import marketcap from '@/services/marketcap';
+
+let valorCambio = 0;
 
 export default {
   name: 'ListaProyectos',
@@ -128,13 +132,13 @@ export default {
         },
         monto: {
           fun(item) {
-            return item.monto >= this.val;
+            return item.monto * valorCambio >= this.val;
           },
           val: '',
         },
         montoSuperaMax: {
           fun(item) {
-            return item.montoSuperaMax <= this.val;
+            return item.monto * valorCambio <= this.val;
           },
           val: '',
         },
@@ -183,19 +187,21 @@ export default {
         console.error(error);
       },
     );
-    this.$http({
-      method: 'GET',
-      url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=ARS',
-    }).then(
-      ({ data }) => {
-        if (data && data[0] && data[0].price_ars) {
-          this.valorCambio = parseFloat(data[0].price_ars);
-        }
+    marketcap.getArs().then(
+      monto => {
+        this.valorCambio = monto;
+        valorCambio = monto;
       },
       error => {
         console.error(error);
+        this.valorCambio = 4000;
+        valorCambio = 4000;
       },
     );
+    this.setPageTitle('Proyectos');
+  },
+  methods: {
+    ...mapActions('general', ['setPageTitle']),
   },
 };
 </script>

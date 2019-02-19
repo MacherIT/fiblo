@@ -1,9 +1,11 @@
 pragma solidity ^0.4.22;
 
 import './mortal.sol';
+import './SafeMath.sol';
 import './CNV.sol';
 
 contract ContratoSAS is mortal {
+    using SafeMath for uint;
 
     CNV cnv;
 
@@ -11,6 +13,9 @@ contract ContratoSAS is mortal {
     event contributionFiled(address indexed from, uint256 indexed uid, uint256 amount);
     event receivedFunds(address _from, uint256 _amount);
     event beneficiarioSet(address beneficiario);
+    event cantAccionesSet(uint cant_acciones);
+    event Transfer(address indexed from, address indexed to, uint tokens);
+    event symbolSet(string symbol);
     event urlSet(string url);
     event nombreSet(string nombre);
     event montoSet(uint256 monto);
@@ -26,10 +31,13 @@ contract ContratoSAS is mortal {
         uint256 _amount;
     }
 
+    uint public    m_total_supply; // ERC 20
+    uint public    m_decimals; // ERC 20
+    string public  m_symbol; // ERC 20
     uint public    contribution_counter;
     address public m_beneficiario;
     string public  m_url;
-    string public  m_nombre;
+    string public  m_nombre; // ERC 20
     uint256 public m_monto;
     uint256 public m_monto_max;
     string public  m_fecha;
@@ -37,14 +45,18 @@ contract ContratoSAS is mortal {
     uint public    m_cuit;
     bool public    m_project_valid;
     bool public    m_beneficiary_valid;
+    bool public    m_closed_round;
     /* uint public    m_uid; */
 
     mapping(uint => Contribution) m_contributions;
+    mapping(address => uint256) balances;
 
     constructor() public {
+      m_decimals = 18;
       contribution_counter = 0;
       m_project_valid = false;
       m_beneficiary_valid = false;
+      m_closed_round = false;
     }
     /* constructor(address beneficiario, string url, string nombre, uint256 monto, uint256 monto_max, string fecha, string descripcion, uint cuit) public {
       contribution_counter = 0;
@@ -61,7 +73,7 @@ contract ContratoSAS is mortal {
     } */
 
     function receiveFunds(uint uid) payable public {
-      require(m_project_valid && m_beneficiary_valid, "Both contract and beneficiary must be validated by the NVC");
+      require(m_project_valid && m_beneficiary_valid && !m_closed_round, "Both contract and beneficiary must be validated by the NVC and the round must be open");
         /* Receive amount */
         if(msg.value > 0) {
             emit receivedFunds(msg.sender, msg.value);
@@ -75,6 +87,19 @@ contract ContratoSAS is mortal {
     /*function getNombre() public returns (string) {
         return m_nombre;
     }*/
+
+    /* Setea el totalSupply de la SAS/proyecto */
+    function setSymbol(string symbol) onlyowner public {
+        m_symbol = symbol;
+        emit symbolSet(symbol);
+    }
+
+    /* Setea el totalSupply de la SAS/proyecto */
+    function setCantAcciones(uint cant) onlyowner public {
+        m_total_supply = cant * 10**uint(m_decimals);
+        balances[msg.sender] = m_total_supply; // Sets all the tokens in the owners balance
+        emit cantAccionesSet(cant);
+    }
 
     /* Setea el beneficiario de la SAS/proyecto */
     function setBeneficiario(address beneficiario) onlyowner public {
@@ -134,6 +159,21 @@ contract ContratoSAS is mortal {
 
     function setBeneficiaryValidity() onlyowner public {
       m_beneficiary_valid = cnv.isBeneficiaryValid(m_beneficiario);
+    }
+
+    function transfer(address to, uint tokens) public returns (bool success) {
+      balances[owner] = balances[owner].sub(tokens); // WARNING: ERC20 dice, debería ser msg.sender, ponemos owner porque no sabemos si se mantiene el msg.sender entre closeRound y transfer
+      balances[to] = balances[to].add(tokens);
+      emit Transfer(owner, to, tokens);
+      return true;
+    }
+
+    function closeRound() onlyowner public returns (bool success) {
+      for (uint i = 1; i <= contribution_counter; i++) {
+        transfer(m_contributions[i]._from, m_contributions[i]._amount * 10**uint(m_decimals));
+      }
+      m_closed_round = true;
+      return true;
     }
 
     /* Setea el uid de la SAS/proyecto */
