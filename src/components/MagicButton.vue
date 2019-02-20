@@ -55,11 +55,13 @@ export default {
         emprendedores: [{ nombre: 'csa' }],
       };
 
-      fiblo.deployProyecto(
+      fiblo.deployProyectoFull(
         proyecto,
         this.beneficiary_address,
         proyecto.cantAcciones,
-        'magic',
+        'magic', // Symbol
+        20000, // Monto
+        30000, // Monto max
         (error, instance) => {
           if (error) {
             console.error(error);

@@ -51,12 +51,32 @@ contract ContratoSAS is mortal {
     mapping(uint => Contribution) m_contributions;
     mapping(address => uint) balances;
 
-    constructor() public {
+    /* constructor() public {
       m_decimals = 18;
       contribution_counter = 0;
       m_project_valid = false;
       m_beneficiary_valid = false;
       m_closed_round = false;
+    } */
+
+    constructor(address cnv_addr, address beneficiario, uint cant_acciones, string symbol, uint monto, uint monto_max) public {
+      m_decimals = 18;
+      contribution_counter = 0;
+      m_project_valid = false;
+      m_beneficiary_valid = false;
+      m_closed_round = false;
+      ///
+      cnv = CNV(cnv_addr);
+      m_beneficiario = beneficiario;
+      emit beneficiarioSet(m_beneficiario);
+      m_total_supply = cant_acciones * 10**uint(m_decimals);
+      emit cantAccionesSet(m_total_supply);
+      m_symbol = symbol;
+      emit symbolSet(symbol);
+      m_monto = monto;
+      emit montoSet(m_monto);
+      m_monto_max = monto_max;
+      emit montoMaxSet(m_monto_max);
     }
     /* constructor(address beneficiario, string url, string nombre, uint monto, uint monto_max, string fecha, string descripcion, uint cuit) public {
       contribution_counter = 0;

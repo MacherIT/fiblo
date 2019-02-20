@@ -160,6 +160,43 @@ export default {
       }
     });
   },
+  deployProyectoFull(
+    proyecto,
+    beneficiary_address,
+    cant_acciones,
+    symbol,
+    monto,
+    monto_max,
+    callback,
+  ) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxy = window.web3.eth.contract(baseJSON.abi);
+          proxy.new(
+            CNV_ADDRESS,
+            beneficiary_address,
+            cant_acciones,
+            symbol,
+            monto,
+            monto_max,
+            {
+              data: baseJSON.bytecode,
+            },
+            (error, instance) => {
+              if (error) {
+                callback(error, null);
+              }
+              callback(null, instance);
+            },
+          );
+        });
+      }
+    });
+  },
   deployProyecto(proyecto, beneficiary_address, cant_acciones, symbol, callback) {
     web3Init((error, accounts) => {
       if (error) {
