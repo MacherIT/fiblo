@@ -1,6 +1,7 @@
 <template lang="pug">
   #root-app
     MainMenu
+    MagicButton
     .page-title
       .holder
         span {{pageTitle}}
@@ -12,11 +13,13 @@
 import { mapState } from 'vuex';
 
 import MainMenu from '@/components/General/MainMenu';
+import MagicButton from '@/components/MagicButton';
 
 export default {
   name: 'App',
   components: {
     MainMenu,
+    MagicButton,
   },
   computed: {
     ...mapState('general', ['pageTitle']),

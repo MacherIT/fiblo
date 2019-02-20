@@ -116,12 +116,12 @@
                 span La cantidad de acciones real se computa una vez finalizada la ronda, el número indicado es estimativo y varía según la cotización del Ether.
               .proyecto-invalido
                 span(v-if="!projectValidity || !beneficiaryValidity") Proyecto todavía inválido
-        .tab.dev(v-if="tabActiva === 'dev'")
-          span projectValidity: {{projectValidity}}
-          span beneficiaryValidity: {{beneficiaryValidity}}
-          .sets
-            button(@click="setProjectValidity") Set project validity
-            button(@click="setBeneficiaryValidity") Set beneficiary validity
+        //- .tab.dev(v-if="tabActiva === 'dev'")
+        //-   span projectValidity: {{projectValidity}}
+        //-   span beneficiaryValidity: {{beneficiaryValidity}}
+        //-   .sets
+        //-     button(@click="setProjectValidity") Set project validity
+        //-     button(@click="setBeneficiaryValidity") Set beneficiary validity
       .tab-menu
         .tab-item.info(
           :class="{active: tabActiva === 'info'}"
@@ -137,11 +137,11 @@
           :class="{active: tabActiva === 'participar'}"
           @click="setTabActiva('participar')")
           span Participar
-        .separador
-        .tab-item.dev(
-          :class="{active: tabActiva === 'dev'}"
-          @click="setTabActiva('dev')")
-          span Dev
+        //- .separador
+        //- .tab-item.dev(
+        //-   :class="{active: tabActiva === 'dev'}"
+        //-   @click="setTabActiva('dev')")
+        //-   span Dev
 </template>
 
 <script>

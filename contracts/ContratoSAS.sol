@@ -10,16 +10,16 @@ contract ContratoSAS is mortal {
     CNV cnv;
 
     /* Events */
-    event contributionFiled(address indexed from, uint256 indexed uid, uint256 amount);
-    event receivedFunds(address _from, uint256 _amount);
+    event contributionFiled(address indexed from, uint indexed uid, uint amount);
+    event receivedFunds(address _from, uint _amount);
     event beneficiarioSet(address beneficiario);
     event cantAccionesSet(uint cant_acciones);
     event Transfer(address indexed from, address indexed to, uint tokens);
     event symbolSet(string symbol);
     event urlSet(string url);
     event nombreSet(string nombre);
-    event montoSet(uint256 monto);
-    event montoMaxSet(uint256 monto_max);
+    event montoSet(uint monto);
+    event montoMaxSet(uint monto_max);
     event fechaSet(string fecha);
     event descripcionSet(string descripcion);
     event cuitSet(uint cuit);
@@ -27,8 +27,8 @@ contract ContratoSAS is mortal {
 
     struct Contribution {
         address _from;
-        uint256 _uid;
-        uint256 _amount;
+        uint _uid;
+        uint _amount;
     }
 
     uint public    m_total_supply; // ERC 20
@@ -38,8 +38,8 @@ contract ContratoSAS is mortal {
     address public m_beneficiario;
     string public  m_url;
     string public  m_nombre; // ERC 20
-    uint256 public m_monto;
-    uint256 public m_monto_max;
+    uint public m_monto;
+    uint public m_monto_max;
     string public  m_fecha;
     string public  m_descripcion;
     uint public    m_cuit;
@@ -49,7 +49,7 @@ contract ContratoSAS is mortal {
     /* uint public    m_uid; */
 
     mapping(uint => Contribution) m_contributions;
-    mapping(address => uint256) balances;
+    mapping(address => uint) balances;
 
     constructor() public {
       m_decimals = 18;
@@ -58,7 +58,7 @@ contract ContratoSAS is mortal {
       m_beneficiary_valid = false;
       m_closed_round = false;
     }
-    /* constructor(address beneficiario, string url, string nombre, uint256 monto, uint256 monto_max, string fecha, string descripcion, uint cuit) public {
+    /* constructor(address beneficiario, string url, string nombre, uint monto, uint monto_max, string fecha, string descripcion, uint cuit) public {
       contribution_counter = 0;
       m_beneficiario = beneficiario;
       m_url = url;
@@ -97,7 +97,7 @@ contract ContratoSAS is mortal {
     /* Setea el totalSupply de la SAS/proyecto */
     function setCantAcciones(uint cant) onlyowner public {
         m_total_supply = cant * 10**uint(m_decimals);
-        balances[msg.sender] = m_total_supply; // Sets all the tokens in the owners balance
+        balances[owner] = m_total_supply; // Sets all the tokens in the owners balance
         emit cantAccionesSet(cant);
     }
 
@@ -120,13 +120,13 @@ contract ContratoSAS is mortal {
     }
 
     /* Setea el monto de la SAS/proyecto */
-    function setMonto(uint256 monto) onlyowner public {
+    function setMonto(uint monto) onlyowner public {
         m_monto = monto;
         emit montoSet(m_monto);
     }
 
     /* Setea el monto max de la SAS/proyecto */
-    function setMontoMax(uint256 monto_max) onlyowner public {
+    function setMontoMax(uint monto_max) onlyowner public {
         m_monto_max = monto_max;
         emit montoMaxSet(m_monto_max);
     }
@@ -168,9 +168,13 @@ contract ContratoSAS is mortal {
       return true;
     }
 
+    function balanceOf(address who) public view returns (uint balance) {
+      return balances[who];
+    }
+
     function closeRound() onlyowner public returns (bool success) {
       for (uint i = 1; i <= contribution_counter; i++) {
-        transfer(m_contributions[i]._from, m_contributions[i]._amount * 10**uint(m_decimals));
+        transfer(m_contributions[i]._from, m_contributions[i]._amount); // Los tokens los mandamos como el amount sin multiplicar por los decimales porque ya los estamos almacenando en wei al crear la contribución.
       }
       m_closed_round = true;
       return true;

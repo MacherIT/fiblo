@@ -247,7 +247,10 @@ export default {
           const proyecto = proxySAS.at(project_address);
 
           proyecto.setProjectValidity((error, res) => {
-            console.log(res);
+            if (error) {
+              callback(error, null);
+            }
+            callback(null, res);
           });
         });
       }
@@ -264,7 +267,10 @@ export default {
           const proyecto = proxySAS.at(project_address);
 
           proyecto.setBeneficiaryValidity((error, res) => {
-            console.log(res);
+            if (error) {
+              callback(error, null);
+            }
+            callback(null, res);
           });
         });
       }
@@ -338,7 +344,6 @@ export default {
           if (error) {
             callback(error, null);
           } else {
-            console.log(res);
             callback(null, res);
           }
         });
@@ -385,6 +390,46 @@ export default {
       }
     });
   },
+  closeRound(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto.closeRound((error, res) => {
+            if (error) {
+              callback(error, null);
+            } else {
+              callback(null, res);
+            }
+          });
+        });
+      }
+    });
+  },
+  isProjectClosed(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto.m_closed_round((error, res) => {
+            if (error) {
+              callback(error, null);
+            } else {
+              callback(null, res);
+            }
+          });
+        });
+      }
+    });
+  },
   isBeneficiaryValid(beneficiary_address, callback) {
     web3Init((error, accounts) => {
       if (error) {
@@ -397,7 +442,6 @@ export default {
           if (error) {
             callback(error, null);
           } else {
-            console.log(res);
             callback(null, res);
           }
         });

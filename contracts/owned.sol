@@ -1,7 +1,7 @@
 pragma solidity ^0.4.15;
 
 contract owned {
-    address owner;
+    address public owner;
 
     modifier onlyowner() {
         /**
