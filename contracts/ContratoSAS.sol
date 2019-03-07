@@ -38,8 +38,8 @@ contract ContratoSAS is mortal {
     address public m_beneficiario;
     string public  m_url;
     string public  m_nombre; // ERC 20
-    uint public m_monto;
-    uint public m_monto_max;
+    uint public    m_monto;
+    uint public    m_monto_max;
     string public  m_fecha;
     string public  m_descripcion;
     uint public    m_cuit;
@@ -59,7 +59,7 @@ contract ContratoSAS is mortal {
       m_closed_round = false;
     } */
 
-    constructor(address cnv_addr, address beneficiario, uint cant_acciones, string symbol, uint monto, uint monto_max) public {
+    constructor(address cnv_addr, address beneficiario, uint cant_acciones, string symbol, uint monto, uint monto_max, string fecha) public {
       m_decimals = 18;
       contribution_counter = 0;
       m_project_valid = false;
@@ -77,6 +77,8 @@ contract ContratoSAS is mortal {
       emit montoSet(m_monto);
       m_monto_max = monto_max;
       emit montoMaxSet(m_monto_max);
+      m_fecha = fecha;
+      emit fechaSet(m_fecha);
     }
     /* constructor(address beneficiario, string url, string nombre, uint monto, uint monto_max, string fecha, string descripcion, uint cuit) public {
       contribution_counter = 0;

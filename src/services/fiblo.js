@@ -167,6 +167,7 @@ export default {
     symbol,
     monto,
     monto_max,
+    fecha,
     callback,
   ) {
     web3Init((error, accounts) => {
@@ -183,6 +184,7 @@ export default {
             symbol,
             monto,
             monto_max,
+            fecha,
             {
               data: baseJSON.bytecode,
             },

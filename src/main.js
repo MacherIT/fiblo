@@ -9,6 +9,7 @@ import faSolid from '@fortawesome/fontawesome-free-solid';
 import faBrands from '@fortawesome/fontawesome-free-brands';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import moment from 'moment';
+import CKEditor from '@ckeditor/ckeditor5-vue';
 import App from '@/App';
 import router from '@/router';
 import store from '@/store/index';
@@ -17,6 +18,8 @@ import FormPlugin from '@/plugins/FormPlugin';
 library.add(faCoffee, faSolid, faBrands);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);
+
+Vue.use(CKEditor);
 
 Vue.use(VueResource);
 Vue.use(VeeValidate);

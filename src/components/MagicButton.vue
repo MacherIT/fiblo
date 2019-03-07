@@ -7,6 +7,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import moment from 'moment';
 
 import fiblo from '@/services/fiblo';
 
@@ -62,6 +63,9 @@ export default {
         'magic', // Symbol
         20000, // Monto
         30000, // Monto max
+        moment(new Date())
+          .add(30, 'days')
+          .format('YYYY/MM/DD'),
         (error, instance) => {
           if (error) {
             console.error(error);

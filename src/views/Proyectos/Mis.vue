@@ -1,66 +1,11 @@
 <template lang="pug">
   .proyectos
-    .seccion-filtros
-      .filtro.nombre
-        input(
-          type="text"
-          placeholder="NOMBRE / EMPRENDEDORES"
-          v-model="filters.nombreEmp.val")
-        font-awesome-icon(icon="search")
-      .filtro.provincia
-        select(v-model="provincia")
-          option(selected, value="") -- Provincia --
-          option(
-            v-for="provincia in provincias"
-            :key="provincia.id"
-            :value="provincia") {{provincia.nombre}}
-      .filtro.ciudad
-        select(v-model="filters.ciudad.val", :disabled="!provincia")
-          option(selected, value="") -- Ciudad --
-          option(
-            v-for="ciudad in provincia.ciudades"
-            :key="ciudad.id"
-            :value="ciudad.id")
-              | {{ciudad.nombre}}
-      .filtro.categoria
-        select(v-model="filters.categoria.val")
-          option(selected, value="") -- Categoria --
-          option(
-            v-for="categoria in categorias"
-            :key="categoria.id"
-            :value="categoria.id") {{categoria.nombre}}
-      .filtro.progreso
-        select(v-model="filters.progreso.val")
-          option(selected, value="") -- Progreso --
-          option(value="0,25") Entre 0% y 25%
-          option(value="25,50") Entre 25% y 50%
-          option(value="50,75") Entre 50% y 75%
-          option(value="75,100") Entre 75% y 100%
-      .filtro.duracion
-        select(v-model="filters.duracion.val")
-          option(selected, value="") -- Finaliza --
-          option(
-            v-for="duracion in duraciones"
-            :key="duracion"
-            :value="duracion") Hasta dentro de {{duracion}} días.
-      .montos
-        span Montos:
-        .filtro.monto
-          input(
-            type="number"
-            placeholder="$ MIN"
-            v-model="filters.monto.val")
-        .filtro.monto-supera-max
-          input(
-            type="number"
-            placeholder="$ MAX"
-            v-model="filters.montoSuperaMax.val")
-    .seccion-lista
+    .mis-proyectos
       .no-hay-proyectos(v-if="proyectos.length === 0 && loaded")
-        span Todavía no hay proyectos
+        span Todavía no creaste ningún proyecto
       router-link.proyecto(
         :to="'/proyectos/' + proyecto.id"
-        v-for="proyecto in proyectosVisibles"
+        v-for="proyecto in proyectos"
         :key="proyecto.id")
         .logo-ciudad
           .logo
@@ -86,6 +31,8 @@
             span {{((proyecto.montoRecaudado * valorCambio) * 100 / proyecto.monto).toFixed(2)}}%
             span.de de
             span ${{proyecto.monto.toFixed(2)}}
+        router-link.editar(:to="'/proyectos/' + proyecto.id + '/edit'")
+          font-awesome-icon(icon="pencil-alt")
         .categoria(
           :style="'background-color: ' + proyecto.categoria.color")
           span(
@@ -95,10 +42,8 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import moment from 'moment';
-
-import provincias from '@/assets/data/ciudades-argentinas.json';
 
 import fiblo from '@/services/fiblo';
 import marketcap from '@/services/marketcap';
@@ -109,82 +54,22 @@ export default {
   name: 'ListaProyectos',
   data() {
     return {
+      loaded: false,
       moment,
       valorCambio: 0,
-      provincia: '',
-      provincias,
-      loaded: false,
       proyectos: [],
-      categorias: [],
-      duraciones: [10, 15, 30, 60, 90],
-      filters: {
-        ciudad: {
-          fun(item) {
-            return item.ciudad && item.ciudad.ciudad.id === this.val;
-          },
-          val: '',
-        },
-        categoria: {
-          fun(item) {
-            return item.categoria_id === this.val;
-          },
-          val: '',
-        },
-        progreso: {
-          fun(item) {
-            return (
-              (item.montoRecaudado * 100) / item.monto >= this.val.split(',')[0] &&
-              (item.montoRecaudado * 100) / item.monto <= this.val.split(',')[1]
-            );
-          },
-          val: '',
-        },
-        nombreEmp: {
-          fun(item) {
-            return (
-              item.nombre.indexOf(this.val) >= 0 ||
-              item.emprendedores.some(emp => emp.nombre.indexOf(this.val) >= 0)
-            );
-          },
-          val: '',
-        },
-        monto: {
-          fun(item) {
-            return item.monto >= this.val;
-          },
-          val: '',
-        },
-        montoSuperaMax: {
-          fun(item) {
-            return item.monto <= this.val;
-          },
-          val: '',
-        },
-        duracion: {
-          fun(item) {
-            return (
-              item.fechaFin &&
-              moment(item.fechaFin).isBefore(moment().add(parseInt(this.val), 'days'))
-            );
-          },
-          val: '',
-        },
-      },
     };
   },
   computed: {
-    proyectosVisibles() {
-      return this.proyectos.filter(proyecto =>
-        Object.keys(this.filters).every(k =>
-          this.filters[k].val ? this.filters[k].fun(proyecto) : true,
-        ),
-      );
-    },
+    ...mapState('usuarios', ['token']),
   },
   mounted() {
     this.$http({
       method: 'GET',
-      url: '/api/proyectos',
+      url: '/api/proyectos/mine',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
     }).then(
       ({ data }) => {
         this.proyectos = data.map(p => {
@@ -204,17 +89,6 @@ export default {
         console.error(error);
       },
     );
-    this.$http({
-      method: 'GET',
-      url: '/api/categorias',
-    }).then(
-      ({ data }) => {
-        this.categorias = data;
-      },
-      error => {
-        console.error(error);
-      },
-    );
     marketcap.getArs().then(
       monto => {
         this.valorCambio = monto;
@@ -226,7 +100,7 @@ export default {
         valorCambio = 4000;
       },
     );
-    this.setPageTitle('Proyectos');
+    this.setPageTitle('Mis proyectos');
   },
   methods: {
     ...mapActions('general', ['setPageTitle']),
@@ -243,60 +117,7 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
-  .seccion-filtros {
-    width: 30%;
-    min-width: 30%;
-    background-color: $colorGrisOscuro;
-    height: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-direction: column;
-    @include sombra(0 0 10px 0 #000);
-    padding: 15px;
-    .filtro {
-      width: 100%;
-      margin-bottom: 20px;
-      &.nombre {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        svg {
-          position: absolute;
-          right: 5px;
-          opacity: 0.7;
-        }
-      }
-      input,
-      select {
-        width: 100%;
-        height: 30px;
-        border: 0;
-        background-color: #fff;
-        padding: 0 7px;
-        text-transform: uppercase;
-        font-family: $fontUbuntuRegular;
-        font-size: 80%;
-        &::placeholder {
-          font-family: $fontUbuntuLight;
-        }
-      }
-    }
-    .montos {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      & > span {
-        width: 100%;
-        margin-bottom: 7px;
-      }
-      .filtro {
-        width: 49%;
-      }
-    }
-  }
-  .seccion-lista {
+  .mis-proyectos {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -421,6 +242,28 @@ export default {
               font-family: $fontUbuntuLight;
             }
           }
+        }
+      }
+      a.editar {
+        position: absolute;
+        right: 50px;
+        @include minmaxwh(45px);
+        border-radius: 50%;
+        background-color: $colorAzulMedio;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        @include sombra(0 0 3px 0 #333);
+        @include ease-transition;
+        cursor: pointer;
+        z-index: 5;
+        &:hover {
+          background-color: $colorAzulClaro;
+        }
+        svg {
+          color: #fff;
+          font-size: 120%;
+          @include ease-transition;
         }
       }
       .categoria {

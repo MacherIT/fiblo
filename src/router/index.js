@@ -1,16 +1,14 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from '@/views/Home';
-// import Usuarios from '@/views/Usuarios/Index';
-// import Wallet from '@/views/Wallet/Index';
 import UsuariosSignUp from '@/components/Usuarios/FormNew';
 import LoginLogout from '@/views/Usuarios/LoginLogout';
 import Proyectos from '@/views/Proyectos/Index';
 import Cnv from '@/views/Proyectos/CNV';
 import NuevoProyecto from '@/views/Proyectos/Nuevo';
 import ListaProyectos from '@/views/Proyectos/Lista';
+import MisProyectos from '@/views/Proyectos/Mis';
 import ShowProyecto from '@/views/Proyectos/Show';
-import MisParticipaciones from '@/views/Usuarios/MisParticipaciones'
+import MisParticipaciones from '@/views/Usuarios/MisParticipaciones';
 
 import store from '@/store/index';
 
@@ -22,7 +20,10 @@ const router = new Router({
     {
       path: '/',
       name: 'Home',
-      component: Home,
+      component: ListaProyectos,
+      meta: {
+        requiresLogin: true,
+      },
     },
     // {
     //   path: '/usuarios',
@@ -61,9 +62,12 @@ const router = new Router({
       },
     },
     {
-      path: '/proyectos',
-      name: 'Proyectos',
-      component: ListaProyectos,
+      path: '/mis-proyectos',
+      name: 'Mis proyectos',
+      component: MisProyectos,
+      meta: {
+        requiresLogin: true,
+      },
     },
     {
       path: '/proyectos/new',

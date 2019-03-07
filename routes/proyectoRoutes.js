@@ -8,6 +8,8 @@ var guardian = require('../security/guardian');
  */
 router.get('/', proyectoController.list);
 
+router.get('/mine', guardian({}), proyectoController.mine);
+
 /*
  * GET
  */

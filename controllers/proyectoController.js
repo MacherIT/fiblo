@@ -34,6 +34,30 @@ module.exports = {
       );
   },
 
+  mine: function(req, res) {
+    proyectoModel
+      .findAll({
+        where: { usuario_id: req.payload.id },
+        include: [
+          {
+            model: categoriaModel,
+            as: 'categoria',
+          },
+        ],
+      })
+      .then(
+        proyectos => {
+          return res.json(proyectos);
+        },
+        error => {
+          return res.status(500).json({
+            message: 'Error when getting proyecto.',
+            error: error,
+          });
+        },
+      );
+  },
+
   /**
    * proyectoController.show()
    */
@@ -84,6 +108,7 @@ module.exports = {
         monto: req.body.monto,
         montoSuperaMax: req.body.montoSuperaMax,
         cantAcciones: req.body.cantAcciones,
+        fechaFin: req.body.fechaFin,
         sector: req.body.sector,
         emprendedores: req.body.emprendedores,
       });
@@ -135,6 +160,7 @@ module.exports = {
         proyecto.cantAcciones = req.body.cantAcciones
           ? req.body.cantAcciones
           : proyecto.cantAcciones;
+        proyecto.fechaFin = req.body.fechaFin ? req.body.fechaFin : proyecto.fechaFin;
         proyecto.sector = req.body.sector ? req.body.sector : proyecto.sector;
         proyecto.emprendedores = req.body.emprendedores
           ? req.body.emprendedores

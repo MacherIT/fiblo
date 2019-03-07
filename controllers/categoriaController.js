@@ -52,6 +52,8 @@ module.exports = {
   create: function(req, res) {
     var categoria = categoriaModel.build({
       nombre: req.body.nombre,
+      color: req.body.color,
+      colorTexto: req.body.colorTexto,
     });
 
     categoria.save().then(
@@ -81,6 +83,8 @@ module.exports = {
         }
 
         categoria.nombre = req.body.nombre ? req.body.nombre : categoria.nombre;
+        categoria.color = req.body.color ? req.body.color : categoria.color;
+        categoria.colorTexto = req.body.colorTexto ? req.body.colorTexto : categoria.colorTexto;
 
         categoria.save().then(
           categoria => {

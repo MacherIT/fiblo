@@ -1,8 +1,10 @@
 <template lang="pug">
   .proyecto-show
     .info-general(v-if="proyecto")
-      .categoria
-        span {{proyecto.categoria.nombre}}
+      .categoria(
+        :style="'background-color: ' + proyecto.categoria.color")
+        span(
+          :style="'color: ' + proyecto.categoria.colorTexto") {{proyecto.categoria.nombre}}
       .logo
         font-awesome-icon(
           v-if="!proyecto.logo"
@@ -18,11 +20,13 @@
       .nombre
         span {{proyecto.nombre}}
       .descripcion
-        span "{{'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' | limitStr(30)}}"
+        span "{{proyecto.descripcion | limitStr(30)}}"
       .monto
         span {{((montoRecaudado * valorCambio) * 100 / proyecto.monto).toFixed(2)}}%
         span.de de
         span ${{proyecto.monto.toFixed(2)}}
+      .fecha-fin
+        span {{moment(proyecto.fechaFin).format('DD/MM/YYYY')}}
     .cuerpo
       .tabs
         .tab.info(v-if="tabActiva === 'info'")
@@ -39,12 +43,12 @@
               a.red.link(href="#", target="_blank")
                 font-awesome-icon(icon="link")
             .contenido
-              p Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+              p {{proyecto.descripcion}}
           .propuesta
             .titulo
               span Propuesta
             .contenido
-              p Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+              p {{proyecto.propuesta}}
           .emprendedores
             .titulo
               span Emprendedores
@@ -60,7 +64,7 @@
               span Todavía no hay contribuciones
             ul(v-if="Object.keys(contribuciones).length > 0")
               li(
-                v-for="(contribucion, key, index) in contribuciones"
+                v-for="(contribucion, index) in orderByUser(contribuciones)"
                 :key="index"
                 :class="{propia: contribucion.user.id === usuario.id}")
                 .avatar-section
@@ -146,6 +150,7 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import moment from 'moment';
 
 import fiblo from '@/services/fiblo';
 import marketcap from '@/services/marketcap';
@@ -154,6 +159,7 @@ export default {
   name: 'ShowProyecto',
   data() {
     return {
+      moment,
       proyecto: false,
       contrato: {},
       projectValidity: false,
@@ -242,7 +248,7 @@ export default {
             },
           }).then(
             ({ data }) => {
-              this.contribuciones[uid].user = data;
+              this.contribuciones[uid].user = { ...this.contribuciones[uid].user, ...data };
             },
             error => {
               console.error(error);
@@ -283,6 +289,11 @@ export default {
           this.getUserData();
         }
       });
+    },
+    orderByUser(contribuciones) {
+      const outArr = Object.keys(contribuciones).map(c => contribuciones[c]);
+      outArr.sort((c1, c2) => (c1.user.id === this.usuario.id ? -1 : 1));
+      return outArr;
     },
     comprarAccion() {
       if (parseFloat(this.montoAccionETH) > 0) {
@@ -438,6 +449,15 @@ export default {
         }
       }
     }
+    .fecha-fin {
+      margin-top: 20px;
+      span {
+        text-transform: uppercase;
+        font-size: 150%;
+        color: $colorAzulBase;
+        font-family: $fontKeepCalmMedium;
+      }
+    }
   }
   .cuerpo {
     display: flex;
@@ -551,6 +571,26 @@ export default {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                position: relative;
+                overflow: hidden;
+                &.propia {
+                  &::after {
+                    position: absolute;
+                    right: -30px;
+                    top: -30px;
+                    content: 'Propia';
+                    background-color: $colorPaletaC4;
+                    @include minmaxwh(60px);
+                    -webkit-transform: rotate(45deg);
+                    transform: rotate(45deg);
+                    display: flex;
+                    justify-content: center;
+                    align-items: flex-end;
+                    font-size: 65%;
+                    font-family: $fontKeepCalmMedium;
+                    text-transform: uppercase;
+                  }
+                }
                 &:not(:last-of-type) {
                   margin-bottom: 15px;
                   padding-bottom: 15px;

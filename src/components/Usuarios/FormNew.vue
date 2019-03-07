@@ -1,6 +1,7 @@
 <template lang="pug">
-  .usuarios-form-new
-    //- p Crear una cuenta
+  .sign-up
+    .presentacion
+      PresentacionFiblo
     form(@submit.prevent="crearCuenta", novalidate)
       .campo
         span Nombre
@@ -47,11 +48,13 @@
 </template>
 
 <script>
-import m from '@/mixins/mixins';
+import PresentacionFiblo from '@/components/General/PresentacionFiblo';
 
 export default {
   name: 'UsuariosFormNew',
-  mixins: [m.FormValidation],
+  components: {
+    PresentacionFiblo,
+  },
   data() {
     return {
       sent: false,
@@ -91,18 +94,24 @@ export default {
 
 <style lang="scss" scoped>
 @import '~Styles/config';
-.usuarios-form-new {
+.sign-up {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
+  .presentacion {
+    width: 50%;
+    height: 100%;
+  }
   form {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     height: 100%;
-    width: 40%;
-    margin-left: auto;
-    margin-right: 40px;
+    width: 50%;
+    padding: 0 30px;
     .campo {
       width: 100%;
       display: flex;

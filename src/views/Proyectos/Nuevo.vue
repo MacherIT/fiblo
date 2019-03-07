@@ -26,4 +26,8 @@ export default {
 
 <style lang="scss" scoped>
 @import '~Styles/_config.scss';
+.proyectos-nuevo {
+  width: 100%;
+  height: 100%;
+}
 </style>

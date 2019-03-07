@@ -12,6 +12,17 @@ export default {
           return Object.keys(this.fields).every(field => this.fields[field].valid);
         },
       },
+      methods: {
+        stripHtml(html) {
+          return (
+            !html ||
+            html
+              .replace(/<(?:.|\n)*?>/gm, ' ')
+              .replace(/&.*;/gm, ' ')
+              .trim()
+          );
+        },
+      },
     });
   },
 };

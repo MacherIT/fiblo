@@ -12,7 +12,7 @@
       //- li(v-if="loggedIn")
       //-   router-link(to="/cnv") CNV
       li
-        router-link(to="/proyectos")
+        router-link(to="/mis-proyectos")
           font-awesome-icon(icon="handshake")
       li
         router-link(to="/mis-participaciones")

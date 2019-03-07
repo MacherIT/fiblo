@@ -1,7 +1,7 @@
 <template lang="pug">
-  .usuarios-form-login
-    //- .titulo
-    //-   span Iniciar sesión
+  .login
+    .presentacion
+      PresentacionFiblo
     form(@submit.prevent="iniciarSesion", novalidate)
       .campo
         span Email
@@ -33,11 +33,14 @@
 
 <script>
 import { mapActions } from 'vuex';
-import mixins from '@/mixins/mixins';
+
+import PresentacionFiblo from '@/components/General/PresentacionFiblo';
 
 export default {
   name: 'UsuariosFormLogin',
-  mixins: [mixins.FormValidation],
+  components: {
+    PresentacionFiblo,
+  },
   data() {
     return {
       sent: false,
@@ -69,17 +72,25 @@ export default {
 
 <style lang="scss" scoped>
 @import '~Styles/config';
-.usuarios-form-login {
+.login {
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .presentacion {
+    width: 50%;
+    height: 100%;
+  }
   form {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     height: 100%;
-    width: 80%;
+    width: 50%;
     margin: auto;
+    padding: 0 30px;
     .campo {
       width: 100%;
       display: flex;

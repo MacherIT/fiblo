@@ -1,312 +1,103 @@
 <template lang="pug">
   .proyectos-form-new
-    p Crear un nuevo proyecto
-    form(@submit.prevent="crearProyecto", novalidate)
-      .secciones
-        .campos-base
-          .campo-ciudades
-            select(v-model="provincia")
-              option(selected, value="", disabled="") -- Provincia --
-              option(
-                v-for="provincia in provincias"
-                :key="provincia.id"
-                :value="provincia") {{provincia.nombre}}
-            select(v-model="proyecto.ciudad", :disabled="!provincia")
-              option(selected, value="", disabled="") -- Ciudad --
-              option(
-                v-for="ciudad in provincia.ciudades"
-                :key="ciudad.id"
-                :value="{provincia: {id: provincia.id, nombre: provincia.nombre}, ciudad: ciudad}")
-                  | {{ciudad.nombre}}
-          .campo-categoria
-            input.required(
-              type="text"
-              placeholder="Categoria"
-              name="categoria"
-              v-model="selectedCategoria"
-              autocomplete="off"
-              @focus="setCatFocused()"
-              @blur="setCatBlured()")
-            .categorias.fadeIn(
-              v-if="catFocused"
-              @mouseover="setListaFocused()"
-              @mouseleave="setListaBlured()")
-              .categoria(
-                v-for="categoria in categoriasVisibles"
-                :key="categoria.id"
-                @click="catFocused = true; setCategoria(categoria)")
-                span {{categoria.nombre}}
-          input(
-            type="text"
-            placeholder="Nombre"
-            v-validate="'required'"
-            name="nombre"
-            v-model="proyecto.nombre")
-          input(
-            type="text"
-            placeholder="Domicilio"
-            v-validate="'required'"
-            name="domicilio"
-            v-model="proyecto.domicilio")
-          input(
-            type="text"
-            placeholder="Telefono"
-            v-validate="'required|numeric'"
-            name="telefono"
-            v-model="proyecto.telefono")
-          input(
-            type="email"
-            placeholder="Email"
-            v-validate="'required|email'"
-            name="email"
-            v-model="proyecto.email")
-          input(
-            type="text"
-            placeholder="Monto esperado en $ ($xx.xx)"
-            v-validate="{required: true, decimal: 2}"
-            name="monto"
-            v-model="proyecto.monto")
-          input(
-            type="text"
-            placeholder="Monto maximo de supersuscripción en $ ($xx.xx)"
-            v-validate="{required: true, decimal: 2, valorMin: proyecto.monto}"
-            name="monto"
-            v-model="proyecto.montoSuperaMax")
-          span {{proyecto.montoSuperaMax ? errors.first('monto') : ''}}
-          input(
-            type="text"
-            placeholder="Cantidad de acciones"
-            v-validate="{required: true, max_value: Math.floor(proyecto.monto)}"
-            name="monto"
-            v-model="proyecto.cantAcciones")
-          span ${{proyecto.monto && proyecto.cantAcciones ? proyecto.monto / proyecto.cantAcciones : '--'}} x acc
-        .emprendedores
-          input(
-            type="text"
-            placeholder="Beneficiary address"
-            :value="beneficiary_address"
-            readonly
-            disabled)
-          .titulo
-            span Lista de emprendedores
-          input(
-            type="text"
-            placeholder="Nombre y apellido"
-            v-model="nuevoEmprendedor")
-          button(
-            @click="addEmprendedor()"
-            :disabled="!nuevoEmprendedor"
-            type="button") Añadir
-          .lista-emprendedores
-            .emprendedor(
-              v-for="emprendedor in proyecto.emprendedores"
-              :key="emprendedor.nombre")
-              .nombre
-                span {{emprendedor.nombre}}
-              .quitar(@click="removeEmprendedor(emprendedor.nombre)")
-                font-awesome-icon(icon="times")
-      input(
-        type="submit"
-        value="Crear proyecto!"
-        :disabled="!validForm || sent || proyecto.emprendedores.length === 0 || !selectedCategoria")
-      .loading(v-if="sent")
-        font-awesome-icon(icon="circle-notch", spin)
+    .lista-etapas
+      .etapa.general(
+        :class="{active: etapaActiva === 0}"
+        @click="setEtapaActiva(0)")
+        .rombo
+        .numero
+          span 1
+        .nombre
+          span General
+      .etapa.propuesta(
+        :class="{active: etapaActiva === 1}"
+        @click="setEtapaActiva(1)"
+        :disabled="etapaActiva <= 0")
+        .rombo
+        .numero
+          span 2
+        .nombre
+          span Propuesta
+      .etapa.emprendedores(
+        :class="{active: etapaActiva === 2}"
+        @click="setEtapaActiva(2)"
+        :disabled="etapaActiva <= 1")
+        .rombo
+        .numero
+          span 3
+        .nombre
+          span Emp...ores
+      .etapa.acciones(
+        :class="{active: etapaActiva === 3}"
+        @click="setEtapaActiva(3)"
+        :disabled="etapaActiva <= 2")
+        .rombo
+        .numero
+          span 4
+        .nombre
+          span Acciones
+    .etapa-activa
+      EtapaGeneral(
+        :proyecto="proyecto"
+        :set="set"
+        :setEtapaActiva="setEtapaActiva"
+        v-if="etapaActiva === 0")
+      EtapaPropuesta(
+        :proyecto="proyecto"
+        :set="set"
+        :setEtapaActiva="setEtapaActiva"
+        v-if="etapaActiva === 1")
+      EtapaEmprendedores(
+        :proyecto="proyecto"
+        :set="set"
+        :setEtapaActiva="setEtapaActiva"
+        v-if="etapaActiva === 2")
+      EtapaAcciones(
+        :proyecto="proyecto"
+        :set="set"
+        :setEtapaActiva="setEtapaActiva"
+        v-if="etapaActiva === 3")
+      EtapaFinal(
+        :proyecto="proyecto"
+        :setEtapaActiva="setEtapaActiva"
+        v-if="etapaActiva === 4")
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
-import { Validator } from 'vee-validate';
+import { mapActions } from 'vuex';
 
-import mixins from '@/mixins/mixins';
-import provincias from '@/assets/data/ciudades-argentinas.json';
-import fiblo from '@/services/fiblo';
-
-Validator.extend('valorMin', {
-  getMessage: () => 'El valor de supersuscripción debe ser mayor o igual que el monto esperado',
-  validate: (value, [monto]) => parseFloat(value, 10) >= parseFloat(monto, 10),
-});
+import EtapaGeneral from '@/components/Proyectos/Nuevo/EtapaGeneral';
+import EtapaPropuesta from '@/components/Proyectos/Nuevo/EtapaPropuesta';
+import EtapaEmprendedores from '@/components/Proyectos/Nuevo/EtapaEmprendedores';
+import EtapaAcciones from '@/components/Proyectos/Nuevo/EtapaAcciones';
+import EtapaFinal from '@/components/Proyectos/Nuevo/EtapaFinal';
 
 export default {
   name: 'ProyectosFormNew',
-  mixins: [mixins.FormValidation],
+  components: {
+    EtapaGeneral,
+    EtapaPropuesta,
+    EtapaEmprendedores,
+    EtapaAcciones,
+    EtapaFinal,
+  },
   data() {
     return {
       sent: false,
-      catFocused: false,
-      listaFocused: false,
-      nuevoEmprendedor: '',
-      categorias: [],
-      provincias,
-      provincia: '',
-      selectedCategoria: '',
-      beneficiary_address: '',
-      proyecto: {
-        ciudad: '',
-        categoria_id: '',
-        nombre: '',
-        domicilio: '',
-        telefono: '',
-        email: '',
-        monto: '',
-        montoSuperaMax: '',
-        cantAcciones: '',
-        sector: '',
-        emprendedores: [],
-      },
+      proyecto: {},
+      etapaActiva: 0,
     };
   },
-  computed: {
-    ...mapState('usuarios', ['token']),
-    ...mapGetters('usuarios', ['usuario']),
-    categoriasVisibles() {
-      return this.selectedCategoria
-        ? this.categorias.filter(categ => categ.nombre.indexOf(this.selectedCategoria) >= 0)
-        : this.categorias;
-    },
-  },
   mounted() {
-    this.$http({
-      method: 'GET',
-      url: '/api/categorias',
-    }).then(
-      ({ data }) => {
-        this.categorias = data;
-      },
-      error => {
-        console.error(error);
-      },
-    );
-    this.$http({
-      method: 'GET',
-      url: `/api/usuarios/${this.usuario.id}`,
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    }).then(
-      ({ data }) => {
-        this.beneficiary_address = data.address;
-      },
-      error => {
-        console.error(error);
-      },
-    );
     this.setPageTitle('Nuevo proyecto');
   },
   methods: {
     ...mapActions('general', ['setPageTitle']),
-    setCatFocused() {
-      this.catFocused = true;
+    set(field, value) {
+      this.proyecto[field] = value;
     },
-    setCatBlured() {
-      if (!this.listaFocused) {
-        this.catFocused = false;
-      }
-    },
-    setListaFocused() {
-      this.listaFocused = true;
-    },
-    setListaBlured() {
-      this.listaFocused = false;
-    },
-    setCategoria(categoria) {
-      this.selectedCategoria = categoria.nombre;
-      this.catFocused = false;
-    },
-    addEmprendedor() {
-      if (!this.proyecto.emprendedores.find(e => e.nombre === this.nuevoEmprendedor)) {
-        this.proyecto.emprendedores.push({ nombre: this.nuevoEmprendedor });
-      }
-      this.nuevoEmprendedor = '';
-    },
-    removeEmprendedor(nombre) {
-      let index = -1;
-      this.proyecto.emprendedores.map((e, i) => {
-        if (e.nombre === nombre) {
-          index = i;
-        }
-      });
-      this.proyecto.emprendedores.splice(index, 1);
-    },
-    crearProyecto() {
-      if (
-        this.dirtyForm &&
-        this.validForm &&
-        this.proyecto.emprendedores.length > 0 &&
-        this.selectedCategoria
-      ) {
-        this.sent = true;
-        const categoria = this.categorias.find(categ => categ.nombre === this.selectedCategoria);
-        if (!categoria) {
-          this.$http({
-            method: 'POST',
-            url: '/api/categorias',
-            body: {
-              nombre: this.selectedCategoria,
-            },
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          }).then(
-            ({ status, data }) => {
-              console.log(status);
-              this._saveProyecto(data);
-            },
-            error => {
-              this.sent = false;
-              console.error(error);
-            },
-          );
-        } else {
-          this._saveProyecto(categoria);
-        }
-      } else {
-        this.$validator.validateAll();
-      }
-    },
-    _saveProyecto(categoria) {
-      fiblo.deployProyecto(
-        this.proyecto,
-        this.beneficiary_address,
-        this.proyecto.cantAcciones,
-        this.proyecto.nombre
-          .toLowerCase()
-          .replace(/\s/g, '-')
-          .replace(/á/g, 'a')
-          .replace(/é/g, 'e')
-          .replace(/í/g, 'i')
-          .replace(/ó/g, 'o')
-          .replace(/ú/g, 'u')
-          .replace(/ñ/g, 'n')
-          .replace(/[^a-zA-Z0-9\.-_]/g, '')
-          .substr(0, 5)
-          .toUpperCase(),
-        (error, instance) => {
-          if (error) {
-            console.error(error);
-            this.sent = false;
-          } else if (instance.address) {
-            this.proyecto.categoria_id = categoria.id;
-            this.proyecto.address = instance.address;
-            this.$http({
-              method: 'POST',
-              url: '/api/proyectos',
-              body: this.proyecto,
-              headers: {
-                Authorization: `Bearer ${this.token}`,
-              },
-            }).then(
-              ({ status }) => {
-                this.sent = false;
-                console.log(status);
-              },
-              error => {
-                this.sent = false;
-                console.error(error);
-              },
-            );
-          }
-        },
-      );
+    setEtapaActiva(index) {
+      this.etapaActiva = index;
     },
   },
 };
@@ -315,111 +106,76 @@ export default {
 <style lang="scss" scoped>
 @import '~Styles/config';
 .proyectos-form-new {
-  @include default-form;
-  form {
-    .secciones {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  .lista-etapas {
+    height: 100%;
+    width: 30%;
+    min-width: 30%;
+    background-color: $colorGrisOscuro;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    @include sombra(0 0 10px 0 #000);
+    padding: 15px;
+    .etapa {
       display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      align-items: flex-start;
-      width: 100%;
-      .campos-base,
-      .emprendedores {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        width: 50%;
-        margin: 5px;
-      }
-      .campos-base {
-        .campo-ciudades {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 100%;
-          select {
-            width: 50%;
-          }
-        }
-        .campo-categoria {
-          margin-bottom: 25px;
-          width: 100%;
-          position: relative;
-          input {
-            margin-bottom: 0;
-          }
-          .categorias {
-            width: 100%;
-            position: absolute;
-            background-color: #fff;
-            top: 100%;
-            @include sombra(0 0 3px 0 #999);
-            .categoria {
-              padding: 8px 6px;
-              cursor: pointer;
-              @include ease-transition;
-              &:hover {
-                background-color: #eee;
-              }
-              &:not(:last-of-type) {
-                border-bottom: 1px solid #ccc;
-              }
-            }
-          }
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      @include minmaxwh(100px);
+      position: relative;
+      margin-bottom: 5px;
+      cursor: pointer;
+      &:hover {
+        .rombo {
+          @include grayscale(0.3);
         }
       }
-      .emprendedores {
-        .titulo {
-          margin-bottom: 10px;
+      &.active {
+        .rombo {
+          @include grayscale(0);
+          background-image: url('../../assets/images/rombo-celeste.png');
         }
-        button {
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          padding: 6px;
-          width: 100%;
-          margin-bottom: 10px;
-          margin: 0;
-          width: 100%;
-          background-color: #eee;
-          border: 0;
-          &:not(:disabled) {
-            cursor: pointer;
-            &:hover {
-              background-color: #999;
-            }
-          }
+      }
+      .rombo {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 0;
+        width: 100%;
+        height: 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-image: url('../../assets/images/rombo-azul.png');
+        @include ease-transition;
+        @include grayscale(0.7);
+      }
+      .numero {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 3px;
+        span {
         }
-        .lista-emprendedores {
-          margin-top: 5px;
-          max-height: 135px;
-          width: 100%;
-          overflow: auto;
-          padding: 0 3px;
-          .emprendedor {
-            padding: 6px;
-            @include sombra(0 1px 2px 0 #bbb);
-            width: 100%;
-            margin: 6px 0;
-            border-radius: 5px;
-            position: relative;
-            display: flex;
-            justify-content: flex-start;
-            align-content: center;
-            .quitar {
-              position: absolute;
-              right: 0;
-              color: #f66;
-              padding: 0 10px;
-              cursor: pointer;
-              &:hover {
-                color: #f33;
-              }
-            }
-          }
+      }
+      .nombre {
+        position: relative;
+        z-index: 1;
+        span {
         }
       }
     }
+  }
+  .etapa-activa {
+    width: 100%;
+    height: 100%;
   }
 }
 </style>

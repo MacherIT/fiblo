@@ -1,9 +1,23 @@
 import usuarioService from '@/services/usuario';
 
+const hasTokenExpired = token => {
+  const outObj = { loggedIn: true, token };
+
+  if (new Date(JSON.parse(window.atob(token.split('.')[1])).exp * 1000) < new Date()) {
+    // Token outdated
+    outObj.loggedIn = false;
+    outObj.token = null;
+
+    usuarioService.logout();
+  }
+
+  return outObj;
+};
+
 export default {
   namespaced: true,
   state: localStorage.getItem('@fibloST:usuario')
-    ? { loggedIn: true, token: localStorage.getItem('@fibloST:usuario') }
+    ? hasTokenExpired(localStorage.getItem('@fibloST:usuario'))
     : { loggedIn: false, token: null },
   getters: {
     usuario(state) {
