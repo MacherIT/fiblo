@@ -54,18 +54,18 @@ export default {
         cantAcciones: 200,
         sector: '',
         emprendedores: [{ nombre: 'csa' }],
+        fechaFin: moment(new Date()).add(30, 'days'),
       };
 
       fiblo.deployProyectoFull(
-        proyecto,
         this.beneficiary_address,
         proyecto.cantAcciones,
         'magic', // Symbol
-        20000, // Monto
-        30000, // Monto max
+        20000 * 100, // Monto * 100 centavos
+        30000 * 100, // Monto max * 100 centavos
         moment(new Date())
           .add(30, 'days')
-          .format('YYYY/MM/DD'),
+          .unix(),
         (error, instance) => {
           if (error) {
             console.error(error);

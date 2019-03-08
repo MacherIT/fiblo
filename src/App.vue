@@ -1,7 +1,8 @@
 <template lang="pug">
   #root-app
     MainMenu
-    MagicButton
+    Flash
+    MagicButton(v-if="loggedIn")
     .page-title
       .holder
         span {{pageTitle}}
@@ -13,15 +14,18 @@
 import { mapState } from 'vuex';
 
 import MainMenu from '@/components/General/MainMenu';
+import Flash from '@/components/General/Flash';
 import MagicButton from '@/components/MagicButton';
 
 export default {
   name: 'App',
   components: {
     MainMenu,
+    Flash,
     MagicButton,
   },
   computed: {
+    ...mapState('usuarios', ['loggedIn']),
     ...mapState('general', ['pageTitle']),
   },
 };

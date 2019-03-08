@@ -207,20 +207,6 @@ const abi = [
   {
     constant: true,
     inputs: [],
-    name: 'm_fecha',
-    outputs: [
-      {
-        name: '',
-        type: 'string',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
     name: 'm_beneficiary_valid',
     outputs: [
       {
@@ -233,9 +219,27 @@ const abi = [
     type: 'function',
   },
   {
+    constant: true,
+    inputs: [],
+    name: 'm_fecha_fin',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         name: 'cnv_addr',
+        type: 'address',
+      },
+      {
+        name: 'oraculo_precio_addr',
         type: 'address',
       },
       {
@@ -259,8 +263,8 @@ const abi = [
         type: 'uint256',
       },
       {
-        name: 'fecha',
-        type: 'string',
+        name: 'fecha_fin',
+        type: 'uint256',
       },
     ],
     payable: false,
@@ -417,8 +421,8 @@ const abi = [
     inputs: [
       {
         indexed: false,
-        name: 'fecha',
-        type: 'string',
+        name: 'fecha_fin',
+        type: 'uint256',
       },
     ],
     name: 'fechaSet',
@@ -564,8 +568,8 @@ const abi = [
     constant: false,
     inputs: [
       {
-        name: 'fecha',
-        type: 'string',
+        name: 'fecha_fin',
+        type: 'uint256',
       },
     ],
     name: 'setFecha',
@@ -694,7 +698,7 @@ const abi = [
 
 const proxySAS = window.web3.eth.contract(abi);
 
-const proyecto = proxySAS.at('0x466547C5f4f3e5e937D7cDB9B50C5b873792f082');
+const proyecto = proxySAS.at('0x354fbFF3706e3a49fc7a1f6Dbe916E339EE583a2');
 
 window.web3.eth.getBalance(proyecto.address, (error, balance) => {
   console.log(error, balance.toNumber());

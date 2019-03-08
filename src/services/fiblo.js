@@ -2,9 +2,11 @@ import Web3 from 'web3';
 // import baseJSONFactory from '../../build/contracts/SASFactory.json';
 import baseJSON from '../../build/contracts/ContratoSAS.json';
 import baseJSONCNV from '../../build/contracts/CNV.json';
+import baseJSONOraculoPrecio from '../../build/contracts/OraculoPrecio.json';
 import { default as contract } from 'truffle-contract';
 
 const CNV_ADDRESS = baseJSONCNV.networks['5777'].address;
+const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks['5777'].address;
 // const FACTORY_ADDRESS = baseJSONFactory.networks['5777'].address;
 
 const web3Init = callback => {
@@ -161,7 +163,6 @@ export default {
     });
   },
   deployProyectoFull(
-    proyecto,
     beneficiary_address,
     cant_acciones,
     symbol,
@@ -179,6 +180,7 @@ export default {
           const proxy = window.web3.eth.contract(baseJSON.abi);
           proxy.new(
             CNV_ADDRESS,
+            ORACULO_PRECIO_ADDRESS,
             beneficiary_address,
             cant_acciones,
             symbol,

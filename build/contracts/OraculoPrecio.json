@@ -1,0 +1,1173 @@
+{
+  "contractName": "OraculoPrecio",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "kill",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "precio_viejo",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "precio",
+          "type": "uint256"
+        }
+      ],
+      "name": "precioSetted",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "precio",
+          "type": "uint256"
+        }
+      ],
+      "name": "setPrecio",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getPrecio",
+      "outputs": [
+        {
+          "name": "precio",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555062088b806001819055506102bf8061006a6000396000f300608060405260043610610062576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146100675780638da5cb5b1461007e57806396320979146100d5578063a312880b14610102575b600080fd5b34801561007357600080fd5b5061007c61012d565b005b34801561008a57600080fd5b506100936101be565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156100e157600080fd5b50610100600480360381019080803590602001909291905050506101e3565b005b34801561010e57600080fd5b50610117610289565b6040518082815260200191505060405180910390f35b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614156101bc576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614151561023e57600080fd5b7f08219c279617eabd27e6bf20f7f48bc5f0095b22d7230099e29b26eabbfb8d2d60015482604051808381526020018281526020019250505060405180910390a18060018190555050565b60006001549050905600a165627a7a72305820eb2a624f03fdad09c42345d8e4265b35c100938a1240cc88fcfe2cb14783243d0029",
+  "deployedBytecode": "0x608060405260043610610062576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806341c0e1b5146100675780638da5cb5b1461007e57806396320979146100d5578063a312880b14610102575b600080fd5b34801561007357600080fd5b5061007c61012d565b005b34801561008a57600080fd5b506100936101be565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156100e157600080fd5b50610100600480360381019080803590602001909291905050506101e3565b005b34801561010e57600080fd5b50610117610289565b6040518082815260200191505060405180910390f35b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614156101bc576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614151561023e57600080fd5b7f08219c279617eabd27e6bf20f7f48bc5f0095b22d7230099e29b26eabbfb8d2d60015482604051808381526020018281526020019250505060405180910390a18060018190555050565b60006001549050905600a165627a7a72305820eb2a624f03fdad09c42345d8e4265b35c100938a1240cc88fcfe2cb14783243d0029",
+  "sourceMap": "50:400:2:-;;;167:55;8:9:-1;5:2;;;30:1;27;20:12;5:2;167:55:2;413:10:5;405:5;;:18;;;;;;;;;;;;;;;;;;211:6:2;194:14;:23;;;;50:400;;;;;;",
+  "deployedSourceMap": "50:400:2:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;80:92:4;;8:9:-1;5:2;;;30:1;27;20:12;5:2;80:92:4;;;;;;47:20:5;;8:9:-1;5:2;;;30:1;27;20:12;5:2;47:20:5;;;;;;;;;;;;;;;;;;;;;;;;;;;226:130:2;;8:9:-1;5:2;;;30:1;27;20:12;5:2;226:130:2;;;;;;;;;;;;;;;;;;;;;;;;;;360:87;;8:9:-1;5:2;;;30:1;27;20:12;5:2;360:87:2;;;;;;;;;;;;;;;;;;;;;;;80:92:4;131:5;;;;;;;;;;;117:19;;:10;:19;;;113:52;;;159:5;;;;;;;;;;;146:19;;;113:52;80:92::o;47:20:5:-;;;;;;;;;;;;;:::o;226:130:2:-;344:5:5;;;;;;;;;;;330:19;;:10;:19;;;322:28;;;;;;;;286:36:2;299:14;;315:6;286:36;;;;;;;;;;;;;;;;;;;;;;;;345:6;328:14;:23;;;;226:130;:::o;360:87::-;402:11;428:14;;421:21;;360:87;:::o",
+  "source": "pragma solidity ^0.4.22;\n\nimport './mortal.sol';\n\ncontract OraculoPrecio is mortal {\n\n  event precioSetted(uint precio_viejo, uint precio);\n\n  uint precio_eth_ars;\n\n  constructor() public {\n    precio_eth_ars = 560000;\n  }\n\n  function setPrecio(uint precio) onlyowner public {\n    emit precioSetted(precio_eth_ars, precio);\n    precio_eth_ars = precio;\n  }\n\n  function getPrecio() public view returns (uint precio) {\n    return precio_eth_ars;\n  }\n\n}\n",
+  "sourcePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/OraculoPrecio.sol",
+  "ast": {
+    "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/OraculoPrecio.sol",
+    "exportedSymbols": {
+      "OraculoPrecio": [
+        925
+      ]
+    },
+    "id": 926,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 880,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".22"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:2"
+      },
+      {
+        "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/mortal.sol",
+        "file": "./mortal.sol",
+        "id": 881,
+        "nodeType": "ImportDirective",
+        "scope": 926,
+        "sourceUnit": 1044,
+        "src": "26:22:2",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 882,
+              "name": "mortal",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 1043,
+              "src": "76:6:2",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_mortal_$1043",
+                "typeString": "contract mortal"
+              }
+            },
+            "id": 883,
+            "nodeType": "InheritanceSpecifier",
+            "src": "76:6:2"
+          }
+        ],
+        "contractDependencies": [
+          1043,
+          1068
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 925,
+        "linearizedBaseContracts": [
+          925,
+          1043,
+          1068
+        ],
+        "name": "OraculoPrecio",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 889,
+            "name": "precioSetted",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 888,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 885,
+                  "indexed": false,
+                  "name": "precio_viejo",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 889,
+                  "src": "107:17:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 884,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "107:4:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 887,
+                  "indexed": false,
+                  "name": "precio",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 889,
+                  "src": "126:11:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 886,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "126:4:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "106:32:2"
+            },
+            "src": "88:51:2"
+          },
+          {
+            "constant": false,
+            "id": 891,
+            "name": "precio_eth_ars",
+            "nodeType": "VariableDeclaration",
+            "scope": 925,
+            "src": "143:19:2",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 890,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "143:4:2",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 898,
+              "nodeType": "Block",
+              "src": "188:34:2",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 896,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 894,
+                      "name": "precio_eth_ars",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 891,
+                      "src": "194:14:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "hexValue": "353630303030",
+                      "id": 895,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "211:6:2",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_560000_by_1",
+                        "typeString": "int_const 560000"
+                      },
+                      "value": "560000"
+                    },
+                    "src": "194:23:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 897,
+                  "nodeType": "ExpressionStatement",
+                  "src": "194:23:2"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 899,
+            "implemented": true,
+            "isConstructor": true,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 892,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "178:2:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 893,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "188:0:2"
+            },
+            "scope": 925,
+            "src": "167:55:2",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 915,
+              "nodeType": "Block",
+              "src": "275:81:2",
+              "statements": [
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 907,
+                        "name": "precio_eth_ars",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 891,
+                        "src": "299:14:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 908,
+                        "name": "precio",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 901,
+                        "src": "315:6:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 906,
+                      "name": "precioSetted",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 889,
+                      "src": "286:12:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_uint256_$_t_uint256_$returns$__$",
+                        "typeString": "function (uint256,uint256)"
+                      }
+                    },
+                    "id": 909,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "286:36:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 910,
+                  "nodeType": "EmitStatement",
+                  "src": "281:41:2"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 913,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 911,
+                      "name": "precio_eth_ars",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 891,
+                      "src": "328:14:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "id": 912,
+                      "name": "precio",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 901,
+                      "src": "345:6:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "328:23:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 914,
+                  "nodeType": "ExpressionStatement",
+                  "src": "328:23:2"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 916,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [
+              {
+                "arguments": null,
+                "id": 904,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 903,
+                  "name": "onlyowner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 1058,
+                  "src": "258:9:2",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "258:9:2"
+              }
+            ],
+            "name": "setPrecio",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 902,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 901,
+                  "name": "precio",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 916,
+                  "src": "245:11:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 900,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "245:4:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "244:13:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 905,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "275:0:2"
+            },
+            "scope": 925,
+            "src": "226:130:2",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 923,
+              "nodeType": "Block",
+              "src": "415:32:2",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 921,
+                    "name": "precio_eth_ars",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 891,
+                    "src": "428:14:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 920,
+                  "id": 922,
+                  "nodeType": "Return",
+                  "src": "421:21:2"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 924,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getPrecio",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 917,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "378:2:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 920,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 919,
+                  "name": "precio",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 924,
+                  "src": "402:11:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 918,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "402:4:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "401:13:2"
+            },
+            "scope": 925,
+            "src": "360:87:2",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 926,
+        "src": "50:400:2"
+      }
+    ],
+    "src": "0:451:2"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/OraculoPrecio.sol",
+    "exportedSymbols": {
+      "OraculoPrecio": [
+        925
+      ]
+    },
+    "id": 926,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 880,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".22"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:2"
+      },
+      {
+        "absolutePath": "/home/ivan/MacherIT/Ethereum/fiblo/contracts/mortal.sol",
+        "file": "./mortal.sol",
+        "id": 881,
+        "nodeType": "ImportDirective",
+        "scope": 926,
+        "sourceUnit": 1044,
+        "src": "26:22:2",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 882,
+              "name": "mortal",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 1043,
+              "src": "76:6:2",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_mortal_$1043",
+                "typeString": "contract mortal"
+              }
+            },
+            "id": 883,
+            "nodeType": "InheritanceSpecifier",
+            "src": "76:6:2"
+          }
+        ],
+        "contractDependencies": [
+          1043,
+          1068
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 925,
+        "linearizedBaseContracts": [
+          925,
+          1043,
+          1068
+        ],
+        "name": "OraculoPrecio",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 889,
+            "name": "precioSetted",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 888,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 885,
+                  "indexed": false,
+                  "name": "precio_viejo",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 889,
+                  "src": "107:17:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 884,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "107:4:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 887,
+                  "indexed": false,
+                  "name": "precio",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 889,
+                  "src": "126:11:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 886,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "126:4:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "106:32:2"
+            },
+            "src": "88:51:2"
+          },
+          {
+            "constant": false,
+            "id": 891,
+            "name": "precio_eth_ars",
+            "nodeType": "VariableDeclaration",
+            "scope": 925,
+            "src": "143:19:2",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 890,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "143:4:2",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 898,
+              "nodeType": "Block",
+              "src": "188:34:2",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 896,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 894,
+                      "name": "precio_eth_ars",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 891,
+                      "src": "194:14:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "hexValue": "353630303030",
+                      "id": 895,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "211:6:2",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_560000_by_1",
+                        "typeString": "int_const 560000"
+                      },
+                      "value": "560000"
+                    },
+                    "src": "194:23:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 897,
+                  "nodeType": "ExpressionStatement",
+                  "src": "194:23:2"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 899,
+            "implemented": true,
+            "isConstructor": true,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 892,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "178:2:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 893,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "188:0:2"
+            },
+            "scope": 925,
+            "src": "167:55:2",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 915,
+              "nodeType": "Block",
+              "src": "275:81:2",
+              "statements": [
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 907,
+                        "name": "precio_eth_ars",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 891,
+                        "src": "299:14:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 908,
+                        "name": "precio",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 901,
+                        "src": "315:6:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 906,
+                      "name": "precioSetted",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 889,
+                      "src": "286:12:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_uint256_$_t_uint256_$returns$__$",
+                        "typeString": "function (uint256,uint256)"
+                      }
+                    },
+                    "id": 909,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "286:36:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 910,
+                  "nodeType": "EmitStatement",
+                  "src": "281:41:2"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 913,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 911,
+                      "name": "precio_eth_ars",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 891,
+                      "src": "328:14:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "id": 912,
+                      "name": "precio",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 901,
+                      "src": "345:6:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "328:23:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 914,
+                  "nodeType": "ExpressionStatement",
+                  "src": "328:23:2"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 916,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [
+              {
+                "arguments": null,
+                "id": 904,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 903,
+                  "name": "onlyowner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 1058,
+                  "src": "258:9:2",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "258:9:2"
+              }
+            ],
+            "name": "setPrecio",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 902,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 901,
+                  "name": "precio",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 916,
+                  "src": "245:11:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 900,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "245:4:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "244:13:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 905,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "275:0:2"
+            },
+            "scope": 925,
+            "src": "226:130:2",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 923,
+              "nodeType": "Block",
+              "src": "415:32:2",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 921,
+                    "name": "precio_eth_ars",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 891,
+                    "src": "428:14:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 920,
+                  "id": 922,
+                  "nodeType": "Return",
+                  "src": "421:21:2"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 924,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getPrecio",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 917,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "378:2:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 920,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 919,
+                  "name": "precio",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 924,
+                  "src": "402:11:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 918,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "402:4:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "401:13:2"
+            },
+            "scope": 925,
+            "src": "360:87:2",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 926,
+        "src": "50:400:2"
+      }
+    ],
+    "src": "0:451:2"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0xb061cc5910e2f194f8a3f213a0479f3fa850e476",
+      "transactionHash": "0xef65b7fb0195549c260aa1f411d7d0d5b83fd9ef9fa2f7cbdb80a6154db9889a"
+    }
+  },
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2019-03-08T15:27:02.847Z"
+}

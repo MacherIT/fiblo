@@ -3,11 +3,13 @@ pragma solidity ^0.4.22;
 import './mortal.sol';
 import './SafeMath.sol';
 import './CNV.sol';
+import './OraculoPrecio.sol';
 
 contract ContratoSAS is mortal {
     using SafeMath for uint;
 
     CNV cnv;
+    OraculoPrecio oraculo_precio;
 
     /* Events */
     event contributionFiled(address indexed from, uint indexed uid, uint amount);
@@ -20,7 +22,7 @@ contract ContratoSAS is mortal {
     event nombreSet(string nombre);
     event montoSet(uint monto);
     event montoMaxSet(uint monto_max);
-    event fechaSet(string fecha);
+    event fechaSet(uint fecha_fin);
     event descripcionSet(string descripcion);
     event cuitSet(uint cuit);
     /* event uidSet(uint uid); */
@@ -38,9 +40,9 @@ contract ContratoSAS is mortal {
     address public m_beneficiario;
     string public  m_url;
     string public  m_nombre; // ERC 20
-    uint public    m_monto;
-    uint public    m_monto_max;
-    string public  m_fecha;
+    uint public    m_monto; // Monto en centavos
+    uint public    m_monto_max; // Monto en centavos
+    uint public    m_fecha_fin;
     string public  m_descripcion;
     uint public    m_cuit;
     bool public    m_project_valid;
@@ -59,7 +61,7 @@ contract ContratoSAS is mortal {
       m_closed_round = false;
     } */
 
-    constructor(address cnv_addr, address beneficiario, uint cant_acciones, string symbol, uint monto, uint monto_max, string fecha) public {
+    constructor(address cnv_addr, address oraculo_precio_addr, address beneficiario, uint cant_acciones, string symbol, uint monto, uint monto_max, uint fecha_fin) public {
       m_decimals = 18;
       contribution_counter = 0;
       m_project_valid = false;
@@ -67,9 +69,12 @@ contract ContratoSAS is mortal {
       m_closed_round = false;
       ///
       cnv = CNV(cnv_addr);
+      oraculo_precio = OraculoPrecio(oraculo_precio_addr);
+      ///
       m_beneficiario = beneficiario;
       emit beneficiarioSet(m_beneficiario);
       m_total_supply = cant_acciones * 10**uint(m_decimals);
+      balances[owner] = m_total_supply; // Sets all the tokens in the owners balance
       emit cantAccionesSet(m_total_supply);
       m_symbol = symbol;
       emit symbolSet(symbol);
@@ -77,8 +82,8 @@ contract ContratoSAS is mortal {
       emit montoSet(m_monto);
       m_monto_max = monto_max;
       emit montoMaxSet(m_monto_max);
-      m_fecha = fecha;
-      emit fechaSet(m_fecha);
+      m_fecha_fin = fecha_fin;
+      emit fechaSet(m_fecha_fin);
     }
     /* constructor(address beneficiario, string url, string nombre, uint monto, uint monto_max, string fecha, string descripcion, uint cuit) public {
       contribution_counter = 0;
@@ -87,7 +92,7 @@ contract ContratoSAS is mortal {
       m_nombre = nombre;
       m_monto = monto;
       m_monto_max = monto_max;
-      m_fecha = fecha;
+      m_fecha_fin = fecha;
       m_descripcion = descripcion;
       m_cuit = cuit;
       m_project_valid = false;
@@ -95,15 +100,18 @@ contract ContratoSAS is mortal {
     } */
 
     function receiveFunds(uint uid) payable public {
-      require(m_project_valid && m_beneficiary_valid && !m_closed_round, "Both contract and beneficiary must be validated by the NVC and the round must be open");
-        /* Receive amount */
-        if(msg.value > 0) {
-            emit receivedFunds(msg.sender, msg.value);
-        }
-        /* File contribution*/
-        contribution_counter++;
-        m_contributions[contribution_counter] = Contribution(msg.sender, uid, msg.value);
-        emit contributionFiled(msg.sender, uid, msg.value);
+      require(m_project_valid, "El proyecto debe ser validado por la CNV");
+      require(m_beneficiary_valid, "El beneficiario del proyecto debe ser validado por la CNV");
+      require(!m_closed_round, "La ronda debe estar abierta para poder contribuir.");
+      require((address(this).balance + msg.value <= m_monto_max / oraculo_precio.getPrecio() * 10**uint(m_decimals)), "El monto del proyecto más el monto a tranferir supera el monto por supersuscripción.");
+      /* Receive amount */
+      if(msg.value > 0) {
+          emit receivedFunds(msg.sender, msg.value);
+      }
+      /* File contribution*/
+      contribution_counter++;
+      m_contributions[contribution_counter] = Contribution(msg.sender, uid, msg.value);
+      emit contributionFiled(msg.sender, uid, msg.value);
     }
 
     /*function getNombre() public returns (string) {
@@ -154,9 +162,9 @@ contract ContratoSAS is mortal {
     }
 
     /* Setea la fecha de la SAS/proyecto */
-    function setFecha(string fecha) onlyowner public {
-        m_fecha = fecha;
-        emit fechaSet(m_fecha);
+    function setFecha(uint fecha_fin) onlyowner public {
+        m_fecha_fin = fecha_fin;
+        emit fechaSet(m_fecha_fin);
     }
 
     /* Setea la descripcion de la SAS/proyecto */
@@ -194,12 +202,24 @@ contract ContratoSAS is mortal {
       return balances[who];
     }
 
-    function closeRound() onlyowner public returns (bool success) {
-      for (uint i = 1; i <= contribution_counter; i++) {
-        transfer(m_contributions[i]._from, m_contributions[i]._amount); // Los tokens los mandamos como el amount sin multiplicar por los decimales porque ya los estamos almacenando en wei al crear la contribución.
+    function calculateTokens(uint _wei) private view returns (uint tokens) {
+      return _wei * m_total_supply / address(this).balance;
+    }
+
+    function closeRound() public returns (bool success) {
+      require(!m_closed_round, "La ronda debe seguir abierta para poder realizar el cierre.");
+      if(oraculo_precio.getPrecio() * address(this).balance / 10**uint(m_decimals) >= m_monto) { // Se alcanzó el monto esperado para el proyecto
+        for (uint i = 1; i <= contribution_counter; i++) { // Repartimos tokens a los holders
+          transfer(m_contributions[i]._from, calculateTokens(m_contributions[i]._amount)); // Los tokens los mandamos como el amount sin multiplicar por los decimales porque ya los estamos almacenando en wei al crear la contribución.
+        }
+        m_closed_round = true;
+      } else if(now >= m_fecha_fin) { // Se alcanzó la fecha de cierre del proyecto y no se alcanzó el monto esperado
+        for (uint j = 1; j <= contribution_counter; j++) { // Devolvemos la plata a los holders y cerramos la ronda
+          m_contributions[j]._from.transfer(m_contributions[j]._amount); // En este caso, address.transfer es una llamada a transfer de solidity https://solidity.readthedocs.io/en/develop/units-and-global-variables.html#members-of-address-types
+        }
+        m_closed_round = true;
       }
-      m_closed_round = true;
-      return true;
+      return m_closed_round;
     }
 
     /* Setea el uid de la SAS/proyecto */

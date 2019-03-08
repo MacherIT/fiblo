@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { Validator } from 'vee-validate';
 import moment from 'moment';
 
@@ -38,8 +38,9 @@ export default {
     const v = new Validator();
     v.verify(this.proyecto.email, 'required|email').then(({ valid, error }) => {
       if (error) {
-        this.sent = false;
         console.error(error);
+        this.setFlash({ tipo: 'error', mensaje: 'El email ingresado es inválido.' });
+        this.sent = false;
         this.error = true;
       } else {
         if (
@@ -78,7 +79,6 @@ export default {
             ({ data }) => {
               const beneficiary_address = data.address;
               fiblo.deployProyectoFull(
-                this.proyecto,
                 beneficiary_address,
                 this.proyecto.cantAcciones,
                 this.proyecto.nombre
@@ -93,12 +93,13 @@ export default {
                   .replace(/[^a-zA-Z0-9\.-_]/g, '')
                   .substr(0, 5)
                   .toUpperCase(),
-                parseFloat(this.proyecto.monto),
-                parseFloat(this.proyecto.montoSuperaMax),
-                moment(this.proyecto.fechaFin).format('YYYY/MM/DD'),
+                parseInt(parseFloat(this.proyecto.monto) * 100), // Monto en centavos
+                parseInt(parseFloat(this.proyecto.montoSuperaMax) * 100), // Monto en centavos
+                moment(this.proyecto.fechaFin).unix(),
                 (error, instance) => {
                   if (error) {
                     console.error(error);
+                    this.setFlash({ tipo: 'error', mensaje: 'Ocurrió un error al crear el contrato.' });
                     this.error = true;
                     this.sent = false;
                   } else if (instance.address) {
@@ -141,6 +142,9 @@ export default {
         }
       }
     });
+  },
+  methods: {
+    ...mapActions('general', ['setFlash']),
   },
 };
 </script>

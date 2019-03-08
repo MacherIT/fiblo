@@ -30,17 +30,15 @@ export default {
     },
   },
   actions: {
-    login({ commit }, { email, password }) {
-      usuarioService
-        .login(email, password)
-        .then(res => {
+    login({ commit }, { email, password, callback }) {
+      usuarioService.login(email, password, (error, res) => {
+        if (error) {
+          callback(error, null);
+        } else {
           commit('loginSuccess', res.data.token);
-          return res;
-        })
-        .catch(error => {
-          commit('loginFailure', error);
-          console.error(error);
-        });
+          callback(null, res);
+        }
+      });
     },
     logout({ commit }) {
       usuarioService.logout();

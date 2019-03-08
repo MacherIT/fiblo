@@ -211,6 +211,9 @@ export default {
       },
       error => {
         console.error(error);
+        if (error.status === 404) {
+          this.$router.replace('/');
+        }
       },
     );
     marketcap.getArs().then(
@@ -224,7 +227,7 @@ export default {
     );
   },
   methods: {
-    ...mapActions('general', ['setPageTitle']),
+    ...mapActions('general', ['setPageTitle', 'setFlash']),
     adjustMontos(prop) {
       if (prop === 'ETH') {
         this.montoAccionARS = this.montoAccionETH * this.valorCambio;
@@ -305,6 +308,10 @@ export default {
           (error, tx) => {
             if (error) {
               console.error(error);
+              this.setFlash({
+                tipo: 'error',
+                mensaje: 'Ocurrió un error al transferir los fondos.',
+              });
             } else {
               this.getMontoRecaudado();
               this.sent = false;

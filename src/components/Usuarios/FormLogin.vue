@@ -54,13 +54,21 @@ export default {
     this.setPageTitle('Login');
   },
   methods: {
-    ...mapActions('general', ['setPageTitle']),
+    ...mapActions('general', ['setPageTitle', 'setFlash']),
     ...mapActions('usuarios', ['login']),
     iniciarSesion() {
       if (this.dirtyForm && this.validForm) {
         this.sent = true;
-        this.login({ email: this.usuario.email, password: this.usuario.password }).then(() => {
-          this.sent = false;
+        this.login({
+          email: this.usuario.email,
+          password: this.usuario.password,
+          callback: (error, res) => {
+            this.sent = false;
+            this.setFlash({ tipo: 'exito', mensaje: 'Inicio de sesión correcto.', timeout: 1500 });
+            if (error && error.status === 401) {
+              this.setFlash({ tipo: 'error', mensaje: 'La contraseña o email son inválidos.' });
+            }
+          },
         });
       } else {
         this.$validator.validateAll();
