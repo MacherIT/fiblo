@@ -99,11 +99,22 @@ contract ContratoSAS is mortal {
       m_beneficiary_valid = false;
     } */
 
+    function noSuperaMontoMax () private view returns (bool supera) {
+      uint balanceActual = uint(address(this).balance);
+      uint precioOraculo = uint(oraculo_precio.getPrecio());
+      uint weiMultiplier = uint(10**uint(m_decimals));
+      /* uint sumaBalanceMonto = uint(balanceActual + val); */ // Omitimos este paso pues solidity suma al balance el value del mensaje previo a la carga del cuerpo del método
+      uint divisionMontoPrecio = uint(m_monto_max / precioOraculo);
+      uint montoPrecioWei = uint(divisionMontoPrecio * weiMultiplier);
+      bool comparacion = balanceActual <= montoPrecioWei;
+      return comparacion;
+    }
+
     function receiveFunds(uint uid) payable public {
       require(m_project_valid, "El proyecto debe ser validado por la CNV");
       require(m_beneficiary_valid, "El beneficiario del proyecto debe ser validado por la CNV");
       require(!m_closed_round, "La ronda debe estar abierta para poder contribuir.");
-      require((address(this).balance + msg.value <= m_monto_max / oraculo_precio.getPrecio() * 10**uint(m_decimals)), "El monto del proyecto más el monto a tranferir supera el monto por supersuscripción.");
+      require(noSuperaMontoMax(), "El monto del proyecto más el monto a tranferir supera el monto por supersuscripción.");
       /* Receive amount */
       if(msg.value > 0) {
           emit receivedFunds(msg.sender, msg.value);

@@ -17,6 +17,23 @@ const web3Init = callback => {
   } else {
     window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
   }
+
+  // DEV ONLY
+  // DEV ONLY
+  // DEV ONLY
+
+  const proxySAS = window.web3.eth.contract(baseJSON.abi);
+  window.initProyecto = project_address => {
+    window.proyecto = proxySAS.at(project_address);
+  };
+
+  const oraculoProxy = window.web3.eth.contract(baseJSONOraculoPrecio.abi);
+  window.oraculo = oraculoProxy.at(ORACULO_PRECIO_ADDRESS);
+
+  // DEV ONLY
+  // DEV ONLY
+  // DEV ONLY
+
   window.web3.eth.getAccounts((error, accounts) => {
     if (error) {
       callback(error, null);

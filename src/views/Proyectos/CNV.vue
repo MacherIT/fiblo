@@ -187,6 +187,7 @@ export default {
       fiblo.addBeneficiary(beneficiary.address, (error, resp) => {
         if (error) {
           console.error(error);
+          console.log(JSON.stringify(error));
         } else {
         }
       });

@@ -11,10 +11,10 @@ library SafeMath {
   }
   function mul(uint a, uint b) internal pure returns (uint c) {
     c = a * b;
-    require(a == 0 || c / a == b);
+    require(a == 0 || c / a == b, 'Fail in multiplication');
   }
   function div(uint a, uint b) internal pure returns (uint c) {
-    require(b > 0);
+    require(b > 0, 'Divider must be greater than 0');
     c = a / b;
   }
 }

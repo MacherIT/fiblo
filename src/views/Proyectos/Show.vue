@@ -87,19 +87,25 @@
             .mismo-usuario(v-if="proyecto.usuario_id === usuario.id")
               span Un usuario no puede aportar a su propio proyecto
             form(@submit.prevent="comprarAccion", novalidate, v-if="proyecto.usuario_id !== usuario.id")
-              .campo
-                input(
-                  type="number"
-                  placeholder="2 Ξ"
-                  v-model="montoAccionETH"
-                  @change="adjustMontos('ETH')"
-                  :disabled="!projectValidity || !beneficiaryValidity")
-                span Ξ
+              .campo.monto
+                .contenido
+                  input(
+                    type="text"
+                    placeholder="2 Ξ"
+                    v-model="montoAccionETH"
+                    name="montoAccionETH"
+                    v-validate="'required|max_value:' + montoMaxETH"
+                    @change="adjustMontos('ETH')"
+                    :disabled="!projectValidity || !beneficiaryValidity")
+                  span Ξ
+                .error
+                  span.fadeIn(v-if="montoAccionETH > montoMaxETH") El monto a comprar no puede superar {{montoMaxETH.toFixed(2)}} Ξ
               .campo
                 input(
                   type="number"
                   placeholder="8.000 $"
                   v-model="montoAccionARS"
+                  name="montoAccionARS"
                   @change="adjustMontos('ARS')"
                   :disabled="!projectValidity || !beneficiaryValidity")
                 span $
@@ -108,13 +114,14 @@
                   type="number"
                   placeholder="200 acc"
                   v-model="montoAccionACC"
+                  name="montoAccionACC"
                   @change="adjustMontos('ACC')"
                   :disabled="!projectValidity || !beneficiaryValidity")
                 span acc
               .subm
                 button(
                   type="submit"
-                  :disabled="!montoAccionETH || montoAccionETH <= 0 || sent")
+                  :disabled="!montoAccionETH || montoAccionETH <= 0 || sent || !validForm")
                   font-awesome-icon(icon="play")
               .aclaracion-acciones(v-if="projectValidity && beneficiaryValidity")
                 span La cantidad de acciones real se computa una vez finalizada la ronda, el número indicado es estimativo y varía según la cotización del Ether.
@@ -181,6 +188,9 @@ export default {
     ciudad() {
       // return this.proyecto && this.proyecto.ciudad ? JSON.parse(this.proyecto.ciudad) : '';
       return '';
+    },
+    montoMaxETH() {
+      return parseFloat(this.proyecto.montoSuperaMax / this.valorCambio - this.montoRecaudado);
     },
   },
   mounted() {
@@ -307,6 +317,7 @@ export default {
           this.montoAccionETH,
           (error, tx) => {
             if (error) {
+              this.sent = false;
               console.error(error);
               this.setFlash({
                 tipo: 'error',
@@ -687,6 +698,26 @@ export default {
                 display: flex;
                 justify-content: flex-start;
                 align-items: center;
+                &.monto {
+                  justify-content: center;
+                  align-items: flex-start;
+                  flex-direction: column;
+                  .contenido {
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                  }
+                  .error {
+                    height: 25px;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                    span {
+                      font-size: 85%;
+                      color: #ff4d00;
+                    }
+                  }
+                }
                 input {
                   height: 35px;
                   padding: 0 10px;
