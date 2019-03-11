@@ -61,7 +61,8 @@
       router-link.proyecto(
         :to="'/proyectos/' + proyecto.id"
         v-for="proyecto in proyectosVisibles"
-        :key="proyecto.id")
+        :key="proyecto.id"
+        :class="{cerrado: proyecto.closedRound}")
         .logo-ciudad
           .logo
             font-awesome-icon(
@@ -187,8 +188,12 @@ export default {
       url: '/api/proyectos',
     }).then(
       ({ data }) => {
-        this.proyectos = data.map(p => {
-          p.montoRecaudado = 0;
+        this.proyectos = data.map(p => ({
+          ...p,
+          closedRound: false,
+          montoRecaudado: 0,
+        }));
+        this.proyectos.map(p => {
           fiblo.getMontoRecaudado(p.address, (error, monto) => {
             if (error) {
               console.error(error);
@@ -196,7 +201,13 @@ export default {
               p.montoRecaudado = monto;
             }
           });
-          return p;
+          fiblo.isProjectClosed(p.address, (error, closed) => {
+            if (error) {
+              console.error(error);
+            } else {
+              p.closedRound = closed;
+            }
+          });
         });
         this.loaded = true;
       },
@@ -326,6 +337,27 @@ export default {
       border-bottom: 2px solid #fff;
       position: relative;
       @include ease-transition;
+      &.cerrado {
+        position: relative;
+        overflow: hidden;
+        &::before {
+          position: absolute;
+          left: -50px;
+          top: -50px;
+          content: 'Cerrado';
+          background-color: #f00;
+          @include minmaxwh(90px);
+          -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+          display: flex;
+          justify-content: center;
+          align-items: flex-end;
+          font-size: 65%;
+          font-family: $fontKeepCalmMedium;
+          text-transform: uppercase;
+          color: #fff;
+        }
+      }
       &:hover {
         background-color: rgba($colorAzulClaro, 0.3);
       }

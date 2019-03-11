@@ -1,6 +1,8 @@
 <template lang="pug">
   .proyecto-show
-    .info-general(v-if="proyecto")
+    .info-general(
+      v-if="proyecto"
+      :class="{cerrado: closedRound}")
       .categoria(
         :style="'background-color: ' + proyecto.categoria.color")
         span(
@@ -81,7 +83,7 @@
                   .address
                     span(v-for="(address, index) in contribucion.from") {{address | limitStr(10)}}{{index !== contribucion.from.length - 1 ? ' / ' : ''}}
                   .monto
-                    span Ξ {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ ACC {{parseInt(contribucion.monto * valorCambio / valorAccion)}}
+                    span Ξ {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ {{parseInt(contribucion.monto * valorCambio / valorAccion)}} acciones
         .tab.participar(v-if="tabActiva === 'participar'")
           .compra-acciones
             .mismo-usuario(v-if="proyecto.usuario_id === usuario.id")
@@ -112,12 +114,12 @@
               .campo
                 input(
                   type="number"
-                  placeholder="200 acc"
+                  placeholder="200 acciones"
                   v-model="montoAccionACC"
                   name="montoAccionACC"
                   @change="adjustMontos('ACC')"
                   :disabled="!projectValidity || !beneficiaryValidity")
-                span acc
+                span acciones
               .subm
                 button(
                   type="submit"
@@ -145,8 +147,8 @@
           span Acciones
         .separador
         .tab-item.participar(
-          :class="{active: tabActiva === 'participar'}"
-          @click="setTabActiva('participar')")
+          :class="[{active: tabActiva === 'participar'}, {disabled: closedRound}]"
+          @click="!closedRound && setTabActiva('participar')")
           span Participar
         //- .separador
         //- .tab-item.dev(
@@ -171,6 +173,7 @@ export default {
       contrato: {},
       projectValidity: false,
       beneficiaryValidity: false,
+      closedRound: true,
       sent: false,
       montoRecaudado: 0,
       montoAccionETH: '',
@@ -216,6 +219,13 @@ export default {
             console.error(error);
           } else {
             this.beneficiaryValidity = res;
+          }
+        });
+        fiblo.isProjectClosed(this.proyecto.address, (error, closed) => {
+          if (error) {
+            console.error(error);
+          } else {
+            this.closedRound = closed;
           }
         });
       },
@@ -380,6 +390,25 @@ export default {
     text-align: center;
     position: relative;
     z-index: 3;
+    &.cerrado {
+      &::before {
+        position: absolute;
+        left: -50px;
+        top: -50px;
+        content: 'Cerrado';
+        background-color: #f00;
+        @include minmaxwh(90px);
+        -webkit-transform: rotate(-45deg);
+        transform: rotate(-45deg);
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        font-size: 65%;
+        font-family: $fontKeepCalmMedium;
+        text-transform: uppercase;
+        color: #fff;
+      }
+    }
     .categoria {
       position: absolute;
       top: 0;
@@ -796,11 +825,12 @@ export default {
         align-items: center;
         @include ease-transition;
         cursor: pointer;
-        &.dev {
-          max-width: 50px;
-        }
         &:hover:not(.active) {
           background-color: rgba($colorAzulClaro, 0.6);
+        }
+        &.disabled {
+          background-color: #666 !important;
+          cursor: not-allowed;
         }
         &.active {
           @include sombra(0 0 2px 0 #333);
