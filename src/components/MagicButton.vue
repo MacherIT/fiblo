@@ -2,7 +2,7 @@
   .magic-button
     .loading(v-if="sent")
       font-awesome-icon(icon="circle-notch", spin)
-    button(@click="exec") Cargar todo todito!
+    button(@click="exec") Crear proyecto de prueba
 </template>
 
 <script>
@@ -54,7 +54,8 @@ export default {
         cantAcciones: 200,
         sector: '',
         emprendedores: [{ nombre: 'csa' }],
-        fechaFin: moment(new Date()).add(30, 'days'),
+        fechaFin: moment(new Date()).subtract(1, 'days'),
+        // fechaFin: moment(new Date()).add(30, 'days'),
       };
 
       fiblo.deployProyectoFull(
@@ -64,7 +65,8 @@ export default {
         20000 * 100, // Monto * 100 centavos
         30000 * 100, // Monto max * 100 centavos
         moment(new Date())
-          .add(30, 'days')
+          .subtract(1, 'days')
+          // .add(30, 'days')
           .unix(),
         (error, instance) => {
           if (error) {
@@ -140,5 +142,24 @@ export default {
   position: fixed;
   left: 20px;
   top: 20px;
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $colorAzulBase;
+    color: #fff;
+    border: 0;
+    @include sombra(0 0 4px 0 #000);
+    border-radius: 6px;
+    font-family: $fontKeepCalmMedium;
+    text-transform: uppercase;
+    height: 40px;
+    padding: 0 20px;
+    cursor: pointer;
+    @include ease-transition(70ms);
+    &:hover {
+      background-color: $colorAzulMedio;
+    }
+  }
 }
 </style>

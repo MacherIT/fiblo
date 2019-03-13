@@ -2,23 +2,22 @@
   .mis-participaciones
     .suma-total
       .total.eth
-        span Ξ {{totalParticipaciones.toFixed(2)}}
+        span Ξ {{cantTotalETH.toFixed(2)}}
       .total.ars
-        span $ {{(totalParticipaciones * valorCambio).toFixed(2)}}
+        span $ {{(cantTotalETH * valorCambio).toFixed(2)}}
       .total.acc
-        span {{parseInt(totalCantAcciones)}} acc
+        span {{parseInt(cantTotalAcciones)}} acc
       .total.de
         span de
       .total.proyectos
-        span {{cantProyectos}} proyectos
+        span {{cantTotalProyectos}} proyectos
     .lista-participaciones
-      .no-hay-participaciones(v-if="Object.keys(proyectos).length === 0")
+      .no-hay-participaciones(v-if="cantTotalProyectos === 0")
         span Todavía no participaste en ningún proyecto
-      ul(v-if="Object.keys(proyectos).length > 0")
+      ul(v-if="cantTotalProyectos > 0")
         li(
           v-for="(proyecto, key, index) in proyectos"
-          :key="key"
-          v-if="proyecto.misParticipaciones.length > 0")
+          :key="key")
           .logo-section
             .logo
               font-awesome-icon(
@@ -33,7 +32,7 @@
             .address
               span {{proyecto.address | limitStr(10)}}
             .monto
-              span Ξ {{(proyecto.totalMisParticipaciones).toFixed(2)}} ≈ $ {{(proyecto.totalMisParticipaciones * valorCambio).toFixed(2)}} ≈ {{parseInt(proyecto.totalMisParticipaciones * valorCambio / proyecto.valorAccion)}} acc
+              span Ξ {{(proyecto.misParticipaciones.montoETH).toFixed(2)}} ≈ $ {{(proyecto.misParticipaciones.montoETH * valorCambio).toFixed(2)}} ≈ {{parseInt(proyecto.misParticipaciones.acciones)}} acc
 </template>
 
 <script>
@@ -42,33 +41,34 @@ import { mapGetters, mapActions } from 'vuex';
 import fiblo from '@/services/fiblo';
 import marketcap from '@/services/marketcap';
 
+const txs = [];
+
 export default {
   data() {
     return {
       proyectos: {},
       valorCambio: 0,
-      totalCantAcciones: 0,
     };
   },
   computed: {
     ...mapGetters('usuarios', ['usuario']),
-    totalParticipaciones() {
+    cantTotalProyectos() {
       return Object.keys(this.proyectos).reduce(
-        (sumaProyectos, pid) =>
-          sumaProyectos +
-          this.proyectos[pid].misParticipaciones.reduce((sumaLocal, participacion) => {
-            this.totalCantAcciones +=
-              (window.web3.fromWei(participacion.amount).toNumber() * this.valorCambio) /
-              (this.proyectos[pid].monto / this.proyectos[pid].cantAcciones);
-            return sumaLocal + window.web3.fromWei(participacion.amount).toNumber();
-          }, 0),
+        (acumulador, p) => (this.proyectos[p].participaEnProyecto ? acumulador + 1 : acumulador),
         0,
       );
     },
-    cantProyectos() {
-      return Object.keys(this.proyectos).filter(
-        pid => this.proyectos[pid].misParticipaciones.length > 0,
-      ).length;
+    cantTotalAcciones() {
+      return Object.keys(this.proyectos).reduce(
+        (acumulador, p) => acumulador + this.proyectos[p].misParticipaciones.acciones,
+        0,
+      );
+    },
+    cantTotalETH() {
+      return Object.keys(this.proyectos).reduce(
+        (acumulador, p) => acumulador + this.proyectos[p].misParticipaciones.montoETH,
+        0,
+      );
     },
   },
   mounted() {
@@ -87,26 +87,56 @@ export default {
       url: '/api/proyectos',
     }).then(
       ({ data }) => {
-        this.proyectos = data.reduce((output, p) => {
-          output[p.id] = {
-            ...p,
-            misParticipaciones: [],
-            totalMisParticipaciones: 0,
-            valorAccion: p.monto / p.cantAcciones,
-          };
-          return output;
-        }, {});
-        data.map(p => {
-          fiblo.getContribuciones(p.address, (error, tx) => {
+        this.proyectos = data.reduce(
+          (acumulador, p) => ({
+            ...acumulador,
+            [p.id]: {
+              ...p,
+              closedRound: false,
+              participaEnProyecto: false,
+              misParticipaciones: {
+                fromList: [],
+                montoETH: 0,
+                acciones: 0,
+              },
+            },
+          }),
+          {},
+        );
+        Object.keys(this.proyectos).map(pid => {
+          const p = this.proyectos[pid];
+          fiblo.isProjectClosed(p.address, (error, closed) => {
             if (error) {
               console.error(error);
             } else {
-              if (tx.args.uid.toNumber() === this.usuario.id) {
-                this.proyectos[p.id].misParticipaciones.push(tx.args);
-                this.proyectos[p.id].totalMisParticipaciones += window.web3
-                  .fromWei(tx.args.amount)
-                  .toNumber();
-              }
+              p.closedRound = closed;
+              fiblo.getContribuciones(p.address, (error, tx) => {
+                if (error) {
+                  console.error(error);
+                } else {
+                  if (tx.args.uid.toNumber() === this.usuario.id) {
+                    if (p.misParticipaciones.fromList.indexOf(tx.args.from) < 0)
+                      p.misParticipaciones.fromList.push(tx.args.from);
+                    p.misParticipaciones.montoETH += web3.fromWei(tx.args.amount).toNumber();
+                    p.participaEnProyecto = true;
+                    if (!closed) {
+                      p.misParticipaciones.acciones +=
+                        (web3.fromWei(tx.args.amount).toNumber() *
+                          this.valorCambio *
+                          p.cantAcciones) /
+                        p.monto;
+                    } else {
+                      fiblo.balanceOf(p.address, tx.args.from, (error, balance) => {
+                        if (error) {
+                          console.error(error);
+                        } else {
+                          p.misParticipaciones.acciones = web3.fromWei(balance).toNumber();
+                        }
+                      });
+                    }
+                  }
+                }
+              });
             }
           });
         });

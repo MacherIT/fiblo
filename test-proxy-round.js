@@ -731,3 +731,7 @@ proyecto
   .get((error, event) => {
     console.log(error, event);
   });
+
+proyecto
+  .fundReturned({}, { fromBlock: 0, toBlock: 'latest' })
+  .get((error, event) => console.log(error, event));

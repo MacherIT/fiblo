@@ -6,7 +6,8 @@
       router-link.proyecto(
         :to="'/proyectos/' + proyecto.id"
         v-for="proyecto in proyectos"
-        :key="proyecto.id")
+        :key="proyecto.id"
+        v-if="showOpen ? !proyecto.closedRound : proyecto.closedRound")
         .logo-ciudad
           .logo
             font-awesome-icon(
@@ -37,6 +38,16 @@
           :style="'background-color: ' + proyecto.categoria.color")
           span(
             :style="'color: ' + proyecto.categoria.colorTexto") {{proyecto.categoria.nombre}}
+    .tab-menu
+      .tab-item(
+        @click="setShowOpen(true)"
+        :class="{active: showOpen}")
+        span Abiertos
+      .separador
+      .tab-item(
+        @click="setShowOpen(false)"
+        :class="{active: !showOpen}")
+        span Cerrados
     router-link.new-project(to="/proyectos/new")
       font-awesome-icon(icon="plus")
 </template>
@@ -58,6 +69,7 @@ export default {
       moment,
       valorCambio: 0,
       proyectos: [],
+      showOpen: true,
     };
   },
   computed: {
@@ -74,11 +86,19 @@ export default {
       ({ data }) => {
         this.proyectos = data.map(p => {
           p.montoRecaudado = 0;
+          p.closedRound = false;
           fiblo.getMontoRecaudado(p.address, (error, monto) => {
             if (error) {
               console.error(error);
             } else {
               p.montoRecaudado = monto;
+            }
+          });
+          fiblo.isProjectClosed(p.address, (error, closed) => {
+            if (error) {
+              console.error(error);
+            } else {
+              p.closedRound = closed;
             }
           });
           return p;
@@ -104,6 +124,9 @@ export default {
   },
   methods: {
     ...mapActions('general', ['setPageTitle']),
+    setShowOpen(val) {
+      this.showOpen = val;
+    },
   },
 };
 </script>
@@ -114,6 +137,7 @@ export default {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   position: relative;
@@ -290,9 +314,70 @@ export default {
       }
     }
   }
+  .tab-menu {
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    background-color: $colorAzulMedio;
+    @include sombra(0 0 2px 0 #333);
+    .tab-item {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      @include ease-transition;
+      cursor: pointer;
+      &:hover:not(.active) {
+        background-color: rgba($colorAzulClaro, 0.6);
+      }
+      &.disabled {
+        background-color: #666 !important;
+        cursor: not-allowed;
+      }
+      &.active {
+        @include sombra(0 0 2px 0 #333);
+        padding-bottom: 5px;
+        background-color: $colorAzulClaro;
+        position: relative;
+        &::before {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 5px;
+          top: -5px;
+          left: 0;
+          background-color: $colorAzulClaro;
+          display: block;
+        }
+      }
+      span {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        text-shadow: 1px 1px 0 #444;
+        text-transform: uppercase;
+        font-family: $fontUbuntuRegular;
+        font-weight: bold;
+        font-size: 90%;
+        letter-spacing: 1px;
+      }
+    }
+    .separador {
+      width: 1px;
+      min-width: 1px;
+      height: 80%;
+      background-color: $colorAzulBase;
+      display: block;
+    }
+  }
   a.new-project {
     position: absolute;
-    bottom: 15px;
+    bottom: 60px;
     right: 15px;
     @include minmaxwh(50px);
     background-color: $colorAzulClaro;

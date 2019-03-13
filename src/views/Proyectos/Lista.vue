@@ -43,6 +43,12 @@
             v-for="duracion in duraciones"
             :key="duracion"
             :value="duracion") Hasta dentro de {{duracion}} días.
+      .filtro.closed
+        select(v-model="filters.open.val")
+          option(selected, value="", disabled) -- Estado --
+          option(value="todos") Todos
+          option(value="abierto") Abierto
+          option(value="cerrado") Cerrado
       .montos
         span Montos:
         .filtro.monto
@@ -119,6 +125,16 @@ export default {
       categorias: [],
       duraciones: [10, 15, 30, 60, 90],
       filters: {
+        open: {
+          fun(item) {
+            return this.val === 'todos'
+              ? true
+              : this.val === 'abierto'
+              ? !item.closedRound
+              : item.closedRound;
+          },
+          val: 'todos',
+        },
         ciudad: {
           fun(item) {
             return item.ciudad && item.ciudad.ciudad.id === this.val;

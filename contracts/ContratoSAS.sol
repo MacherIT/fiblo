@@ -14,6 +14,7 @@ contract ContratoSAS is mortal {
     /* Events */
     event contributionFiled(address indexed from, uint indexed uid, uint amount);
     event receivedFunds(address _from, uint _amount);
+    event fundReturned(address _to, uint _amount);
     event beneficiarioSet(address beneficiario);
     event cantAccionesSet(uint cant_acciones);
     event Transfer(address indexed from, address indexed to, uint tokens);
@@ -43,6 +44,7 @@ contract ContratoSAS is mortal {
     uint public    m_monto; // Monto en centavos
     uint public    m_monto_max; // Monto en centavos
     uint public    m_fecha_fin;
+    uint public    m_fecha_cierre;
     string public  m_descripcion;
     uint public    m_cuit;
     bool public    m_project_valid;
@@ -224,11 +226,14 @@ contract ContratoSAS is mortal {
           transfer(m_contributions[i]._from, calculateTokens(m_contributions[i]._amount)); // Los tokens los mandamos como el amount sin multiplicar por los decimales porque ya los estamos almacenando en wei al crear la contribución.
         }
         m_closed_round = true;
+        m_fecha_cierre = now;
       } else if(now >= m_fecha_fin) { // Se alcanzó la fecha de cierre del proyecto y no se alcanzó el monto esperado
         for (uint j = 1; j <= contribution_counter; j++) { // Devolvemos la plata a los holders y cerramos la ronda
           m_contributions[j]._from.transfer(m_contributions[j]._amount); // En este caso, address.transfer es una llamada a transfer de solidity https://solidity.readthedocs.io/en/develop/units-and-global-variables.html#members-of-address-types
+          emit fundReturned(m_contributions[j]._from, m_contributions[j]._amount);
         }
         m_closed_round = true;
+        m_fecha_cierre = now;
       }
       return m_closed_round;
     }

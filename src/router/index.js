@@ -81,6 +81,9 @@ const router = new Router({
       path: '/proyectos/:id',
       name: 'Show proyecto',
       component: ShowProyecto,
+      meta: {
+        requiresLogin: true,
+      },
     },
     { path: '*', redirect: '/' },
   ],

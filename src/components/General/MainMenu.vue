@@ -13,7 +13,7 @@
       //-   router-link(to="/cnv") CNV
       li
         router-link(to="/mis-proyectos")
-          font-awesome-icon(icon="handshake")
+          font-awesome-icon(icon="th-list")
       li
         router-link(to="/mis-participaciones")
           font-awesome-icon(icon="briefcase")

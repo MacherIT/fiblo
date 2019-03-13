@@ -1,8 +1,7 @@
 <template lang="pug">
   .proyecto-show
     .info-general(
-      v-if="proyecto"
-      :class="{cerrado: closedRound}")
+      v-if="proyecto")
       .categoria(
         :style="'background-color: ' + proyecto.categoria.color")
         span(
@@ -32,6 +31,23 @@
     .cuerpo
       .tabs
         .tab.info(v-if="tabActiva === 'info'")
+          .closed-round(
+            v-if="proyecto && closedRound"
+            :class="{failed: montoRecaudado === 0}")
+            .titulo
+              span Proyecto cerrado
+            .resultado
+              span {{montoRecaudado > 0 ? 'Se' : 'No se'}} alcanzó el monto esperado
+            .alcanzacion
+              span(v-if="montoRecaudado === 0") Se alcanzó Ξ {{montoTotalContribuciones}} ≈ $ {{(montoTotalContribuciones * valorCambioFechaFin).toFixed(2)}} de los $ {{proyecto.monto}} esperados
+              span(v-if="montoRecaudado > 0") Se alcanzó Ξ {{montoRecaudado}} ≈ $ {{(montoRecaudado * valorCambio).toFixed(2)}} de los $ {{proyecto.monto}} esperados
+            .conclusion
+              p(v-if="montoRecaudado === 0")
+                | Al {{moment(fechaCierre).format('DD/MM/YYYY')}} no se alcanzó el monto esperado del proyecto.
+                | Las contribuciones se devolvieron a los usuarios.
+              p(v-if="montoRecaudado > 0")
+                | Al {{moment(fechaCierre).format('DD/MM/YYYY')}} se superó el monto esperado del proyecto.
+                | Se repartieron las {{proyecto.cantAcciones}} acciones.
           .descripcion
             .titulo
               span Descripción
@@ -83,7 +99,8 @@
                   .address
                     span(v-for="(address, index) in contribucion.from") {{address | limitStr(10)}}{{index !== contribucion.from.length - 1 ? ' / ' : ''}}
                   .monto
-                    span Ξ {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ {{parseInt(contribucion.monto * valorCambio / valorAccion)}} acciones
+                    span(v-if="!closedRound") Ξ {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ {{parseInt(contribucion.monto * valorCambio / valorAccion)}} acciones
+                    span(v-if="closedRound") {{parseInt(contribucion.acciones)}} acciones
         .tab.participar(v-if="tabActiva === 'participar'")
           .compra-acciones
             .mismo-usuario(v-if="proyecto.usuario_id === usuario.id")
@@ -142,8 +159,8 @@
           span Info
         .separador
         .tab-item.acciones(
-          :class="{active: tabActiva === 'acciones'}"
-          @click="setTabActiva('acciones')")
+          :class="[{active: tabActiva === 'acciones'}, {disabled: closedRound && montoRecaudado === 0}]"
+          @click="!(closedRound && montoRecaudado === 0) && setTabActiva('acciones')")
           span Acciones
         .separador
         .tab-item.participar(
@@ -173,16 +190,20 @@ export default {
       contrato: {},
       projectValidity: false,
       beneficiaryValidity: false,
-      closedRound: true,
+      closedRound: false,
       sent: false,
       montoRecaudado: 0,
       montoAccionETH: '',
       montoAccionARS: '',
       montoAccionACC: '',
       valorCambio: 1,
+      valorCambioFechaFin: 1,
       contribuciones: {},
       tabActiva: 'info',
       valorAccion: 0,
+      fundsReturned: [],
+      montoTotalContribuciones: 0,
+      fechaCierre: '',
     };
   },
   computed: {
@@ -202,10 +223,21 @@ export default {
       url: `/api/proyectos/${this.$route.params.id}`,
     }).then(
       ({ data }) => {
+        marketcap.getArsAtDate(data.fechaFin).then(
+          monto => {
+            this.valorCambioFechaFin = monto;
+          },
+          error => {
+            console.error(error);
+            this.valorCambioFechaFin = 4000;
+          },
+        );
+
         this.proyecto = data;
         this.valorAccion = this.proyecto.monto / this.proyecto.cantAcciones;
         this.setPageTitle(this.proyecto.nombre);
         this.getMontoRecaudado();
+        this.getMontoTotalContribuciones(data.address);
         this.getContribuciones(this.proyecto.address);
         fiblo.projectValiditySet(this.proyecto.address, (error, res) => {
           if (error) {
@@ -226,6 +258,14 @@ export default {
             console.error(error);
           } else {
             this.closedRound = closed;
+            this.getFundsReturned();
+          }
+        });
+        fiblo.getFechaCierre(this.proyecto.address, (error, fechaCierre) => {
+          if (error) {
+            console.error(error);
+          } else {
+            this.fechaCierre = fechaCierre.toNumber() * 1000;
           }
         });
       },
@@ -294,6 +334,7 @@ export default {
                 id: contribucion.args.uid.toNumber(),
               },
               monto: 0,
+              acciones: 0,
               from: [],
             };
           }
@@ -310,6 +351,17 @@ export default {
             .fromWei(contribucion.args.amount)
             .toNumber();
           this.getUserData();
+          if (this.closedRound) {
+            fiblo.balanceOf(project_address, contribucion.args.from, (error, balance) => {
+              if (error) {
+                console.error(error);
+              } else {
+                this.contribuciones[
+                  `${contribucion.args.uid.toNumber()}`
+                ].acciones += window.web3.fromWei(balance).toNumber();
+              }
+            });
+          }
         }
       });
     },
@@ -319,7 +371,7 @@ export default {
       return outArr;
     },
     comprarAccion() {
-      if (parseFloat(this.montoAccionETH) > 0) {
+      if (!this.closeRound && parseFloat(this.montoAccionETH) > 0) {
         this.sent = true;
         fiblo.receiveFunds(
           this.proyecto.address,
@@ -352,6 +404,15 @@ export default {
         }
       });
     },
+    getFundsReturned() {
+      fiblo.getFundsReturned(this.proyecto.address, (error, txs) => {
+        if (error) {
+          console.error(error);
+        } else {
+          this.fundReturned = txs;
+        }
+      });
+    },
     setProjectValidity() {
       fiblo.setProjectValidity(this.proyecto.address, (error, res) => {
         console.log(res);
@@ -360,6 +421,18 @@ export default {
     setBeneficiaryValidity() {
       fiblo.setBeneficiaryValidity(this.proyecto.address, (error, res) => {
         console.log(res);
+      });
+    },
+    getMontoTotalContribuciones(addr) {
+      fiblo.getContribucionesGET(addr, (error, arr) => {
+        if (error) {
+          console.error(error);
+        } else {
+          this.montoTotalContribuciones = arr.reduce(
+            (acumulador, tx) => acumulador + window.web3.fromWei(tx.args.amount).toNumber(),
+            0,
+          );
+        }
       });
     },
   },
@@ -376,39 +449,21 @@ export default {
   height: 100%;
   position: relative;
   .info-general {
+    height: 100%;
     width: 30%;
     min-width: 30%;
     background-color: $colorGrisOscuro;
     height: 100%;
+    @include sombra(0 0 10px 0 #000);
+    z-index: 3;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     flex-direction: column;
-    @include sombra(0 0 10px 0 #000);
     padding: 15px;
     padding-top: 40px;
     text-align: center;
     position: relative;
-    z-index: 3;
-    &.cerrado {
-      &::before {
-        position: absolute;
-        left: -50px;
-        top: -50px;
-        content: 'Cerrado';
-        background-color: #f00;
-        @include minmaxwh(90px);
-        -webkit-transform: rotate(-45deg);
-        transform: rotate(-45deg);
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        font-size: 65%;
-        font-family: $fontKeepCalmMedium;
-        text-transform: uppercase;
-        color: #fff;
-      }
-    }
     .categoria {
       position: absolute;
       top: 0;
@@ -522,6 +577,44 @@ export default {
         padding: 30px;
         overflow: auto;
         &.info {
+          .closed-round {
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            background-color: #488360;
+            margin-bottom: 50px;
+            &.failed {
+              background-color: #836648;
+            }
+            .titulo {
+              text-align: center;
+              span {
+                text-decoration: none;
+              }
+            }
+            .resultado {
+              margin-bottom: 15px;
+              text-align: center;
+              span {
+                color: #fff;
+                text-transform: uppercase;
+                font-weight: bold;
+              }
+            }
+            .alcanzacion {
+              text-align: center;
+              span {
+                color: #fff;
+              }
+            }
+            .conclusion {
+              text-align: center;
+              p {
+                color: #fff;
+                white-space: pre-line;
+              }
+            }
+          }
           .titulo {
             margin: 15px 0;
             span {
@@ -824,6 +917,7 @@ export default {
         justify-content: center;
         align-items: center;
         @include ease-transition;
+        @include not-selectable;
         cursor: pointer;
         &:hover:not(.active) {
           background-color: rgba($colorAzulClaro, 0.6);

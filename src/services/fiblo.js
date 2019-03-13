@@ -179,6 +179,79 @@ export default {
       }
     });
   },
+  getContribucionesGET(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto
+            .contributionFiled(
+              {},
+              {
+                fromBlock: 0,
+                toBlock: 'latest',
+              },
+            )
+            .get((error, events) => {
+              if (error) {
+                callback(error, null);
+              }
+              callback(null, events);
+            });
+        });
+      }
+    });
+  },
+  getFechaCierre(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto.m_fecha_cierre((error, fechaCierre) => {
+            if (error) {
+              callback(error, null);
+            }
+            callback(null, fechaCierre);
+          });
+        });
+      }
+    });
+  },
+  getFundsReturned(project_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto
+            .fundReturned(
+              {},
+              {
+                fromBlock: 0,
+                toBlock: 'latest',
+              },
+            )
+            .get((error, event) => {
+              if (error) {
+                callback(error, null);
+              }
+              callback(null, event);
+            });
+        });
+      }
+    });
+  },
   deployProyectoFull(
     beneficiary_address,
     cant_acciones,
@@ -438,6 +511,26 @@ export default {
           const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
           const cnv = proxyCNV.at(CNV_ADDRESS);
           cnv.removeProject(project_address, (error, res) => {
+            if (error) {
+              callback(error, null);
+            } else {
+              callback(null, res);
+            }
+          });
+        });
+      }
+    });
+  },
+  balanceOf(project_address, account_address, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto.balanceOf(account_address, (error, res) => {
             if (error) {
               callback(error, null);
             } else {

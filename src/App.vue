@@ -1,5 +1,8 @@
 <template lang="pug">
   #root-app
+    .active-user(v-if="usuario")
+      .holder
+        span {{usuario.email}}
     MainMenu
     Flash
     MagicButton(v-if="loggedIn")
@@ -11,7 +14,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 import MainMenu from '@/components/General/MainMenu';
 import Flash from '@/components/General/Flash';
@@ -27,6 +30,7 @@ export default {
   computed: {
     ...mapState('usuarios', ['loggedIn']),
     ...mapState('general', ['pageTitle']),
+    ...mapGetters('usuarios', ['usuario']),
   },
 };
 </script>
@@ -70,6 +74,32 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    .active-user {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      width: 200px;
+      position: fixed;
+      top: 0;
+      .holder {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 40px;
+        @include sombra(0 1px 6px 0 #555);
+        background-color: $colorGrisBase;
+        border-radius: 0 0 10px 10px;
+        z-index: 5;
+        position: relative;
+        span {
+          color: $colorAzulBase;
+          font-family: $fontKeepCalmMedium;
+          text-transform: uppercase;
+          font-size: 85%;
+        }
+      }
+    }
     .page-title {
       display: flex;
       justify-content: flex-start;
