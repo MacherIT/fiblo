@@ -169,6 +169,7 @@ export default {
       });
     },
     adminValidarProyecto(project) {
+      console.log(project.address);
       fiblo.setProjectValidity(project.address, (error, resp) => {
         if (error) {
           console.error(error);
