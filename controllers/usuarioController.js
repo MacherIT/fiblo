@@ -4,6 +4,7 @@ var proyectoModel = require('../models/proyectoModel.js');
 var mpc = require('../modules/mpc.js');
 var mca = require('../modules/mca.js');
 var crypto = require('crypto');
+const Op = require('sequelize').Op;
 
 /**
  * usuarioController.js
@@ -26,6 +27,29 @@ module.exports = {
       })
       .then(
         // usuarioModel.findAll().then(
+        usuarios => {
+          return res.json(usuarios);
+        },
+        error => {
+          return res.status(500).json({
+            message: 'Error when getting usuario.',
+            error: error,
+          });
+        },
+      );
+  },
+
+  with_address: function(req, res) {
+    usuarioModel
+      .findAll({
+        where: {
+          address: {
+            [Op.ne]: null,
+          },
+        },
+        attributes: ['id', 'nombre', 'address'],
+      })
+      .then(
         usuarios => {
           return res.json(usuarios);
         },
@@ -62,7 +86,7 @@ module.exports = {
   },
   simple_data: function(req, res) {
     var id = req.params.id;
-    usuarioModel.findOne({ where: { id: id }, attributes: ['nombre'] }).then(
+    usuarioModel.findOne({ where: { id: id }, attributes: ['nombre', 'address'] }).then(
       usuario => {
         if (!usuario) {
           return res.status(404).json({
@@ -218,13 +242,18 @@ module.exports = {
           });
         }
 
-        usuario.address = req.body.address ? req.body.address : usuario.address;
+        usuario.address = req.body.address
+          ? Array.isArray(req.body.address)
+            ? req.body.address
+            : [req.body.address]
+          : usuario.address;
 
         usuario.save().then(
           usuario => {
             return res.json(usuario);
           },
           error => {
+            console.log(error);
             return res.status(500).json({
               message: 'Error when updating usuario.',
               error: error,

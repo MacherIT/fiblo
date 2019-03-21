@@ -1,4 +1,4 @@
-const { STRING, INTEGER, DOUBLE, DATE, JSONB } = require('sequelize');
+const { STRING, ARRAY, TEXT, INTEGER, DOUBLE, DATE, JSONB } = require('sequelize');
 const sequelize = require('./db');
 var usuarioModel = require('./usuarioModel.js');
 var categoriaModel = require('./categoriaModel.js');
@@ -31,6 +31,12 @@ var proyectoSchema = sequelize.define('proyecto', {
     type: STRING,
     allowNull: false,
     unique: true,
+  },
+  descripcion: {
+    type: TEXT,
+  },
+  propuesta: {
+    type: TEXT,
   },
   ciudad: {
     type: JSONB,

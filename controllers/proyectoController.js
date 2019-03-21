@@ -102,6 +102,8 @@ module.exports = {
         address: req.body.address,
         ciudad: req.body.ciudad,
         nombre: req.body.nombre,
+        descripcion: req.body.descripcion,
+        propuesta: req.body.propuesta,
         domicilio: req.body.domicilio,
         telefono: req.body.telefono,
         email: req.body.email,
@@ -149,6 +151,8 @@ module.exports = {
           ? req.body.categoria_id
           : proyecto.categoria_id;
         proyecto.nombre = req.body.nombre ? req.body.nombre : proyecto.nombre;
+        proyecto.descripcion = req.body.descripcion ? req.body.descripcion : proyecto.descripcion;
+        proyecto.propuesta = req.body.propuesta ? req.body.propuesta : proyecto.propuesta;
         proyecto.ciudad = req.body.ciudad ? req.body.ciudad : proyecto.ciudad;
         proyecto.domicilio = req.body.domicilio ? req.body.domicilio : proyecto.domicilio;
         proyecto.telefono = req.body.telefono ? req.body.telefono : proyecto.telefono;

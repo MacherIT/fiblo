@@ -169,6 +169,9 @@ export default {
         position: relative;
         z-index: 1;
         span {
+          text-transform: uppercase;
+          font-size: 70%;
+          font-weight: bold;
         }
       }
     }
@@ -176,6 +179,8 @@ export default {
   .etapa-activa {
     width: 100%;
     height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 }
 </style>

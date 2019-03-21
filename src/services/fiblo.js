@@ -44,12 +44,15 @@ const web3Init = callback => {
 
 export default {
   getDefaultAccount(callback) {
-    web3Init();
-    window.web3.eth.getAccounts((error, accounts) => {
+    web3Init((error, accounts) => {
       if (error) {
-        callback(error, null);
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          callback(null, accounts[0]);
+        });
       }
-      callback(null, accounts[0]);
     });
   },
   receiveFunds(project_address, userId, monto, callback) {
@@ -61,10 +64,14 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
+          console.log(monto);
 
           proyecto.receiveFunds(
             userId,
             {
+              gasLimit: 6721975,
+              gasPrice: 2000000,
+              from: window.web3.eth.defaultAccount,
               value: window.web3.toWei(parseFloat(monto), 'ether'),
             },
             (error, tx) => {
@@ -531,6 +538,26 @@ export default {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
           proyecto.balanceOf(account_address, (error, res) => {
+            if (error) {
+              callback(error, null);
+            } else {
+              callback(null, res);
+            }
+          });
+        });
+      }
+    });
+  },
+  transfer(project_address, to_address, cant_tokens, callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
+          const proxySAS = window.web3.eth.contract(baseJSON.abi);
+          const proyecto = proxySAS.at(project_address);
+          proyecto.transfer(to_address, cant_tokens, (error, res) => {
             if (error) {
               callback(error, null);
             } else {

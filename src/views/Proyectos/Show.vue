@@ -21,7 +21,7 @@
       .nombre
         span {{proyecto.nombre}}
       .descripcion
-        span "{{proyecto.descripcion | limitStr(30)}}"
+        span "{{stripHtml(proyecto.descripcion) | limitStr(30)}}"
       .monto
         span {{((montoRecaudado * valorCambio) * 100 / proyecto.monto).toFixed(2)}}%
         span.de de
@@ -61,12 +61,12 @@
               a.red.link(href="#", target="_blank")
                 font-awesome-icon(icon="link")
             .contenido
-              p {{proyecto.descripcion}}
+              p(v-html="proyecto.descripcion")
           .propuesta
             .titulo
               span Propuesta
             .contenido
-              p {{proyecto.propuesta}}
+              p(v-html="proyecto.propuesta")
           .emprendedores
             .titulo
               span Emprendedores
@@ -75,7 +75,7 @@
                 li(
                   v-for="(emprendedor, index) in proyecto.emprendedores"
                   :key="index")
-                  span {{emprendedor.nombre}}
+                  span {{emprendedor.nombre}} {{emprendedor.apellido}} ({{emprendedor.rol}})
         .tab.acciones(v-if="tabActiva === 'acciones'")
           .lista-acciones
             .no-hay-contribuciones(v-if="Object.keys(contribuciones).length === 0")
@@ -356,9 +356,10 @@ export default {
               if (error) {
                 console.error(error);
               } else {
+                // console.log(window.web3.fromWei(balance).toNumber());
                 this.contribuciones[
                   `${contribucion.args.uid.toNumber()}`
-                ].acciones += window.web3.fromWei(balance).toNumber();
+                ].acciones = window.web3.fromWei(balance).toNumber();
               }
             });
           }

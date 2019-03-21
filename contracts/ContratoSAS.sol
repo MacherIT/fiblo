@@ -12,6 +12,7 @@ contract ContratoSAS is mortal {
     OraculoPrecio oraculo_precio;
 
     /* Events */
+
     event contributionFiled(address indexed from, uint indexed uid, uint amount);
     event receivedFunds(address _from, uint _amount);
     event fundReturned(address _to, uint _amount);
@@ -101,14 +102,78 @@ contract ContratoSAS is mortal {
       m_beneficiary_valid = false;
     } */
 
+    function appendUintToString(string inStr, uint v) private pure returns (string str) {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        while (v != 0) {
+            uint remainder = v % 10;
+            v = v / 10;
+            reversed[i++] = byte(48 + remainder);
+        }
+        bytes memory inStrb = bytes(inStr);
+        bytes memory s = new bytes(inStrb.length + i);
+        uint j;
+        for (j = 0; j < inStrb.length; j++) {
+            s[j] = inStrb[j];
+        }
+        for (j = 0; j < i; j++) {
+            s[j + inStrb.length] = reversed[i - 1 - j];
+        }
+        str = string(s);
+    }
+
+    function append(string a, string b) private pure returns (string str) {
+      return string(abi.encodePacked(a, b));
+    }
+
+    function appendFive(string a, string b, string c, string d, string e) private pure returns (string str) {
+      return string(abi.encodePacked(a, b, c, d, e));
+    }
+
     function noSuperaMontoMax () private view returns (bool supera) {
-      uint balanceActual = uint(address(this).balance);
-      uint precioOraculo = uint(oraculo_precio.getPrecio());
-      uint weiMultiplier = uint(10**uint(m_decimals));
+      uint balanceActual = address(this).balance;
+      uint precioOraculo = oraculo_precio.getPrecio();
+      uint weiMultiplier = 10**uint(m_decimals);
       /* uint sumaBalanceMonto = uint(balanceActual + val); */ // Omitimos este paso pues solidity suma al balance el value del mensaje previo a la carga del cuerpo del método
-      uint divisionMontoPrecio = uint(m_monto_max / precioOraculo);
-      uint montoPrecioWei = uint(divisionMontoPrecio * weiMultiplier);
+      /* uint divisionMontoPrecio = m_monto_max / precioOraculo; */
+      uint montoPrecioWei = m_monto_max * weiMultiplier / precioOraculo;
       bool comparacion = balanceActual <= montoPrecioWei;
+
+      /* append(
+        appendUintToString("divisionMontoPrecio: ", divisionMontoPrecio),
+        "  "
+      ), */
+
+      /* if(comparacion){
+        require(false, append("Comparación VERDADERA --- ", appendFive(
+            append(appendUintToString("balanceActual: ", balanceActual), "  "),
+            append(appendUintToString("precioOraculo: ", precioOraculo), "  "),
+            append(appendUintToString("weiMultiplier: ", weiMultiplier), "  "),
+            append(appendUintToString("m_monto_max: ", m_monto_max), "  "),
+            append(appendUintToString("montoPrecioWei: ", montoPrecioWei), "  ")
+            )
+          )
+        );
+      }
+      else{
+        require(false, append("Comparación FALSA --- ", appendFive(
+            append(appendUintToString("balanceActual: ", balanceActual), "  "),
+            append(appendUintToString("precioOraculo: ", precioOraculo), "  "),
+            append(appendUintToString("weiMultiplier: ", weiMultiplier), "  "),
+            append(appendUintToString("m_monto_max: ", m_monto_max), "  "),
+            append(appendUintToString("montoPrecioWei: ", montoPrecioWei), "  ")
+            )
+          )
+        );
+      } */
+
+      /* if(comparacion){
+        require(false, append("Comparación VERDADERA --- ", append(appendUintToString("Balance actual: ", balanceActual), appendUintToString("Monto precio wei: ", montoPrecioWei))));
+      }
+      else{
+        require(false, append("Comparación FALSA --- ", append(appendUintToString("Balance actual: ", balanceActual), appendUintToString("Monto precio wei: ", montoPrecioWei))));
+      } */
       return comparacion;
     }
 
@@ -116,7 +181,8 @@ contract ContratoSAS is mortal {
       require(m_project_valid, "El proyecto debe ser validado por la CNV");
       require(m_beneficiary_valid, "El beneficiario del proyecto debe ser validado por la CNV");
       require(!m_closed_round, "La ronda debe estar abierta para poder contribuir.");
-      require(noSuperaMontoMax(), "El monto del proyecto más el monto a tranferir supera el monto por supersuscripción.");
+      bool noSupera = bool(noSuperaMontoMax());
+      require(noSupera, "El monto del proyecto más el monto a tranferir supera el monto por supersuscripción.");
       /* Receive amount */
       if(msg.value > 0) {
           emit receivedFunds(msg.sender, msg.value);
@@ -204,8 +270,25 @@ contract ContratoSAS is mortal {
       m_beneficiary_valid = cnv.isBeneficiaryValid(m_beneficiario);
     }
 
+    function transferFrom(address from, address to, uint tokens) public returns (bool success) {
+      require(m_closed_round, "No se pueden transferir tokens de un proyecto abierto.");
+      require(from == msg.sender, "Un usuario solo puede transferir sus propios tokens");
+      balances[from] = balances[from].sub(tokens);
+      balances[to] = balances[to].add(tokens);
+      emit Transfer(owner, to, tokens);
+      return true;
+    }
+
     function transfer(address to, uint tokens) public returns (bool success) {
-      balances[owner] = balances[owner].sub(tokens); // WARNING: ERC20 dice, debería ser msg.sender, ponemos owner porque no sabemos si se mantiene el msg.sender entre closeRound y transfer
+      require(m_closed_round, "No se pueden transferir tokens de un proyecto abierto.");
+      balances[msg.sender] = balances[msg.sender].sub(tokens);
+      balances[to] = balances[to].add(tokens);
+      emit Transfer(msg.sender, to, tokens);
+      return true;
+    }
+
+    function transferCloseRound(address to, uint tokens) private returns (bool success) {
+      balances[owner] = balances[owner].sub(tokens);
       balances[to] = balances[to].add(tokens);
       emit Transfer(owner, to, tokens);
       return true;
@@ -223,7 +306,7 @@ contract ContratoSAS is mortal {
       require(!m_closed_round, "La ronda debe seguir abierta para poder realizar el cierre.");
       if(oraculo_precio.getPrecio() * address(this).balance / 10**uint(m_decimals) >= m_monto) { // Se alcanzó el monto esperado para el proyecto
         for (uint i = 1; i <= contribution_counter; i++) { // Repartimos tokens a los holders
-          transfer(m_contributions[i]._from, calculateTokens(m_contributions[i]._amount)); // Los tokens los mandamos como el amount sin multiplicar por los decimales porque ya los estamos almacenando en wei al crear la contribución.
+          transferCloseRound(m_contributions[i]._from, calculateTokens(m_contributions[i]._amount)); // Los tokens los mandamos como el amount sin multiplicar por los decimales porque ya los estamos almacenando en wei al crear la contribución.
         }
         m_closed_round = true;
         m_fecha_cierre = now;

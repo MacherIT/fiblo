@@ -73,10 +73,14 @@
         type="button"
         @click="setFields"
         :disabled="etapa.emprendedores.length <= 0") Siguiente
+    BotonGenial(:go="go")
 </template>
 
 <script>
+import BotonGenial from '@/components/General/BotonGenial';
+
 export default {
+  components: { BotonGenial },
   props: ['proyecto', 'set', 'setEtapaActiva'],
   data() {
     return {
@@ -108,6 +112,27 @@ export default {
         this.set(k, this.etapa[k]);
       });
       this.setEtapaActiva(3);
+    },
+    go() {
+      this.etapa = {
+        emprendedores: [
+          {
+            nombre: 'Juan',
+            apellido: 'Perez',
+            rol: 'CEO',
+          },
+          {
+            nombre: 'Pablo',
+            apellido: 'Gomez',
+            rol: 'CTO',
+          },
+          {
+            nombre: 'Laura',
+            apellido: 'Esquivel',
+            rol: 'CFO',
+          },
+        ],
+      };
     },
   },
 };

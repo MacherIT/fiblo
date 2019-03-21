@@ -28,12 +28,16 @@
           type="submit"
           value="Siguiente"
           :disabled="!validForm || sent")
+    BotonGenial(:go="go")
 </template>
 
 <script>
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
+import BotonGenial from '@/components/General/BotonGenial';
+
 export default {
+  components: { BotonGenial },
   props: ['proyecto', 'set', 'setEtapaActiva'],
   data() {
     return {
@@ -51,6 +55,14 @@ export default {
         this.set(k, this.etapa[k]);
       });
       this.setEtapaActiva(2);
+    },
+    go() {
+      this.etapa = {
+        descripcion:
+          'Las cactáceas son plantas de la familia de las suculentas. Son originarias de América pero también se encuentran en África y Madagascar. Son de tamaño mediano, grande o pequeño. En su interior contienen gran caudal de sábila como reserva de líquido dado que son plantas que se encuentran en climas desérticos (secos).',
+        propuesta:
+          'El combo se compone de una mesa de roble de 4 metros x 3,50 metros y 4 sillas de roble. La mesa tiene la opción extensible convirtiéndose en una mesa de 6 metros de largo. Tanto la mesa como las sillas presentan una capa de lustre para la protección de la madera y su mayor durabilidad. Además es posible la opción de comprar 2 o 4 sillas más en caso que el comprador así lo requiera.',
+      };
     },
   },
 };

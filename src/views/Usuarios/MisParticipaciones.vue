@@ -17,7 +17,8 @@
       ul(v-if="cantTotalProyectos > 0")
         li(
           v-for="(proyecto, key, index) in proyectos"
-          :key="key")
+          :key="key"
+          v-if="proyecto.misParticipaciones.fromList.length > 0")
           .logo-section
             .logo
               font-awesome-icon(
@@ -33,10 +34,24 @@
               span {{proyecto.address | limitStr(10)}}
             .monto
               span Ξ {{(proyecto.misParticipaciones.montoETH).toFixed(2)}} ≈ $ {{(proyecto.misParticipaciones.montoETH * valorCambio).toFixed(2)}} ≈ {{parseInt(proyecto.misParticipaciones.acciones)}} acc
+          .boton-transferir-tokens(
+            v-if="proyecto.closedRound && proyecto.misParticipaciones.fromList.indexOf(defaultAccount) >= 0")
+            button(
+              title="Transferir acciones"
+              @click="showPopupTransferirTokens(proyecto.address)")
+              font-awesome-icon(icon="exchange-alt")
+            TransferirTokens(
+              v-if="transferAddress === proyecto.address"
+              :proyectoAddress="proyecto.address"
+              :accionesActuales="parseInt(proyecto.misParticipaciones.acciones)"
+              :showPopupTransferirTokens="showPopupTransferirTokens"
+              :initMisParticipaciones="initMisParticipaciones")
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+
+import TransferirTokens from '@/components/Proyectos/TranferirTokens';
 
 import fiblo from '@/services/fiblo';
 import marketcap from '@/services/marketcap';
@@ -44,10 +59,15 @@ import marketcap from '@/services/marketcap';
 const txs = [];
 
 export default {
+  components: {
+    TransferirTokens,
+  },
   data() {
     return {
       proyectos: {},
       valorCambio: 0,
+      transferAddress: '',
+      defaultAccount: '',
     };
   },
   computed: {
@@ -72,83 +92,97 @@ export default {
     },
   },
   mounted() {
-    marketcap.getArs().then(
-      monto => {
-        this.valorCambio = monto;
-      },
-      error => {
-        console.error(error);
-        this.valorCambio = 4000;
-      },
-    );
-
-    this.$http({
-      method: 'GET',
-      url: '/api/proyectos',
-    }).then(
-      ({ data }) => {
-        this.proyectos = data.reduce(
-          (acumulador, p) => ({
-            ...acumulador,
-            [p.id]: {
-              ...p,
-              closedRound: false,
-              participaEnProyecto: false,
-              misParticipaciones: {
-                fromList: [],
-                montoETH: 0,
-                acciones: 0,
-              },
-            },
-          }),
-          {},
-        );
-        Object.keys(this.proyectos).map(pid => {
-          const p = this.proyectos[pid];
-          fiblo.isProjectClosed(p.address, (error, closed) => {
-            if (error) {
-              console.error(error);
-            } else {
-              p.closedRound = closed;
-              fiblo.getContribuciones(p.address, (error, tx) => {
-                if (error) {
-                  console.error(error);
-                } else {
-                  if (tx.args.uid.toNumber() === this.usuario.id) {
-                    if (p.misParticipaciones.fromList.indexOf(tx.args.from) < 0)
-                      p.misParticipaciones.fromList.push(tx.args.from);
-                    p.misParticipaciones.montoETH += web3.fromWei(tx.args.amount).toNumber();
-                    p.participaEnProyecto = true;
-                    if (!closed) {
-                      p.misParticipaciones.acciones +=
-                        (web3.fromWei(tx.args.amount).toNumber() *
-                          this.valorCambio *
-                          p.cantAcciones) /
-                        p.monto;
-                    } else {
-                      fiblo.balanceOf(p.address, tx.args.from, (error, balance) => {
-                        if (error) {
-                          console.error(error);
-                        } else {
-                          p.misParticipaciones.acciones = web3.fromWei(balance).toNumber();
-                        }
-                      });
-                    }
-                  }
-                }
-              });
-            }
-          });
-        });
-      },
-      error => {
-        console.error(error);
-      },
-    );
+    this.initMisParticipaciones();
     this.setPageTitle('Mis participaciones');
   },
   methods: {
     ...mapActions('general', ['setPageTitle']),
+    showPopupTransferirTokens(address) {
+      this.transferAddress = address;
+    },
+    initMisParticipaciones() {
+      fiblo.getDefaultAccount((error, account) => {
+        if (error) {
+          console.error(error);
+        } else {
+          this.defaultAccount = account;
+        }
+      });
+
+      marketcap.getArs().then(
+        monto => {
+          this.valorCambio = monto;
+        },
+        error => {
+          console.error(error);
+          this.valorCambio = 4000;
+        },
+      );
+
+      this.$http({
+        method: 'GET',
+        url: '/api/proyectos',
+      }).then(
+        ({ data }) => {
+          this.proyectos = data.reduce(
+            (acumulador, p) => ({
+              ...acumulador,
+              [p.id]: {
+                ...p,
+                closedRound: false,
+                participaEnProyecto: false,
+                misParticipaciones: {
+                  fromList: [],
+                  montoETH: 0,
+                  acciones: 0,
+                },
+              },
+            }),
+            {},
+          );
+          Object.keys(this.proyectos).map(pid => {
+            const p = this.proyectos[pid];
+            fiblo.isProjectClosed(p.address, (error, closed) => {
+              if (error) {
+                console.error(error);
+              } else {
+                p.closedRound = closed;
+                fiblo.getContribuciones(p.address, (error, tx) => {
+                  if (error) {
+                    console.error(error);
+                  } else {
+                    if (tx.args.uid.toNumber() === this.usuario.id) {
+                      if (p.misParticipaciones.fromList.indexOf(tx.args.from) < 0)
+                        p.misParticipaciones.fromList.push(tx.args.from);
+                      p.misParticipaciones.montoETH += web3.fromWei(tx.args.amount).toNumber();
+                      p.participaEnProyecto = true;
+                      if (!closed) {
+                        p.misParticipaciones.acciones +=
+                          (web3.fromWei(tx.args.amount).toNumber() *
+                            this.valorCambio *
+                            p.cantAcciones) /
+                          p.monto;
+                      } else {
+                        fiblo.balanceOf(p.address, tx.args.from, (error, balance) => {
+                          if (error) {
+                            console.error(error);
+                          } else {
+                            p.misParticipaciones.acciones = web3.fromWei(balance).toNumber();
+                          }
+                        });
+                      }
+                    }
+                  }
+                });
+              }
+            });
+          });
+        },
+        error => {
+          console.error(error);
+        },
+      );
+    },
   },
 };
 </script>
@@ -223,6 +257,7 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        position: relative;
         &:not(:last-of-type) {
           margin-bottom: 15px;
           padding-bottom: 15px;
@@ -280,6 +315,27 @@ export default {
               color: #fff;
               font-size: 160%;
               font-family: $fontUbuntuLight;
+            }
+          }
+        }
+        .boton-transferir-tokens {
+          position: absolute;
+          right: 0;
+          top: 0;
+          button {
+            @include minmaxwh(40px);
+            border: 0;
+            background-color: $colorAzulClaro;
+            @include ease-transition;
+            cursor: pointer;
+            border-radius: 4px;
+            @include sombra(0 0 2px 0 #333);
+            position: relative;
+            &:hover {
+              background-color: $colorAzulMedio;
+            }
+            svg {
+              color: #fff;
             }
           }
         }

@@ -99,21 +99,19 @@ export default {
                               if (error) {
                                 console.error(error);
                               } else {
-                                // for (let i = 0; i < 2; i++) {
-                                fiblo.receiveFunds(
-                                  proyecto.address,
-                                  2, // User id
-                                  1, // Amount in ETH
-                                  (error, tx) => {
-                                    if (error) {
-                                      console.error(error);
-                                    } else {
-                                      console.log(tx);
-                                      this.sent = false;
-                                    }
-                                  },
-                                );
-                                // }
+                                // fiblo.receiveFunds(
+                                //   proyecto.address,
+                                //   2, // User id
+                                //   2, // Amount in ETH
+                                //   (error, tx) => {
+                                //     if (error) {
+                                //       console.error(error);
+                                //     } else {
+                                //       console.log(tx);
+                                //       this.sent = false;
+                                //     }
+                                //   },
+                                // );
                               }
                             });
                           }
@@ -146,19 +144,20 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: $colorAzulBase;
+    background-color: $colorPaletaC7;
     color: #fff;
     border: 0;
     @include sombra(0 0 4px 0 #000);
     border-radius: 6px;
     font-family: $fontKeepCalmMedium;
     text-transform: uppercase;
-    height: 40px;
-    padding: 0 20px;
+    height: 35px;
+    padding: 0 15px;
     cursor: pointer;
+    font-size: 70%;
     @include ease-transition(70ms);
     &:hover {
-      background-color: $colorAzulMedio;
+      background-color: $colorPaletaC6;
     }
   }
 }

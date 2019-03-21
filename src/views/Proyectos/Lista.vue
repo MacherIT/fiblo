@@ -88,7 +88,7 @@
           .nombre
             span {{proyecto.nombre}}
           .descripcion
-            span "{{proyecto.descripcion | limitStr(30)}}"
+            span "{{stripHtml(proyecto.descripcion) | limitStr(30)}}"
           .monto
             span {{((proyecto.montoRecaudado * valorCambio) * 100 / proyecto.monto).toFixed(2)}}%
             span.de de

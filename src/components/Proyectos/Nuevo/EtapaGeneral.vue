@@ -2,7 +2,8 @@
   .etapa-general
     form(
       @submit.prevent="setFields"
-      novalidate)
+      novalidate
+      name="formulario")
       .campo
         span Nombre del proyecto
         input(
@@ -72,8 +73,8 @@
         input(
           type="date"
           v-model="etapa.fechaFin"
-          name="fechaFin"
           :min="fechaMin"
+          name="fechaFin"
           :max="fechaMax")
       .subm
         .loading(v-if="sent")
@@ -82,21 +83,28 @@
           type="submit"
           value="Siguiente"
           :disabled="!validForm || sent || !fechaFinValida")
+    BotonGenial(:go="go")
 </template>
 
 <script>
 import { mapActions } from 'vuex';
 import moment from 'moment';
 
+import BotonGenial from '@/components/General/BotonGenial';
+
 import provincias from '@/assets/data/ciudades-argentinas.json';
 
 const CANT_MAX_DIAS_RONDA = 90;
 
 export default {
+  components: { BotonGenial },
   props: ['proyecto', 'set', 'setEtapaActiva'],
   data() {
     return {
-      fechaMin: moment(new Date()).format('YYYY-MM-DD'),
+      // fechaMin: moment(new Date()).format('YYYY-MM-DD'),
+      fechaMin: moment(new Date())
+        .subtract(2, 'days')
+        .format('YYYY-MM-DD'),
       fechaMax: moment(new Date())
         .add(CANT_MAX_DIAS_RONDA, 'days')
         .format('YYYY-MM-DD'),
@@ -136,7 +144,8 @@ export default {
       return (
         this.etapa.fechaFin &&
         moment(new Date(this.etapa.fechaFin)).isBetween(
-          moment(new Date()).subtract(1, 'days'),
+          moment(new Date()).subtract(2, 'days'),
+          // moment(new Date()).subtract(1, 'days'),
           moment(new Date()).add(CANT_MAX_DIAS_RONDA, 'days'),
         )
       );
@@ -150,6 +159,22 @@ export default {
       });
       this.setPageTitle(this.etapa.nombre);
       this.setEtapaActiva(1);
+    },
+    go() {
+      this.provincia = this.provincias[0];
+      this.etapa = {
+        nombre: 'Ejemplo',
+        categoria_id: this.categorias[0].id,
+        ciudad: {
+          provincia: { id: this.provincias[0].id, nombre: this.provincias[0].nombre },
+          ciudad: this.provincias[0].ciudades[0],
+        },
+        domicilio: 'Calle 7 - 623 - Bariloche, Argentina',
+        email: 'proyecto-ejemplo@fiblo.com',
+        fechaFin: moment(new Date())
+          .add(30, 'days')
+          .format('YYYY-MM-DD'),
+      };
     },
   },
 };

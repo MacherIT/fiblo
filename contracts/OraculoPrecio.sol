@@ -9,7 +9,7 @@ contract OraculoPrecio is mortal {
   uint precio_eth_ars;
 
   constructor() public {
-    precio_eth_ars = 560000;
+    precio_eth_ars = 546604;
   }
 
   function setPrecio(uint precio) onlyowner public {

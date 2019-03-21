@@ -68,6 +68,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 import fiblo from '@/services/fiblo';
 
 export default {
@@ -77,6 +79,9 @@ export default {
       beneficiaries: [],
       tabActiva: 0,
     };
+  },
+  computed: {
+    ...mapState('usuarios', ['token']),
   },
   mounted() {
     this.$http({
@@ -129,8 +134,12 @@ export default {
     this.$http({
       method: 'GET',
       url: '/api/usuarios',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
     }).then(
       ({ data }) => {
+        console.log(data);
         this.beneficiaries = data.map(b => ({ ...b, valid: false }));
         this.beneficiaries.map(b => {
           fiblo.isBeneficiaryValid(b.address, (error, valid) => {
@@ -187,7 +196,6 @@ export default {
       fiblo.addBeneficiary(beneficiary.address, (error, resp) => {
         if (error) {
           console.error(error);
-          console.log(JSON.stringify(error));
         } else {
         }
       });

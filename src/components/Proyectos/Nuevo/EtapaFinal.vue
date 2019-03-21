@@ -53,7 +53,8 @@ export default {
           valid &&
           this.proyecto.fechaFin &&
           moment(new Date(this.proyecto.fechaFin)).isBetween(
-            moment(new Date()).subtract(1, 'days'),
+            moment(new Date()).subtract(2, 'days'),
+            // moment(new Date()).subtract(1, 'days'),
             moment(new Date()).add(CANT_MAX_DIAS_RONDA, 'days'),
           ) &&
           this.proyecto.descripcion &&

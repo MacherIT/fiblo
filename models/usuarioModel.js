@@ -1,4 +1,4 @@
-const { STRING } = require('sequelize');
+const { STRING, ARRAY } = require('sequelize');
 const sequelize = require('./db');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -9,8 +9,14 @@ const usuarioSchema = sequelize.define('usuario', {
     unique: true,
     allowNull: false,
   },
-  nombre: { type: STRING, allowNull: false },
-  address: { type: STRING },
+  nombre: {
+    type: STRING,
+    allowNull: false,
+  },
+  address: {
+    type: ARRAY(STRING),
+    default: [],
+  },
   role: STRING,
   activation: STRING,
   hash: STRING,
