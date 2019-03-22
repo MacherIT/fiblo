@@ -69,6 +69,9 @@ var proyectoSchema = sequelize.define('proyecto', {
     type: DATE,
     allowNull: false,
   },
+  logo: {
+    type: STRING,
+  },
   emprendedores: JSONB,
 });
 

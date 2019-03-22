@@ -33,8 +33,9 @@ router.post('/', usuarioController.create);
 router.put('/ch_pass', guardian({ mailToken: true }), usuarioController.ch_pass);
 
 router.put('/set_address', guardian({}), usuarioController.set_address);
+router.put('/', guardian({}), usuarioController.update);
+// router.put('/set_avatar', guardian({}), usuarioController.set_avatar);
 
-router.put('/:id', guardian({}), usuarioController.update);
 /*
   El guardian valida la existencia de un usuario con _id igual al uid del token especial, de ser así pasa la petición al controlador, este, setea la nueva contraseña de usuario
 */

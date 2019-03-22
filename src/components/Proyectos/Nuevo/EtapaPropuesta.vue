@@ -72,7 +72,7 @@ export default {
 @import '~Styles/_config.scss';
 .etapa-propuesta {
   width: 100%;
-  height: 100%;
+  height: auto;
   form {
     width: 100%;
     height: 100%;

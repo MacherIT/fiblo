@@ -13,7 +13,7 @@
           //- Logo fiblo
         img(
           v-if="proyecto.logo"
-          :src="proyecto.logo")
+          :src="'/api' + proyecto.logo")
       .ciudad
         span {{proyecto.ciudad.ciudad.nombre}}
       .provincia
@@ -71,11 +71,39 @@
             .titulo
               span Emprendedores
             .lista
-              ul
-                li(
-                  v-for="(emprendedor, index) in proyecto.emprendedores"
-                  :key="index")
-                  span {{emprendedor.nombre}} {{emprendedor.apellido}} ({{emprendedor.rol}})
+              .emprendedor(
+                v-for="(emprendedor, index) in proyecto.emprendedores"
+                :key="emprendedor.nombre + emprendedor.apellido + emprendedor.rol")
+                .atributo.avatar
+                  .holder
+                    font-awesome-icon(
+                      v-if="!emprendedor.avatar"
+                      icon="user")
+                    img(
+                      v-if="emprendedor.avatar"
+                      :src="(emprendedor.avatar.indexOf('api') < 0 ? '/api' : '') + emprendedor.avatar")
+                .atributo.nombre
+                  span {{emprendedor.nombre}}
+                .atributo.apellido
+                  span {{emprendedor.apellido}}
+                .atributo.rol
+                  span {{emprendedor.rol}}
+                .atributo.redes-sociales
+                  a.red(
+                    :href="emprendedor.facebook || null"
+                    target="_blank"
+                    :class="{disabled: !emprendedor.facebook}")
+                    font-awesome-icon(:icon="['fab', 'facebook']")
+                  a.red(
+                    :href="emprendedor.twitter || null"
+                    target="_blank"
+                    :class="{disabled: !emprendedor.twitter}")
+                    font-awesome-icon(:icon="['fab', 'twitter']")
+                  a.red(
+                    :href="emprendedor.linkedin || null"
+                    target="_blank"
+                    :class="{disabled: !emprendedor.linkedin}")
+                    font-awesome-icon(:icon="['fab', 'linkedin']")
         .tab.acciones(v-if="tabActiva === 'acciones'")
           .lista-acciones
             .no-hay-contribuciones(v-if="Object.keys(contribuciones).length === 0")
@@ -502,6 +530,7 @@ export default {
         width: 90%;
         height: 90%;
         object-fit: contain;
+        border-radius: 50%;
       }
     }
     .ciudad {
@@ -675,10 +704,99 @@ export default {
           }
           .emprendedores {
             .lista {
-              ul {
-                li {
-                  color: #fff;
+              .emprendedor {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                height: 45px;
+                &:not(:last-of-type) {
+                  border-bottom: 1px solid #ccc;
+                }
+                .atributo {
+                  width: 32.33%;
+                  margin-right: 1%;
+                  display: flex;
+                  justify-content: flex-start;
+                  align-items: center;
+                  &.avatar {
+                    width: 45px;
+                    justify-content: center;
+                    .holder {
+                      align-items: center;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      position: relative;
+                      @include minmaxwh(27px);
+                      border-radius: 50%;
+                      background-color: $colorPaletaC3;
+                      svg {
+                        color: $colorAzulClaro;
+                      }
+                      img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        border-radius: 50%;
+                      }
+                    }
+                  }
+                  &.redes-sociales {
+                    display: flex;
+                    justify-content: space-around;
+                    align-items: center;
+                    width: 120px;
+                    .red {
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      background-color: #fff;
+                      @include minmaxwh(25px);
+                      cursor: pointer;
+                      border-radius: 50%;
+                      opacity: 0.6;
+                      @include ease-transition;
+                      &.disabled {
+                        cursor: not-allowed;
+                        svg {
+                          color: #888;
+                        }
+                      }
+                      &:hover:not(.disabled) {
+                        opacity: 1;
+                      }
+                      svg {
+                        color: #000;
+                      }
+                    }
+                  }
                   span {
+                    color: #fff;
+                    font-family: $fontUbuntuRegular;
+                  }
+                }
+                .remove {
+                  @include minmaxwh(27px);
+                  button {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 3px;
+                    border: 0;
+                    font-size: 90%;
+                    background-color: $colorGrisBase;
+                    text-transform: uppercase;
+                    color: #999;
+                    font-weight: bold;
+                    @include ease-transition;
+                    opacity: 0.8;
+                    cursor: pointer;
+                    &:not(:disabled) {
+                      color: $colorBeigeBase;
+                      opacity: 1;
+                      &:hover {
+                        @include sombra(0 0 5px 0 #000);
+                      }
+                    }
                   }
                 }
               }

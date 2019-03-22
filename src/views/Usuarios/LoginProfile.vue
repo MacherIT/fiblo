@@ -1,15 +1,15 @@
 <template lang="pug">
-  .login-logout
-    //- h1 Login/Logout
+  .login-profile
+    //- h1 Login/Profile
     UsuariosFormLogin(v-if="!loggedIn")
-    UsuariosButtonLogout(v-if="loggedIn")
+    UsuariosButtonProfile(v-if="loggedIn")
 </template>
 
 <script>
 import { mapState } from 'vuex';
 
 import UsuariosFormLogin from '@/components/Usuarios/FormLogin';
-import UsuariosButtonLogout from '@/components/Usuarios/ButtonLogout';
+import UsuariosButtonProfile from '@/components/Usuarios/Profile';
 
 export default {
   name: 'Usuarios',
@@ -18,14 +18,14 @@ export default {
   },
   components: {
     UsuariosFormLogin,
-    UsuariosButtonLogout,
+    UsuariosButtonProfile,
   },
 };
 </script>
 
 <style lang="scss" scoped>
 @import '~Styles/_config.scss';
-.login-logout {
+.login-profile {
   width: 100%;
   height: 100%;
 }

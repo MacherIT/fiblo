@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import UsuariosSignUp from '@/components/Usuarios/FormNew';
-import LoginLogout from '@/views/Usuarios/LoginLogout';
+import LoginProfile from '@/views/Usuarios/LoginProfile';
 import Proyectos from '@/views/Proyectos/Index';
 import Cnv from '@/views/Proyectos/CNV';
 import NuevoProyecto from '@/views/Proyectos/Nuevo';
@@ -32,7 +32,7 @@ const router = new Router({
     {
       path: '/usuarios',
       name: 'Login',
-      component: LoginLogout,
+      component: LoginProfile,
     },
     {
       path: '/usuarios/crear-cuenta',

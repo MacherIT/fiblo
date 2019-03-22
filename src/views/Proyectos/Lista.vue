@@ -77,7 +77,7 @@
               //- Logo fiblo
             img(
               v-if="proyecto.logo"
-              :src="proyecto.logo")
+              :src="'/api' + proyecto.logo")
           .ciudad
             span {{proyecto.ciudad.ciudad.nombre}}
           .provincia
@@ -111,6 +111,14 @@ import fiblo from '@/services/fiblo';
 import marketcap from '@/services/marketcap';
 
 let valorCambio = 0;
+
+const shuffleArray = array => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
 
 export default {
   name: 'ListaProyectos',
@@ -204,7 +212,7 @@ export default {
       url: '/api/proyectos',
     }).then(
       ({ data }) => {
-        this.proyectos = data.map(p => ({
+        this.proyectos = shuffleArray(data).map(p => ({
           ...p,
           closedRound: false,
           montoRecaudado: 0,
@@ -331,7 +339,14 @@ export default {
     width: 100%;
     height: 100%;
     overflow: auto;
-    padding: 15px;
+    padding: 0 15px;
+    &::after {
+      content: '';
+      height: 30px;
+      min-height: 30px;
+      width: 100%;
+      display: block;
+    }
     .no-hay-proyectos {
       width: 100%;
       height: 40px;
@@ -404,6 +419,7 @@ export default {
             width: 90%;
             height: 90%;
             object-fit: contain;
+            border-radius: 50%;
           }
         }
         .ciudad {

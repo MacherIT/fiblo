@@ -86,22 +86,27 @@ module.exports = {
   },
   simple_data: function(req, res) {
     var id = req.params.id;
-    usuarioModel.findOne({ where: { id: id }, attributes: ['nombre', 'address'] }).then(
-      usuario => {
-        if (!usuario) {
-          return res.status(404).json({
-            message: 'No such usuario',
+    usuarioModel
+      .findOne({
+        where: { id: id },
+        attributes: ['nombre', 'avatar', 'address'],
+      })
+      .then(
+        usuario => {
+          if (!usuario) {
+            return res.status(404).json({
+              message: 'No such usuario',
+            });
+          }
+          return res.json(usuario);
+        },
+        error => {
+          return res.status(500).json({
+            message: 'Error when getting usuario.',
+            error: error,
           });
-        }
-        return res.json(usuario);
-      },
-      error => {
-        return res.status(500).json({
-          message: 'Error when getting usuario.',
-          error: error,
-        });
-      },
-    );
+        },
+      );
   },
   // //////////////
   mail_pass_check: (req, res) => {
@@ -196,41 +201,41 @@ module.exports = {
   /**
    * usuarioController.update()
    */
-  update: function(req, res) {
-    var id = req.payload.id;
-    usuarioModel.findOne({ where: { id: id } }).then(
-      usuario => {
-        if (!usuario) {
-          return res.status(404).json({
-            message: 'No such usuario',
-          });
-        }
-
-        usuario.email = req.body.email ? req.body.email : usuario.email;
-        usuario.nombre = req.body.nombre ? req.body.nombre : usuario.nombre;
-        usuario.hash = req.body.hash ? req.body.hash : usuario.hash;
-        usuario.role = req.body.role ? req.body.role : usuario.role;
-
-        usuario.save().then(
-          usuario => {
-            return res.json(usuario);
-          },
-          error => {
-            return res.status(500).json({
-              message: 'Error when updating usuario.',
-              error: error,
-            });
-          },
-        );
-      },
-      error => {
-        return res.status(500).json({
-          message: 'Error when getting usuario',
-          error: error,
-        });
-      },
-    );
-  },
+  // update: function(req, res) {
+  //   var id = req.payload.id;
+  //   usuarioModel.findOne({ where: { id: id } }).then(
+  //     usuario => {
+  //       if (!usuario) {
+  //         return res.status(404).json({
+  //           message: 'No such usuario',
+  //         });
+  //       }
+  //
+  //       usuario.email = req.body.email ? req.body.email : usuario.email;
+  //       usuario.nombre = req.body.nombre ? req.body.nombre : usuario.nombre;
+  //       usuario.hash = req.body.hash ? req.body.hash : usuario.hash;
+  //       usuario.role = req.body.role ? req.body.role : usuario.role;
+  //
+  //       usuario.save().then(
+  //         usuario => {
+  //           return res.json(usuario);
+  //         },
+  //         error => {
+  //           return res.status(500).json({
+  //             message: 'Error when updating usuario.',
+  //             error: error,
+  //           });
+  //         },
+  //       );
+  //     },
+  //     error => {
+  //       return res.status(500).json({
+  //         message: 'Error when getting usuario',
+  //         error: error,
+  //       });
+  //     },
+  //   );
+  // },
 
   set_address: function(req, res) {
     var id = req.payload.id;
@@ -247,6 +252,41 @@ module.exports = {
             ? req.body.address
             : [req.body.address]
           : usuario.address;
+
+        usuario.save().then(
+          usuario => {
+            return res.json(usuario);
+          },
+          error => {
+            console.log(error);
+            return res.status(500).json({
+              message: 'Error when updating usuario.',
+              error: error,
+            });
+          },
+        );
+      },
+      error => {
+        return res.status(500).json({
+          message: 'Error when getting usuario',
+          error: error,
+        });
+      },
+    );
+  },
+
+  update: function(req, res) {
+    var id = req.payload.id;
+    usuarioModel.findOne({ where: { id: id } }).then(
+      usuario => {
+        if (!usuario) {
+          return res.status(404).json({
+            message: 'No such usuario',
+          });
+        }
+
+        usuario.nombre = req.body.nombre ? req.body.nombre : usuario.nombre;
+        usuario.avatar = req.body.avatar ? req.body.avatar : usuario.avatar;
 
         usuario.save().then(
           usuario => {

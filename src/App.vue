@@ -1,6 +1,8 @@
 <template lang="pug">
   #root-app
-    .active-user(v-if="usuario")
+    router-link.active-user(
+      to="/usuarios"
+      v-if="usuario")
       .holder
         span {{usuario.email}}
     MainMenu
@@ -81,6 +83,7 @@ body {
       width: 200px;
       position: fixed;
       top: 0;
+      text-decoration: none;
       .holder {
         display: flex;
         justify-content: center;

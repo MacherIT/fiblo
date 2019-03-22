@@ -4,28 +4,39 @@
       @submit.prevent="setFields"
       novalidate
       name="formulario")
-      .campo
-        span Nombre del proyecto
-        input(
-          type="text"
-          v-validate="'required'"
-          name="nombre"
-          v-model="etapa.nombre"
-          placeholder="Nombre")
-      .campo
-        span Categoría
-        select(
-          name="categoria"
-          v-model="etapa.categoria_id"
-          v-validate="'required'")
-          option(
-            selected
-            value=""
-            disabled) -- Seleccionar categoría --
-          option(
-            v-for="categoria in categorias"
-            :key="categoria.id"
-            :value="categoria.id") {{categoria.nombre}}
+      .logo-nombre-categoria
+        .logo
+          .no-imagen(v-if="!etapa.logo")
+            span {{archivoInvalido ? 'Archivo inválido' : 'Seleccionar logo'}}
+          input(
+            type="file"
+            accept="image/*"
+            name="logo"
+            @change="setLogo")
+          img(v-show="etapa.logo")
+        .nombre-categoria
+          .campo
+            span Nombre del proyecto
+            input(
+              type="text"
+              v-validate="'required'"
+              name="nombre"
+              v-model="etapa.nombre"
+              placeholder="Nombre")
+          .campo
+            span Categoría
+            select(
+              name="categoria"
+              v-model="etapa.categoria_id"
+              v-validate="'required'")
+              option(
+                selected
+                value=""
+                disabled) -- Seleccionar categoría --
+              option(
+                v-for="categoria in categorias"
+                :key="categoria.id"
+                :value="categoria.id") {{categoria.nombre}}
       .half
         .campo
           span Provincia
@@ -69,7 +80,7 @@
           name="email"
           v-model="etapa.email")
       .campo
-        span Fecha de finalización
+        span Se podrá invertir hasta el:
         input(
           type="date"
           v-model="etapa.fechaFin"
@@ -101,6 +112,7 @@ export default {
   props: ['proyecto', 'set', 'setEtapaActiva'],
   data() {
     return {
+      archivoInvalido: false,
       // fechaMin: moment(new Date()).format('YYYY-MM-DD'),
       fechaMin: moment(new Date())
         .subtract(2, 'days')
@@ -116,6 +128,7 @@ export default {
       categorias: [],
       sent: false,
       etapa: {
+        logo: false,
         nombre: this.proyecto.nombre ? this.proyecto.nombre : '',
         categoria_id: this.proyecto.categoria ? this.proyecto.categoria : '',
         ciudad:
@@ -153,6 +166,23 @@ export default {
   },
   methods: {
     ...mapActions('general', ['setPageTitle']),
+    setLogo(ev) {
+      this.archivoInvalido = false;
+      if (ev.target.files && ev.target.files[0]) {
+        if (new RegExp('image/*').test(ev.target.files[0].type)) {
+          this.etapa.logo = ev.target.files[0];
+          const fileReader = new FileReader();
+          fileReader.onload = () => {
+            document.querySelector('form .logo-nombre-categoria .logo img').src = fileReader.result;
+          };
+          fileReader.readAsDataURL(ev.target.files[0]);
+        } else {
+          this.archivoInvalido = true;
+        }
+      } else {
+        this.archivoInvalido = true;
+      }
+    },
     setFields() {
       Object.keys(this.etapa).map(k => {
         this.set(k, this.etapa[k]);
@@ -163,6 +193,7 @@ export default {
     go() {
       this.provincia = this.provincias[0];
       this.etapa = {
+        logo: false,
         nombre: 'Ejemplo',
         categoria_id: this.categorias[0].id,
         ciudad: {
@@ -184,7 +215,7 @@ export default {
 @import '~Styles/_config.scss';
 .etapa-general {
   width: 100%;
-  height: 100%;
+  height: auto;
   form {
     width: 100%;
     height: 100%;
@@ -193,6 +224,54 @@ export default {
     align-items: flex-start;
     flex-direction: column;
     padding: 20px;
+    .logo-nombre-categoria {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      width: 100%;
+      margin-bottom: 15px;
+      .logo {
+        @include minmaxwh(120px);
+        background-color: $colorAzulMedio;
+        margin-right: 15px;
+        border: 5px solid #fff;
+        @include sombra(0 0 2px 0 #333);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+        .no-imagen {
+          width: 80%;
+          text-align: center;
+          span {
+            font-size: 90%;
+            color: #eee;
+            white-space: pre-line;
+          }
+        }
+        input {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          z-index: 5;
+          cursor: pointer;
+          border: 0;
+          margin: 0;
+        }
+        img {
+          width: 90%;
+          height: 90%;
+          object-fit: cover;
+        }
+      }
+      .nombre-categoria {
+        width: 100%;
+      }
+    }
     .campo {
       display: flex;
       justify-content: flex-start;

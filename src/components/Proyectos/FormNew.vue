@@ -179,6 +179,9 @@ export default {
   .etapa-activa {
     width: 100%;
     height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
     overflow-x: hidden;
     overflow-y: auto;
   }

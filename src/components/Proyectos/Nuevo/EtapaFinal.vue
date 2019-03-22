@@ -70,71 +70,133 @@ export default {
           this.proyecto.cantAcciones &&
           parseFloat(this.proyecto.cantAcciones) > 0
         ) {
-          this.$http({
-            method: 'GET',
-            url: `/api/usuarios/${this.usuario.id}`,
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          }).then(
-            ({ data }) => {
-              const beneficiary_address = data.address;
-              fiblo.deployProyectoFull(
-                beneficiary_address,
-                this.proyecto.cantAcciones,
-                this.proyecto.nombre
-                  .toLowerCase()
-                  .replace(/\s/g, '-')
-                  .replace(/á/g, 'a')
-                  .replace(/é/g, 'e')
-                  .replace(/í/g, 'i')
-                  .replace(/ó/g, 'o')
-                  .replace(/ú/g, 'u')
-                  .replace(/ñ/g, 'n')
-                  .replace(/[^a-zA-Z0-9\.-_]/g, '')
-                  .substr(0, 5)
-                  .toUpperCase(),
-                parseInt(parseFloat(this.proyecto.monto) * 100), // Monto en centavos
-                parseInt(parseFloat(this.proyecto.montoSuperaMax) * 100), // Monto en centavos
-                moment(this.proyecto.fechaFin).unix(),
-                (error, instance) => {
-                  if (error) {
+          const proms = [];
+
+          const isImagen = imagen =>
+            imagen &&
+            typeof imagen === 'object' &&
+            imagen.type &&
+            new RegExp('image/*').test(imagen.type);
+
+          const subirImagen = imagen => {
+            const formData = new FormData();
+            formData.append('imagenes', imagen);
+            return this.$http({
+              method: 'POST',
+              url: '/api/upload',
+              body: formData,
+              headers: {
+                Authorization: `Bearer ${this.token}`,
+              },
+            });
+          };
+
+          if (isImagen(this.proyecto.logo)) {
+            proms.push(
+              subirImagen(this.proyecto.logo).then(
+                ({ data }) => {
+                  this.proyecto.logo = data[0].uri;
+                },
+                error => {
+                  console.error(error);
+                },
+              ),
+            );
+          }
+
+          this.proyecto.emprendedores.map(emp => {
+            if (isImagen(emp.avatar)) {
+              proms.push(
+                subirImagen(emp.avatar).then(
+                  ({ data }) => {
+                    emp.avatar = data[0].uri;
+                  },
+                  error => {
                     console.error(error);
-                    this.setFlash({ tipo: 'error', mensaje: 'Ocurrió un error al crear el contrato.' });
-                    this.error = true;
-                    this.sent = false;
-                  } else if (instance.address) {
-                    this.proyecto.address = instance.address;
-                    this.$http({
-                      method: 'POST',
-                      url: '/api/proyectos',
-                      body: this.proyecto,
-                      headers: {
-                        Authorization: `Bearer ${this.token}`,
-                      },
-                    }).then(
-                      ({ status, data }) => {
-                        this.sent = false;
-                        console.log(status);
-                        if (status === 201) {
-                          this.correcto = true;
-                          this.new_project_id = data.id;
-                        }
-                      },
-                      error => {
-                        this.sent = false;
+                  },
+                ),
+              );
+            }
+          });
+
+          Promise.all(proms).then(
+            () => {
+              this.$http({
+                method: 'GET',
+                url: `/api/usuarios/${this.usuario.id}`,
+                headers: {
+                  Authorization: `Bearer ${this.token}`,
+                },
+              }).then(
+                ({ data }) => {
+                  const beneficiary_address = data.address;
+                  fiblo.deployProyectoFull(
+                    beneficiary_address,
+                    this.proyecto.cantAcciones,
+                    this.proyecto.nombre
+                      .toLowerCase()
+                      .replace(/\s/g, '-')
+                      .replace(/á/g, 'a')
+                      .replace(/é/g, 'e')
+                      .replace(/í/g, 'i')
+                      .replace(/ó/g, 'o')
+                      .replace(/ú/g, 'u')
+                      .replace(/ñ/g, 'n')
+                      .replace(/[^a-zA-Z0-9\.-_]/g, '')
+                      .substr(0, 5)
+                      .toUpperCase(),
+                    parseInt(parseFloat(this.proyecto.monto) * 100), // Monto en centavos
+                    parseInt(parseFloat(this.proyecto.montoSuperaMax) * 100), // Monto en centavos
+                    moment(this.proyecto.fechaFin).unix(),
+                    (error, instance) => {
+                      if (error) {
                         console.error(error);
+                        this.setFlash({
+                          tipo: 'error',
+                          mensaje: 'Ocurrió un error al crear el contrato.',
+                        });
                         this.error = true;
-                      },
-                    );
-                  }
+                        this.sent = false;
+                      } else if (instance.address) {
+                        this.proyecto.address = instance.address;
+                        this.$http({
+                          method: 'POST',
+                          url: '/api/proyectos',
+                          body: this.proyecto,
+                          headers: {
+                            Authorization: `Bearer ${this.token}`,
+                          },
+                        }).then(
+                          ({ status, data }) => {
+                            this.sent = false;
+                            console.log(status);
+                            if (status === 201) {
+                              this.correcto = true;
+                              this.new_project_id = data.id;
+                            }
+                          },
+                          error => {
+                            this.sent = false;
+                            console.error(error);
+                            this.error = true;
+                          },
+                        );
+                      }
+                    },
+                  );
+                },
+                error => {
+                  console.error(error);
+                  this.error = true;
+                  this.sent = false;
                 },
               );
             },
             error => {
-              console.error(error);
-              this.error = true;
-              this.sent = false;
+              this.setFlash({
+                tipo: 'error',
+                mensaje: 'Ocurrió un error al guardar las imágenes',
+              });
             },
           );
         } else {

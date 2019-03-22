@@ -112,6 +112,7 @@ module.exports = {
         cantAcciones: req.body.cantAcciones,
         fechaFin: req.body.fechaFin,
         sector: req.body.sector,
+        logo: req.body.logo,
         emprendedores: req.body.emprendedores,
       });
 
@@ -166,6 +167,7 @@ module.exports = {
           : proyecto.cantAcciones;
         proyecto.fechaFin = req.body.fechaFin ? req.body.fechaFin : proyecto.fechaFin;
         proyecto.sector = req.body.sector ? req.body.sector : proyecto.sector;
+        proyecto.logo = req.body.logo ? req.body.logo : proyecto.logo;
         proyecto.emprendedores = req.body.emprendedores
           ? req.body.emprendedores
           : proyecto.emprendedores;

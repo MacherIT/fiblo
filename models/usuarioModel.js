@@ -13,6 +13,9 @@ const usuarioSchema = sequelize.define('usuario', {
     type: STRING,
     allowNull: false,
   },
+  avatar: {
+    type: STRING,
+  },
   address: {
     type: ARRAY(STRING),
     default: [],

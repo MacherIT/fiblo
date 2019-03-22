@@ -4,8 +4,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 const sequelize = require('./models/db');
-
 
 require('./models/db');
 require('./security/passport');
@@ -27,6 +27,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 const usuario = require('./routes/usuarioRoutes');
 app.use('/api/usuarios', usuario);
 
+app.use(fileUpload());
+
+const fileupload = require('./modules/fileUpload');
+app.use('/api/upload', fileupload);
+
 const proyecto = require('./routes/proyectoRoutes');
 app.use('/api/proyectos', proyecto);
 
@@ -35,10 +40,11 @@ app.use('/api/categorias', categoria);
 
 require('./models/relations');
 
-if (process.env.NODE_ENV === 'development')
+if (process.env.NODE_ENV === 'development') {
   // Sincroniza las definiciones de los modelos en la base de datos
   sequelize.sync();
-
+  app.use('/api/public', express.static(path.join(__dirname, 'public')));
+}
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
