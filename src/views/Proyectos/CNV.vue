@@ -1,5 +1,8 @@
 <template lang="pug">
   .cnv
+    TourCNV(
+      :setTabActiva="setTabActiva"
+      v-if="!tour.cnv && projects.length > 0 && beneficiaries.length > 0")
     .tabs
       .section.cnv(v-if="tabActiva === 0")
         .titulo
@@ -70,9 +73,14 @@
 <script>
 import { mapState } from 'vuex';
 
+import TourCNV from '@/components/General/Tour/CNV';
+
 import fiblo from '@/services/fiblo';
 
 export default {
+  components: {
+    TourCNV,
+  },
   data() {
     return {
       projects: [],
@@ -81,6 +89,7 @@ export default {
     };
   },
   computed: {
+    ...mapState('tour', ['tour']),
     ...mapState('usuarios', ['token']),
   },
   mounted() {

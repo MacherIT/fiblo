@@ -1,8 +1,10 @@
 <template lang="pug">
   #root-app
-    .active-user(v-if="usuario")
+    TourFirstRun(v-if="!tour.firstRun")
+    TourMain(v-if="tour.firstRun && !tour.main")
+    .active-user
       .holder
-        span {{usuario.email}}
+        span {{usuario ? usuario.email : 'Usuario'}}
     MainMenu
     Flash
     MagicButton(v-if="loggedIn")
@@ -11,10 +13,22 @@
         span {{pageTitle}}
     .main-box
       router-view
+    .reset-tour(@click="reiniciarTour")
+      .about
+        span Reiniciar tutorial
+      font-awesome-icon.undo(icon="undo")
+      font-awesome-icon.info(icon="info")
+    .web3-not-ready(v-if="!web3Ready")
+      span Para poder utilizar la plataforma tenés que tener instalada la extensión 'MetaMask' y tener al menos 1 cuenta habilitada.
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
+
+import fiblo from '@/services/fiblo';
+
+import TourFirstRun from '@/components/General/Tour/FirstRun';
+import TourMain from '@/components/General/Tour/Main';
 
 import MainMenu from '@/components/General/MainMenu';
 import Flash from '@/components/General/Flash';
@@ -22,7 +36,14 @@ import MagicButton from '@/components/MagicButton';
 
 export default {
   name: 'App',
+  data() {
+    return {
+      web3Ready: true,
+    };
+  },
   components: {
+    TourFirstRun,
+    TourMain,
     MainMenu,
     Flash,
     MagicButton,
@@ -30,7 +51,23 @@ export default {
   computed: {
     ...mapState('usuarios', ['loggedIn']),
     ...mapState('general', ['pageTitle']),
+    ...mapState('tour', ['tour']),
     ...mapGetters('usuarios', ['usuario']),
+  },
+  mounted() {
+    setTimeout(() => {
+      const self = this;
+      fiblo.isMetaMaskInstalled(ready => {
+        self.web3Ready = ready;
+      });
+    }, 3000);
+  },
+  methods: {
+    ...mapActions('tour', ['resetTour']),
+    reiniciarTour() {
+      this.$router.replace('/');
+      this.resetTour();
+    },
   },
 };
 </script>
@@ -53,6 +90,10 @@ export default {
 
 * {
   box-sizing: border-box !important;
+  button::-moz-focus-inner,
+  a::-moz-focus-inner {
+    border: 0;
+  }
 }
 
 body {
@@ -137,6 +178,64 @@ body {
       align-items: center;
       flex-direction: column;
       overflow: hidden;
+    }
+    .reset-tour {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      @include minmaxwh(50px);
+      background-color: #222;
+      border-radius: 50%;
+      cursor: pointer;
+      @include ease-transition;
+      @include sombra(0 0 2px 0 #000);
+      &:hover {
+        background-color: #444;
+      }
+      &:hover > .about {
+        opacity: 1;
+        z-index: 10;
+      }
+      .about {
+        position: absolute;
+        top: -50px;
+        left: -100px;
+        width: 150px;
+        height: 35px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(#000, 0.5);
+        z-index: -1;
+        opacity: 0;
+        @include ease-transition(300ms);
+        span {
+          color: #fff;
+        }
+      }
+      svg {
+        color: #fff;
+        margin: 0 3px;
+      }
+    }
+    .web3-not-ready {
+      position: fixed;
+      bottom: 0;
+      background-color: $colorPaletaC7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 15px;
+      height: 40px;
+      border-radius: 10px 10px 0 0;
+      @include sombra(0 0 3px 0 #000);
+      span {
+        color: #fff;
+      }
     }
   }
 }

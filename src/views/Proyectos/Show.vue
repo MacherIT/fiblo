@@ -1,5 +1,6 @@
 <template lang="pug">
   .proyecto-show
+    TourComprar(v-if="tour.firstRun && tour.main && !tour.comprar && proyecto && tabActiva === 'participar'")
     .info-general(
       v-if="proyecto")
       .categoria(
@@ -178,11 +179,15 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 
+import TourComprar from '@/components/General/Tour/Comprar';
+
 import fiblo from '@/services/fiblo';
 import marketcap from '@/services/marketcap';
 
 export default {
-  name: 'ShowProyecto',
+  components: {
+    TourComprar,
+  },
   data() {
     return {
       moment,
@@ -207,6 +212,7 @@ export default {
     };
   },
   computed: {
+    ...mapState('tour', ['tour']),
     ...mapState('usuarios', ['token']),
     ...mapGetters('usuarios', ['usuario']),
     ciudad() {

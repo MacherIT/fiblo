@@ -8,23 +8,27 @@
         .valor-equivalencia
           input(
             type="text"
-            v-validate="'required|numeric'"
+            v-validate="'required|numeric|max_value:100'"
             name="monto"
             v-model="etapa.monto"
-            placeholder="$15000")
+            placeholder="$100")
           .equivalencia
             span ≈ Ξ {{(etapa.monto / valorCambio).toFixed(2)}}
+          .error
+            span.fadeIn(v-if="etapa.monto > 200") El monto máximo es $100
       .campo
         span Monto de supersuscripción
         .valor-equivalencia
           input(
             type="text"
-            v-validate="'required|numeric|min_value:' + etapa.monto"
+            v-validate="'required|numeric|min_value:' + etapa.monto + '|max_value: 200'"
             name="montoSuperaMax"
             v-model="etapa.montoSuperaMax"
-            placeholder="$15000")
+            placeholder="$200")
           .equivalencia
             span ≈ Ξ {{(etapa.montoSuperaMax / valorCambio).toFixed(2)}}
+          .error
+            span.fadeIn(v-if="etapa.montoSuperaMax > 200") El monto máximo es $200
       .campo
         span Cantidad de acciones
         .valor-equivalencia
@@ -115,6 +119,7 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
         width: 100%;
         input {
           width: 70%;
@@ -134,6 +139,17 @@ export default {
           span {
             font-size: 120%;
             color: #fff;
+          }
+        }
+        .error {
+          width: 100%;
+          height: 25px;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          span {
+            font-size: 85%;
+            color: #ff4d00;
           }
         }
       }
