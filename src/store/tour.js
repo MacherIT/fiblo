@@ -44,11 +44,23 @@ export default {
   },
   mutations: {
     skiptTour(state) {
-      state.tour = { firstRun: true, main: true, proyectosIndex: true, comprar: true };
+      state.tour = {
+        firstRun: true,
+        main: true,
+        proyectosIndex: true,
+        proyectoNew: true,
+        comprar: true,
+      };
       saveState(state.tour);
     },
     resetTour(state) {
-      state.tour = { firstRun: false, main: false, proyectosIndex: false, comprar: false };
+      state.tour = {
+        firstRun: false,
+        main: false,
+        proyectosIndex: false,
+        proyectoNew: false,
+        comprar: false,
+      };
       saveState(state.tour);
     },
     finishFirstRun(state) {

@@ -23,7 +23,10 @@
       :class="'etapa' + etapa")
       .texto.etapa0(
         v-show="etapa === 0")
-        p El proyecto se creó correctamente pero, para poder comenzar a comerciar acciones, tanto el beneficiario como el proyecto deben ser validados por la CNV (Comisión Nacional de Valores). Tené en cuenta que es un proceso que puede tardar algunos días.
+        p
+          | El proyecto se creó correctamente pero, para poder comenzar a comerciar acciones, tanto el beneficiario como el proyecto deben ser validados por la
+          router-link(to="/cnv") CNV
+          | (Comisión Nacional de Valores). Tené en cuenta que es un proceso que puede tardar algunos días.
     //- button.boton.saltar(
     //-   @click="saltar")
     //-   span Saltar
@@ -117,6 +120,10 @@ export default {
       p {
         font-family: $fontUbuntuRegular;
         color: #fff;
+        a {
+          margin: 0 5px;
+          color: #eee;
+        }
       }
     }
   }

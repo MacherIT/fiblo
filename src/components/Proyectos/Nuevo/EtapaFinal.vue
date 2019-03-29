@@ -1,6 +1,6 @@
 <template lang="pug">
   .etapa-final
-    TourProyectoNew(v-if="tour.firstRun && tour.main && !tour.proyectoNew && $route.path === '/new' && !sent && correcto")
+    TourProyectoNew(v-if="tour.firstRun && tour.main && !tour.proyectoNew && $route.path === '/proyectos/new' && !sent && correcto")
     .creando-proyecto(v-if="sent")
       span Creando proyecto
       font-awesome-icon(icon="circle-notch", spin)
@@ -32,7 +32,7 @@ export default {
     return {
       sent: true,
       error: false,
-      correcto: false,
+      correcto: true,
       new_project_id: '',
     };
   },
