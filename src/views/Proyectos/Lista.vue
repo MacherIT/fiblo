@@ -1,5 +1,6 @@
 <template lang="pug">
   .proyectos
+    TourProyectosIndex(v-if="tour.firstRun && tour.main && !tour.proyectosIndex")
     .seccion-filtros
       .filtro.nombre
         input(
@@ -102,8 +103,10 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import moment from 'moment';
+
+import TourProyectosIndex from '@/components/General/Tour/ProyectosIndex';
 
 import provincias from '@/assets/data/ciudades-argentinas.json';
 
@@ -121,7 +124,9 @@ const shuffleArray = array => {
 };
 
 export default {
-  name: 'ListaProyectos',
+  components: {
+    TourProyectosIndex,
+  },
   data() {
     return {
       moment,
@@ -198,6 +203,7 @@ export default {
     };
   },
   computed: {
+    ...mapState('tour', ['tour']),
     proyectosVisibles() {
       return this.proyectos.filter(proyecto =>
         Object.keys(this.filters).every(k =>

@@ -3,11 +3,17 @@ import Web3 from 'web3';
 import baseJSON from '../../build/contracts/ContratoSAS.json';
 import baseJSONCNV from '../../build/contracts/CNV.json';
 import baseJSONOraculoPrecio from '../../build/contracts/OraculoPrecio.json';
+import MODULE from '../../build/contracts/Module.json';
+import SA from '../../build/contracts/StandAlone.json';
 import { default as contract } from 'truffle-contract';
 
-const CNV_ADDRESS = baseJSONCNV.networks['5777'].address;
-const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks['5777'].address;
-// const FACTORY_ADDRESS = baseJSONFactory.networks['5777'].address;
+const CNV_ADDRESS = baseJSONCNV.networks['3'].address;
+const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks['3'].address;
+
+// const MODULE_ADDRESS = MODULE.networks['3'].address;
+// const SA_ADDRESS = SA.networks['3'].address;
+
+// const FACTORY_ADDRESS = baseJSONFactory.networks['3'].address;
 
 const web3Init = callback => {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
@@ -30,6 +36,48 @@ const web3Init = callback => {
   const oraculoProxy = window.web3.eth.contract(baseJSONOraculoPrecio.abi);
   window.oraculo = oraculoProxy.at(ORACULO_PRECIO_ADDRESS);
 
+  // window.estimateGas = () => {
+  //   window.web3.eth.getGasPrice((error, result) => {
+  //     const gasPrice = result;
+  //     console.log(`Gas Price is ${gasPrice} wei`); // "10000000000000"
+  //     const ContratoSAS = contract(baseJSON);
+  //     ContratoSAS.setProvider(web3.currentProvider);
+  //     ContratoSAS.at('0xf747639083fad0964e93fdafdcb7352d2d4a1c59')
+  //       .receiveFunds.estimateGas(1)
+  //       .then(result => {
+  //         console.log(result);
+  //       });
+  //   });
+  // };
+
+  // const modProxy = window.web3.eth.contract(MODULE.abi);
+  // window.modulo = modProxy.at(MODULE_ADDRESS);
+  //
+  // const saProxy = window.web3.eth.contract(SA.abi);
+  // window.salon = saProxy.at(SA_ADDRESS);
+
+  // // getGasPrice returns the gas price on the current network
+  // TestContract.web3.eth.getGasPrice((error, result) => {
+  //   const gasPrice = Number(result);
+  //   console.log(`Gas Price is ${gasPrice} wei`); // "10000000000000"
+  //
+  //   // Get Contract instance
+  //   TestContract.deployed()
+  //     .then(instance =>
+  //       // Use the keyword 'estimateGas' after the function name to get the gas estimation for this particular function
+  //       instance.giveAwayDividend.estimateGas(1),
+  //     )
+  //     .then(result => {
+  //       const gas = Number(result);
+  //
+  //       console.log(`gas estimation = ${gas} units`);
+  //       console.log(`gas cost estimation = ${gas * gasPrice} wei`);
+  //       console.log(
+  //         `gas cost estimation = ${TestContract.web3.fromWei(gas * gasPrice, 'ether')} ether`,
+  //       );
+  //     });
+  // });
+
   // DEV ONLY
   // DEV ONLY
   // DEV ONLY
@@ -43,6 +91,23 @@ const web3Init = callback => {
 };
 
 export default {
+  isMetaMaskInstalled(callback) {
+    web3Init((error, accounts) => {
+      if (error) {
+        callback(false);
+      } else if (
+        !window.web3 ||
+        !window.web3.currentProvider ||
+        !window.web3.currentProvider.isMetaMask ||
+        !accounts ||
+        !accounts[0]
+      ) {
+        callback(false);
+      } else {
+        callback(true);
+      }
+    });
+  },
   getDefaultAccount(callback) {
     web3Init((error, accounts) => {
       if (error) {
@@ -69,17 +134,22 @@ export default {
           proyecto.receiveFunds(
             userId,
             {
-              gasLimit: 6721975,
-              gasPrice: 2000000,
               from: window.web3.eth.defaultAccount,
               value: window.web3.toWei(parseFloat(monto), 'ether'),
             },
-            (error, tx) => {
-              if (error) {
-                callback(error, null);
-              } else {
-                callback(null, tx);
-              }
+            (error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: 'latest',
+              });
+              filter.watch((error, log) => {
+                if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                  if (error) {
+                    callback(error, null);
+                  }
+                  callback(null, instance);
+                  filter.stopWatching();
+                }
+              });
             },
           );
         });
@@ -288,10 +358,18 @@ export default {
               data: baseJSON.bytecode,
             },
             (error, instance) => {
-              if (error) {
-                callback(error, null);
-              }
-              callback(null, instance);
+              const filter = web3.eth.filter({
+                toBlock: 'latest',
+              });
+              filter.watch((error, log) => {
+                if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                  if (error) {
+                    callback(error, null);
+                  }
+                  callback(null, { ...instance, address: log.address });
+                  filter.stopWatching();
+                }
+              });
             },
           );
         });
@@ -384,11 +462,20 @@ export default {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
 
-          proyecto.setProjectValidity((error, res) => {
-            if (error) {
-              callback(error, null);
-            }
-            callback(null, res);
+          proyecto.setProjectValidity((error, instance) => {
+            const filter = web3.eth.filter({
+              toBlock: 'latest',
+            });
+            filter.watch((error, log) => {
+              console.log(log.transactionHash);
+              if (log.transactionHash && log.transactionHash === instance) {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, instance);
+                filter.stopWatching();
+              }
+            });
           });
         });
       }
@@ -404,11 +491,19 @@ export default {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
 
-          proyecto.setBeneficiaryValidity((error, res) => {
-            if (error) {
-              callback(error, null);
-            }
-            callback(null, res);
+          proyecto.setBeneficiaryValidity((error, instance) => {
+            const filter = web3.eth.filter({
+              toBlock: 'latest',
+            });
+            filter.watch((error, log) => {
+              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, instance);
+                filter.stopWatching();
+              }
+            });
           });
         });
       }
@@ -497,12 +592,19 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
           const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv.addProject(project_address, (error, res) => {
-            if (error) {
-              callback(error, null);
-            } else {
-              callback(null, res);
-            }
+          cnv.addProject(project_address, (error, instance) => {
+            const filter = web3.eth.filter({
+              toBlock: 'latest',
+            });
+            filter.watch((error, log) => {
+              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, instance);
+                filter.stopWatching();
+              }
+            });
           });
         });
       }
@@ -517,12 +619,19 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
           const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv.removeProject(project_address, (error, res) => {
-            if (error) {
-              callback(error, null);
-            } else {
-              callback(null, res);
-            }
+          cnv.removeProject(project_address, (error, instance) => {
+            const filter = web3.eth.filter({
+              toBlock: 'latest',
+            });
+            filter.watch((error, log) => {
+              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, instance);
+                filter.stopWatching();
+              }
+            });
           });
         });
       }
@@ -557,12 +666,19 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
-          proyecto.transfer(to_address, cant_tokens, (error, res) => {
-            if (error) {
-              callback(error, null);
-            } else {
-              callback(null, res);
-            }
+          proyecto.transfer(to_address, cant_tokens, (error, instance) => {
+            const filter = web3.eth.filter({
+              toBlock: 'latest',
+            });
+            filter.watch((error, log) => {
+              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, instance);
+                filter.stopWatching();
+              }
+            });
           });
         });
       }
@@ -577,12 +693,19 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxySAS = window.web3.eth.contract(baseJSON.abi);
           const proyecto = proxySAS.at(project_address);
-          proyecto.closeRound((error, res) => {
-            if (error) {
-              callback(error, null);
-            } else {
-              callback(null, res);
-            }
+          proyecto.closeRound((error, instance) => {
+            const filter = web3.eth.filter({
+              toBlock: 'latest',
+            });
+            filter.watch((error, log) => {
+              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, instance);
+                filter.stopWatching();
+              }
+            });
           });
         });
       }
@@ -635,12 +758,19 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
           const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv.addBeneficiary(beneficiary_address, (error, res) => {
-            if (error) {
-              callback(error, null);
-            } else {
-              callback(null, res);
-            }
+          cnv.addBeneficiary(beneficiary_address, (error, instance) => {
+            const filter = web3.eth.filter({
+              toBlock: 'latest',
+            });
+            filter.watch((error, log) => {
+              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, instance);
+                filter.stopWatching();
+              }
+            });
           });
         });
       }
@@ -655,12 +785,19 @@ export default {
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
           const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv.removeBeneficiary(beneficiary_address, (error, res) => {
-            if (error) {
-              callback(error, null);
-            } else {
-              callback(null, res);
-            }
+          cnv.removeBeneficiary(beneficiary_address, (error, instance) => {
+            const filter = web3.eth.filter({
+              toBlock: 'latest',
+            });
+            filter.watch((error, log) => {
+              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, instance);
+                filter.stopWatching();
+              }
+            });
           });
         });
       }

@@ -1,5 +1,6 @@
 <template lang="pug">
   .etapa-final
+    TourProyectoNew(v-if="tour.firstRun && tour.main && !tour.proyectoNew && $route.path === '/proyectos/new' && !sent && correcto")
     .creando-proyecto(v-if="sent")
       span Creando proyecto
       font-awesome-icon(icon="circle-notch", spin)
@@ -15,6 +16,8 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 import { Validator } from 'vee-validate';
 import moment from 'moment';
 
+import TourProyectoNew from '@/components/General/Tour/ProyectoNew';
+
 import fiblo from '@/services/fiblo';
 import marketcap from '@/services/marketcap';
 
@@ -22,15 +25,19 @@ const CANT_MAX_DIAS_RONDA = 90;
 
 export default {
   props: ['proyecto', 'set', 'setEtapaActiva'],
+  components: {
+    TourProyectoNew,
+  },
   data() {
     return {
       sent: true,
       error: false,
-      correcto: false,
+      correcto: true,
       new_project_id: '',
     };
   },
   computed: {
+    ...mapState('tour', ['tour']),
     ...mapState('usuarios', ['token']),
     ...mapGetters('usuarios', ['usuario']),
   },

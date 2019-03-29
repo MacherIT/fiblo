@@ -64,7 +64,7 @@ contract ContratoSAS is mortal {
       m_closed_round = false;
     } */
 
-    constructor(address cnv_addr, address oraculo_precio_addr, address beneficiario, uint cant_acciones, string symbol, uint monto, uint monto_max, uint fecha_fin) public {
+    constructor(address cnv_addr, address oraculo_precio_addr, address beneficiario, uint cant_acciones, string symbol, uint monto, uint monto_max, uint fecha_fin) payable public {
       m_decimals = 18;
       contribution_counter = 0;
       m_project_valid = false;
@@ -264,10 +264,13 @@ contract ContratoSAS is mortal {
 
     function setProjectValidity() onlyowner public {
       m_project_valid = cnv.isProjectValid(address(this));
+      /* m_project_valid = true; */
     }
 
     function setBeneficiaryValidity() onlyowner public {
       m_beneficiary_valid = cnv.isBeneficiaryValid(m_beneficiario);
+      /* return m_beneficiary_valid; */
+      /* m_beneficiary_valid = true; */
     }
 
     function transferFrom(address from, address to, uint tokens) public returns (bool success) {
