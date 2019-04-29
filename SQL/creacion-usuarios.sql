@@ -1,0 +1,5 @@
+insert into usuarios ("email", "nombre", "address", "activation", "hash", "createdAt", "updatedAt")
+values
+('creador@fiblo.com', 'Creador Proyectos', '{}', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3VpZCI6bnVsbCwiZXhwIjoxNTUzMjAwMjYxMTUzLCJpYXQiOjE1NTMxMTM4NjF9.aotVat29yAL_a6J9G5dKA6MRs8d-hBoXh2EgSf_Gr7k', '36e7580a11a1dc893914df17f94e39495450295d86a85a082e6099b890e5c8bd127e7c7e0b595acf3c7f0d2e07eb736945d7731e8718b4f5b297b30c93e6e1b9', NOW(), NOW()),
+('accionista1@fiblo.com', 'Accionista Uno', '{}', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3VpZCI6bnVsbCwiZXhwIjoxNTUzMjAwMjc3Mjk5LCJpYXQiOjE1NTMxMTM4Nzd9.aD-007CNC8XeKU8k9HJhxE3--_-p0Eq2T5KnNf62wD4', '36e7580a11a1dc893914df17f94e39495450295d86a85a082e6099b890e5c8bd127e7c7e0b595acf3c7f0d2e07eb736945d7731e8718b4f5b297b30c93e6e1b9', NOW(), NOW()),
+('accionista2@fiblo.com', 'Accionista Dos', '{}', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3VpZCI6bnVsbCwiZXhwIjoxNTUzMjAwMjkwNTY0LCJpYXQiOjE1NTMxMTM4OTB9.kCm3eXd8eHRmcQGpxqToFBMeFhzQNxSPh5VQSq87n9Q', '36e7580a11a1dc893914df17f94e39495450295d86a85a082e6099b890e5c8bd127e7c7e0b595acf3c7f0d2e07eb736945d7731e8718b4f5b297b30c93e6e1b9', NOW(), NOW());
