@@ -137,14 +137,15 @@
             form(@submit.prevent="comprarAccion", novalidate, v-if="proyecto.usuario_id !== usuario.id")
               .campo.monto
                 .contenido
+                  //- v-validate="'required|max_value:' + montoMaxETH"
                   input(
                     type="text"
                     placeholder="2 Ξ"
                     v-model="montoAccionETH"
+                    v-validate="'required'"
                     name="montoAccionETH"
-                    v-validate="'required|max_value:' + montoMaxETH"
-                    @change="adjustMontos('ETH')"
-                    :disabled="!projectValidity || !beneficiaryValidity")
+                    @change="adjustMontos('ETH')")
+                    //- :disabled="!projectValidity || !beneficiaryValidity")
                   span Ξ
                 .error
                   span.fadeIn(v-if="montoAccionETH > montoMaxETH") El monto a comprar no puede superar {{montoMaxETH.toFixed(2)}} Ξ
@@ -154,8 +155,8 @@
                   placeholder="8.000 $"
                   v-model="montoAccionARS"
                   name="montoAccionARS"
-                  @change="adjustMontos('ARS')"
-                  :disabled="!projectValidity || !beneficiaryValidity")
+                  @change="adjustMontos('ARS')")
+                  //- :disabled="!projectValidity || !beneficiaryValidity")
                 span $
               .campo
                 input(
@@ -163,8 +164,8 @@
                   placeholder="200 acciones"
                   v-model="montoAccionACC"
                   name="montoAccionACC"
-                  @change="adjustMontos('ACC')"
-                  :disabled="!projectValidity || !beneficiaryValidity")
+                  @change="adjustMontos('ACC')")
+                  //- :disabled="!projectValidity || !beneficiaryValidity")
                 span acciones
               .subm
                 button(

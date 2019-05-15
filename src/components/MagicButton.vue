@@ -30,7 +30,7 @@ export default {
       },
     }).then(
       ({ data }) => {
-        this.beneficiary_address = data.address;
+        this.beneficiary_address = data.address[0];
       },
       error => {
         console.error(error);

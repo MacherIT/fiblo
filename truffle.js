@@ -5,6 +5,8 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 const MNEMONIC =
   'filter yard prison quality subject engage exhibit zebra divert picnic spread crystal';
 
+const RSKMNEMONIC = 'battle room approve cube scrap version wheat same divide name banner toy';
+
 module.exports = {
   networks: {
     development: {
@@ -27,6 +29,25 @@ module.exports = {
       },
       network_id: 3,
       gas: 4000000, //make sure this gas allocation isn't over 4M, which is the max
+    },
+    rsk: {
+      provider: function() {
+        return new HDWalletProvider(
+          // RSKMNEMONIC,
+          MNEMONIC,
+          'https://public-node.testnet.rsk.co:443',
+        );
+      },
+      network_id: '*',
+      gas: 2500000,
+      gasPrice: 183000,
+    },
+    rsklocal: {
+      host: '127.0.0.1',
+      port: 4444,
+      network_id: '33', // Match any network id
+      gas: 6800000,
+      from: '0x81bedcc7314baf7606b665909cecdb4c68b180d6',
     },
   },
 };

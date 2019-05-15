@@ -7,13 +7,13 @@ import MODULE from '../../build/contracts/Module.json';
 import SA from '../../build/contracts/StandAlone.json';
 import { default as contract } from 'truffle-contract';
 
-const CNV_ADDRESS = baseJSONCNV.networks['3'].address;
-const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks['3'].address;
+const CNV_ADDRESS = baseJSONCNV.networks['33'].address;
+const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks['33'].address;
 
-// const MODULE_ADDRESS = MODULE.networks['3'].address;
-// const SA_ADDRESS = SA.networks['3'].address;
+// const MODULE_ADDRESS = MODULE.networks['33'].address;
+// const SA_ADDRESS = SA.networks['33'].address;
 
-// const FACTORY_ADDRESS = baseJSONFactory.networks['3'].address;
+// const FACTORY_ADDRESS = baseJSONFactory.networks['33'].address;
 
 const web3Init = callback => {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
@@ -132,12 +132,13 @@ export default {
           console.log(monto);
 
           proyecto.receiveFunds(
-            userId,
+            parseInt(userId),
             {
               from: window.web3.eth.defaultAccount,
               value: window.web3.toWei(parseFloat(monto), 'ether'),
             },
             (error, instance) => {
+										console.log(window.web3.eth.defaultAccount, window.web3.toWei(parseFloat(monto), 'ether'));
               const filter = web3.eth.filter({
                 toBlock: 'latest',
               });
@@ -345,6 +346,7 @@ export default {
         window.web3.eth.defaultAccount = accounts[0];
         window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
           const proxy = window.web3.eth.contract(baseJSON.abi);
+          window.prox = proxy;
           proxy.new(
             CNV_ADDRESS,
             ORACULO_PRECIO_ADDRESS,
@@ -355,6 +357,7 @@ export default {
             monto_max,
             fecha,
             {
+              from: web3.eth.defaultAccount,
               data: baseJSON.bytecode,
             },
             (error, instance) => {
