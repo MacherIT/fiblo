@@ -1,0 +1,47 @@
+version: '3'
+services:
+  webserver:
+    image: nginx:mainline-alpine
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./dist:/usr/share/nginx/html
+      - ./nginx-conf:/etc/nginx
+    networks:
+      - app-network
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nodejs
+    container_name: nodejs
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    environment: 
+      - NODE_ENV=production
+      - BCF=8ee2e16d5e745f485955613e68f033ef
+      - DB_HOST=db
+      - DB_NAME=fiblo
+      - DB_USERNAME=fiblo_user
+      - DB_PASSWORD=123456
+    command: ./wait-for.sh db:5432 -- /home/node/app/node_modules/.bin/nodemon
+  db:
+    image: postgres:9.6-alpine
+    container_name: db
+    restart: unless-stopped
+    environment: 
+      POSTGRES_DB: "fiblo"
+      POSTGRES_USER: "fiblo_user"
+      POSTGRES_PASSWORD: "123456"
+    ports:                                                                                                                                                                  
+      - 5432:5432
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge

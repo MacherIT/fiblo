@@ -2,7 +2,7 @@
   "env": {
     "NODE_ENV": "development",
     "BCF": "8ee2e16d5e745f485955613e68f033ef",
-    "HOST": "localhost",
+    "DB_HOST": "localhost",
     "DB_NAME": "fiblo",
     "DB_USERNAME": "ivan",
     "DB_PASSWORD": "eidel"
