@@ -12,45 +12,49 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
-import { Validator } from 'vee-validate';
-import moment from 'moment';
+import { mapState, mapGetters, mapActions } from "vuex";
+import { Validator } from "vee-validate";
+import moment from "moment";
 
-import TourProyectoNew from '@/components/General/Tour/ProyectoNew';
+import TourProyectoNew from "@/components/General/Tour/ProyectoNew";
 
-import fiblo from '@/services/fiblo';
-import marketcap from '@/services/marketcap';
+import fiblo from "@/services/fiblo";
+import marketcap from "@/services/marketcap";
 
 const CANT_MAX_DIAS_RONDA = 90;
 
 export default {
-  props: ['proyecto', 'set', 'setEtapaActiva'],
+  props: ["proyecto", "set", "setEtapaActiva"],
   components: {
-    TourProyectoNew,
+    TourProyectoNew
   },
   data() {
     return {
       sent: true,
       error: false,
-      correcto: true,
-      new_project_id: '',
+      correcto: false,
+      new_project_id: ""
     };
   },
   computed: {
-    ...mapState('tour', ['tour']),
-    ...mapState('usuarios', ['token']),
-    ...mapGetters('usuarios', ['usuario']),
+    ...mapState("tour", ["tour"]),
+    ...mapState("usuarios", ["token"]),
+    ...mapGetters("usuarios", ["usuario"])
   },
   mounted() {
     const v = new Validator();
-    v.verify(this.proyecto.email, 'required|email').then(({ valid, error }) => {
+    v.verify(this.proyecto.email, "required|email").then(({ valid, error }) => {
       if (error) {
         console.error(error);
-        this.setFlash({ tipo: 'error', mensaje: 'El email ingresado es inválido.' });
+        this.setFlash({
+          tipo: "error",
+          mensaje: "El email ingresado es inválido."
+        });
         this.sent = false;
         this.error = true;
       } else {
         if (
+          this.proyecto.beneficiary_address &&
           this.proyecto.nombre &&
           this.proyecto.categoria_id &&
           this.proyecto.ciudad &&
@@ -60,14 +64,14 @@ export default {
           valid &&
           this.proyecto.fechaFin &&
           moment(new Date(this.proyecto.fechaFin)).isBetween(
-            moment(new Date()).subtract(2, 'days'),
+            moment(new Date()).subtract(2, "days"),
             // moment(new Date()).subtract(1, 'days'),
-            moment(new Date()).add(CANT_MAX_DIAS_RONDA, 'days'),
+            moment(new Date()).add(CANT_MAX_DIAS_RONDA, "days")
           ) &&
           this.proyecto.descripcion &&
-          this.stripHtml(this.proyecto.descripcion) !== '' &&
+          this.stripHtml(this.proyecto.descripcion) !== "" &&
           this.proyecto.propuesta &&
-          this.stripHtml(this.proyecto.propuesta) !== '' &&
+          this.stripHtml(this.proyecto.propuesta) !== "" &&
           this.proyecto.emprendedores &&
           this.proyecto.emprendedores.length > 0 &&
           this.proyecto.monto &&
@@ -81,20 +85,20 @@ export default {
 
           const isImagen = imagen =>
             imagen &&
-            typeof imagen === 'object' &&
+            typeof imagen === "object" &&
             imagen.type &&
-            new RegExp('image/*').test(imagen.type);
+            new RegExp("image/*").test(imagen.type);
 
           const subirImagen = imagen => {
             const formData = new FormData();
-            formData.append('imagenes', imagen);
+            formData.append("imagenes", imagen);
             return this.$http({
-              method: 'POST',
-              url: '/api/upload',
+              method: "POST",
+              url: "/api/upload",
               body: formData,
               headers: {
-                Authorization: `Bearer ${this.token}`,
-              },
+                Authorization: `Bearer ${this.token}`
+              }
             });
           };
 
@@ -106,8 +110,8 @@ export default {
                 },
                 error => {
                   console.error(error);
-                },
-              ),
+                }
+              )
             );
           }
 
@@ -120,107 +124,91 @@ export default {
                   },
                   error => {
                     console.error(error);
-                  },
-                ),
+                  }
+                )
               );
             }
           });
 
           Promise.all(proms).then(
             () => {
-              this.$http({
-                method: 'GET',
-                url: `/api/usuarios/${this.usuario.id}`,
-                headers: {
-                  Authorization: `Bearer ${this.token}`,
-                },
-              }).then(
-                ({ data }) => {
-                  const beneficiary_address = data.address;
-                  fiblo.deployProyectoFull(
-                    beneficiary_address,
-                    this.proyecto.cantAcciones,
-                    this.proyecto.nombre
-                      .toLowerCase()
-                      .replace(/\s/g, '-')
-                      .replace(/á/g, 'a')
-                      .replace(/é/g, 'e')
-                      .replace(/í/g, 'i')
-                      .replace(/ó/g, 'o')
-                      .replace(/ú/g, 'u')
-                      .replace(/ñ/g, 'n')
-                      .replace(/[^a-zA-Z0-9\.-_]/g, '')
-                      .substr(0, 5)
-                      .toUpperCase(),
-                    parseInt(parseFloat(this.proyecto.monto) * 100), // Monto en centavos
-                    parseInt(parseFloat(this.proyecto.montoSuperaMax) * 100), // Monto en centavos
-                    moment(this.proyecto.fechaFin).unix(),
-                    (error, instance) => {
-                      if (error) {
-                        console.error(error);
-                        this.setFlash({
-                          tipo: 'error',
-                          mensaje: 'Ocurrió un error al crear el contrato.',
-                        });
-                        this.error = true;
-                        this.sent = false;
-                      } else if (instance.address) {
-                        this.proyecto.address = instance.address;
-                        this.$http({
-                          method: 'POST',
-                          url: '/api/proyectos',
-                          body: this.proyecto,
-                          headers: {
-                            Authorization: `Bearer ${this.token}`,
-                          },
-                        }).then(
-                          ({ status, data }) => {
-                            this.sent = false;
-                            console.log(status);
-                            if (status === 201) {
-                              this.correcto = true;
-                              this.new_project_id = data.id;
-                            }
-                          },
-                          error => {
-                            this.sent = false;
-                            console.error(error);
-                            this.error = true;
-                          },
-                        );
+              fiblo.deployProyectoFull(
+                this.proyecto.beneficiary_address,
+                this.proyecto.cantAcciones,
+                this.proyecto.nombre
+                  .toLowerCase()
+                  .replace(/\s/g, "-")
+                  .replace(/á/g, "a")
+                  .replace(/é/g, "e")
+                  .replace(/í/g, "i")
+                  .replace(/ó/g, "o")
+                  .replace(/ú/g, "u")
+                  .replace(/ñ/g, "n")
+                  .replace(/[^a-zA-Z0-9\.-_]/g, "")
+                  .substr(0, 5)
+                  .toUpperCase(),
+                parseInt(parseFloat(this.proyecto.monto) * 100), // Monto en centavos
+                parseInt(parseFloat(this.proyecto.montoSuperaMax) * 100), // Monto en centavos
+                moment(this.proyecto.fechaFin).unix(),
+                (error, instance) => {
+                  if (error) {
+                    console.error(error);
+                    this.setFlash({
+                      tipo: "error",
+                      mensaje: "Ocurrió un error al crear el contrato."
+                    });
+                    this.error = true;
+                    this.sent = false;
+                  } else if (instance.address) {
+                    this.proyecto.address = instance.address;
+                    this.$http({
+                      method: "POST",
+                      url: "/api/proyectos",
+                      body: this.proyecto,
+                      headers: {
+                        Authorization: `Bearer ${this.token}`
                       }
-                    },
-                  );
-                },
-                error => {
-                  console.error(error);
-                  this.error = true;
-                  this.sent = false;
-                },
+                    }).then(
+                      ({ status, data }) => {
+                        this.sent = false;
+                        console.log(status);
+                        if (status === 201) {
+                          this.correcto = true;
+                          this.new_project_id = data.id;
+                        }
+                      },
+                      error => {
+                        this.sent = false;
+                        console.error(error);
+                        this.error = true;
+                      }
+                    );
+                  }
+                }
               );
             },
             error => {
               this.setFlash({
-                tipo: 'error',
-                mensaje: 'Ocurrió un error al guardar las imágenes',
+                tipo: "error",
+                mensaje: "Ocurrió un error al guardar las imágenes"
               });
-            },
+            }
           );
         } else {
-          console.log('error');
+          console.log("error");
           this.sent = false;
         }
       }
     });
   },
   methods: {
-    ...mapActions('general', ['setFlash']),
-  },
+    ...mapActions("general", ["setFlash"])
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/_config.scss';
+@import "~Styles/_config.scss";
 .etapa-final {
   width: 100%;
   height: 100%;

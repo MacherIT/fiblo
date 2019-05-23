@@ -1,9 +1,14 @@
 <template lang="pug">
   .etapa-general
+    .no-beneficiary-address(v-if="!etapa.beneficiary_address")
+      p
+        | No hay ninguna billetera de Ethereum asociada a tu cuenta, podes asociar una billetera desde la sección de
+        router-link(to="/usuarios") usuario
     form(
       @submit.prevent="setFields"
       novalidate
-      name="formulario")
+      name="formulario"
+      v-if="etapa.beneficiary_address")
       .logo-nombre-categoria
         .logo
           .no-imagen(v-if="!etapa.logo")
@@ -98,82 +103,106 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
-import moment from 'moment';
+import { mapState, mapGetters, mapActions } from "vuex";
+import moment from "moment";
 
-import BotonGenial from '@/components/General/BotonGenial';
+import BotonGenial from "@/components/General/BotonGenial";
 
-import provincias from '@/assets/data/ciudades-argentinas.json';
+import provincias from "@/assets/data/ciudades-argentinas.json";
 
 const CANT_MAX_DIAS_RONDA = 90;
 
+let beneficiary_address;
+
 export default {
   components: { BotonGenial },
-  props: ['proyecto', 'set', 'setEtapaActiva'],
+  props: ["proyecto", "set", "setEtapaActiva"],
   data() {
     return {
       archivoInvalido: false,
       // fechaMin: moment(new Date()).format('YYYY-MM-DD'),
       fechaMin: moment(new Date())
-        .subtract(2, 'days')
-        .format('YYYY-MM-DD'),
+        .subtract(2, "days")
+        .format("YYYY-MM-DD"),
       fechaMax: moment(new Date())
-        .add(CANT_MAX_DIAS_RONDA, 'days')
-        .format('YYYY-MM-DD'),
+        .add(CANT_MAX_DIAS_RONDA, "days")
+        .format("YYYY-MM-DD"),
       provincias,
       provincia:
         this.proyecto.ciudad && this.proyecto.ciudad.provincia
           ? this.proyecto.ciudad.provincia.id
-          : '',
+          : "",
       categorias: [],
       sent: false,
       etapa: {
+        beneficiary_address: "",
         logo: false,
-        nombre: this.proyecto.nombre ? this.proyecto.nombre : '',
-        categoria_id: this.proyecto.categoria ? this.proyecto.categoria : '',
+        nombre: this.proyecto.nombre ? this.proyecto.nombre : "",
+        categoria_id: this.proyecto.categoria ? this.proyecto.categoria : "",
         ciudad:
-          this.proyecto.ciudad && this.proyecto.ciudad.ciudad ? this.proyecto.ciudad.ciudad.id : '',
-        domicilio: this.proyecto.domicilio ? this.proyecto.domicilio : '',
-        email: this.proyecto.email ? this.proyecto.email : '',
-        fechaFin: '',
-      },
+          this.proyecto.ciudad && this.proyecto.ciudad.ciudad
+            ? this.proyecto.ciudad.ciudad.id
+            : "",
+        domicilio: this.proyecto.domicilio ? this.proyecto.domicilio : "",
+        email: this.proyecto.email ? this.proyecto.email : "",
+        fechaFin: ""
+      }
     };
   },
   mounted() {
     this.$http({
-      method: 'GET',
-      url: '/api/categorias',
+      method: "GET",
+      url: "/api/categorias"
     }).then(
       ({ data }) => {
         this.categorias = data;
       },
       error => {
         console.error(error);
+      }
+    );
+    this.$http({
+      method: "GET",
+      url: `/api/usuarios/${this.usuario.id}/simple_data`,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      }
+    }).then(
+      ({ data }) => {
+        beneficiary_address = data.address[0];
+        this.etapa.beneficiary_address = data.address[0];
       },
+      error => {
+        console.error(error);
+      }
     );
   },
   computed: {
+    ...mapState("usuarios", ["token"]),
+    ...mapGetters("usuarios", ["usuario"]),
     fechaFinValida() {
       return (
         this.etapa.fechaFin &&
         moment(new Date(this.etapa.fechaFin)).isBetween(
-          moment(new Date()).subtract(2, 'days'),
+          moment(new Date()).subtract(2, "days"),
           // moment(new Date()).subtract(1, 'days'),
-          moment(new Date()).add(CANT_MAX_DIAS_RONDA, 'days'),
+          moment(new Date()).add(CANT_MAX_DIAS_RONDA, "days")
         )
       );
-    },
+    }
   },
   methods: {
-    ...mapActions('general', ['setPageTitle']),
+    ...mapActions("general", ["setPageTitle"]),
     setLogo(ev) {
       this.archivoInvalido = false;
       if (ev.target.files && ev.target.files[0]) {
-        if (new RegExp('image/*').test(ev.target.files[0].type)) {
+        if (new RegExp("image/*").test(ev.target.files[0].type)) {
           this.etapa.logo = ev.target.files[0];
           const fileReader = new FileReader();
           fileReader.onload = () => {
-            document.querySelector('form .logo-nombre-categoria .logo img').src = fileReader.result;
+            document.querySelector(
+              "form .logo-nombre-categoria .logo img"
+            ).src = fileReader.result;
           };
           fileReader.readAsDataURL(ev.target.files[0]);
         } else {
@@ -193,29 +222,47 @@ export default {
     go() {
       this.provincia = this.provincias[0];
       this.etapa = {
+        beneficiary_address,
         logo: false,
-        nombre: 'Ejemplo',
+        nombre: "Ejemplo",
         categoria_id: this.categorias[0].id,
         ciudad: {
-          provincia: { id: this.provincias[0].id, nombre: this.provincias[0].nombre },
-          ciudad: this.provincias[0].ciudades[0],
+          provincia: {
+            id: this.provincias[0].id,
+            nombre: this.provincias[0].nombre
+          },
+          ciudad: this.provincias[0].ciudades[0]
         },
-        domicilio: 'Calle 7 - 623 - Bariloche, Argentina',
-        email: 'proyecto-ejemplo@fiblo.com',
+        domicilio: "Calle 7 - 623 - Bariloche, Argentina",
+        email: "proyecto-ejemplo@fiblo.com",
         fechaFin: moment(new Date())
-          .add(30, 'days')
-          .format('YYYY-MM-DD'),
+          .add(30, "days")
+          .format("YYYY-MM-DD")
       };
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/_config.scss';
+@import "~Styles/_config.scss";
 .etapa-general {
   width: 100%;
   height: auto;
+  .no-beneficiary-address {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    p {
+      color: #fff;
+      a {
+        color: #fff;
+        margin: 0 4px;
+      }
+    }
+  }
   form {
     width: 100%;
     height: 100%;

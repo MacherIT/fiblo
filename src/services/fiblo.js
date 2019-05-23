@@ -1,14 +1,14 @@
-import Web3 from 'web3';
+import Web3 from "web3";
 // import baseJSONFactory from '../../build/contracts/SASFactory.json';
-import baseJSON from '../../build/contracts/ContratoSAS.json';
-import baseJSONCNV from '../../build/contracts/CNV.json';
-import baseJSONOraculoPrecio from '../../build/contracts/OraculoPrecio.json';
-import MODULE from '../../build/contracts/Module.json';
-import SA from '../../build/contracts/StandAlone.json';
-import { default as contract } from 'truffle-contract';
+import baseJSON from "../../build/contracts/ContratoSAS.json";
+import baseJSONCNV from "../../build/contracts/CNV.json";
+import baseJSONOraculoPrecio from "../../build/contracts/OraculoPrecio.json";
+import MODULE from "../../build/contracts/Module.json";
+import SA from "../../build/contracts/StandAlone.json";
+import { default as contract } from "truffle-contract";
 
-const CNV_ADDRESS = baseJSONCNV.networks['33'].address;
-const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks['33'].address;
+const CNV_ADDRESS = baseJSONCNV.networks["33"].address;
+const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks["31"].address;
 
 // const MODULE_ADDRESS = MODULE.networks['33'].address;
 // const SA_ADDRESS = SA.networks['33'].address;
@@ -17,11 +17,13 @@ const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks['33'].address;
 
 const web3Init = callback => {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-  if (typeof window.web3 !== 'undefined') {
+  if (typeof window.web3 !== "undefined") {
     // Use Mist/MetaMask's provider
     window.web3 = new Web3(window.web3.currentProvider);
   } else {
-    window.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
+    window.web3 = new Web3(
+      new Web3.providers.HttpProvider("http://127.0.0.1:7545")
+    );
   }
 
   // DEV ONLY
@@ -114,46 +116,64 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          callback(null, accounts[0]);
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            callback(null, accounts[0]);
+          }
+        );
       }
     });
   },
   receiveFunds(project_address, userId, monto, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          console.log(monto);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            console.log(monto);
 
-          proyecto.receiveFunds(
-            parseInt(userId),
-            {
-              from: window.web3.eth.defaultAccount,
-              value: window.web3.toWei(parseFloat(monto), 'ether'),
-            },
-            (error, instance) => {
-										console.log(window.web3.eth.defaultAccount, window.web3.toWei(parseFloat(monto), 'ether'));
-              const filter = web3.eth.filter({
-                toBlock: 'latest',
-              });
-              filter.watch((error, log) => {
-                if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                  if (error) {
-                    callback(error, null);
+            proyecto.receiveFunds(
+              parseInt(userId),
+              {
+                from: window.web3.eth.defaultAccount,
+                value: Math.floor(window.web3.toWei(monto, "ether"))
+              },
+              (error, instance) => {
+                console.log(
+                  window.web3.eth.accounts[0],
+                  window.web3.toWei(parseFloat(monto), "ether")
+                );
+                const filter = web3.eth.filter({
+                  toBlock: "latest"
+                });
+                filter.watch((error, log) => {
+                  if (
+                    log.transactionHash &&
+                    log.transactionHash === instance.transactionHash &&
+                    logIndexN < 0
+                  ) {
+                    if (error) {
+                      callback(error, null);
+                    } else {
+                      logIndexN = log.logIndex;
+                      callback(null, instance);
+                      filter.stopWatching();
+                    }
                   }
-                  callback(null, instance);
-                  filter.stopWatching();
-                }
-              });
-            },
-          );
-        });
+                });
+              }
+            );
+          }
+        );
       }
     });
   },
@@ -163,16 +183,20 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto.m_project_valid((error, res) => {
-            if (error) {
-              callback(error, null);
-            }
-            callback(null, res);
-          });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto.m_project_valid((error, res) => {
+              if (error) {
+                callback(error, null);
+              }
+              callback(null, res);
+            });
+          }
+        );
       }
     });
   },
@@ -182,16 +206,20 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto.m_beneficiary_valid((error, res) => {
-            if (error) {
-              callback(error, null);
-            }
-            callback(null, res);
-          });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto.m_beneficiary_valid((error, res) => {
+              if (error) {
+                callback(error, null);
+              }
+              callback(null, res);
+            });
+          }
+        );
       }
     });
   },
@@ -201,32 +229,36 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          // const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-          // const cnv = proxyCNV.at(CNV_ADDRESS);
-          // cnv
-          //   .beneficiaryAdded(
-          //     {},
-          //     {
-          //       fromBlock: 0,
-          //       toBlock: 'latest',
-          //     },
-          //   )
-          //   .watch((error, event) => {
-          //     if (error) {
-          //       // callback(error, null);
-          //     }
-          //     console.log(event.args);
-          //   });
-          window.web3.eth.getBalance(proyecto.address, (error, balance) => {
-            if (error) {
-              callback(error, null);
-            }
-            callback(null, window.web3.fromWei(balance).toNumber());
-          });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            // const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+            // const cnv = proxyCNV.at(CNV_ADDRESS);
+            // cnv
+            //   .beneficiaryAdded(
+            //     {},
+            //     {
+            //       fromBlock: 0,
+            //       toBlock: 'latest',
+            //     },
+            //   )
+            //   .watch((error, event) => {
+            //     if (error) {
+            //       // callback(error, null);
+            //     }
+            //     console.log(event.args);
+            //   });
+            window.web3.eth.getBalance(proyecto.address, (error, balance) => {
+              if (error) {
+                callback(error, null);
+              }
+              callback(null, window.web3.fromWei(balance).toNumber());
+            });
+          }
+        );
       }
     });
   },
@@ -236,24 +268,28 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto
-            .contributionFiled(
-              {},
-              {
-                fromBlock: 0,
-                toBlock: 'latest',
-              },
-            )
-            .watch((error, event) => {
-              if (error) {
-                callback(error, null);
-              }
-              callback(null, event);
-            });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto
+              .contributionFiled(
+                {},
+                {
+                  fromBlock: 0,
+                  toBlock: "latest"
+                }
+              )
+              .watch((error, event) => {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, event);
+              });
+          }
+        );
       }
     });
   },
@@ -263,24 +299,28 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto
-            .contributionFiled(
-              {},
-              {
-                fromBlock: 0,
-                toBlock: 'latest',
-              },
-            )
-            .get((error, events) => {
-              if (error) {
-                callback(error, null);
-              }
-              callback(null, events);
-            });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto
+              .contributionFiled(
+                {},
+                {
+                  fromBlock: 0,
+                  toBlock: "latest"
+                }
+              )
+              .get((error, events) => {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, events);
+              });
+          }
+        );
       }
     });
   },
@@ -290,16 +330,20 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto.m_fecha_cierre((error, fechaCierre) => {
-            if (error) {
-              callback(error, null);
-            }
-            callback(null, fechaCierre);
-          });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto.m_fecha_cierre((error, fechaCierre) => {
+              if (error) {
+                callback(error, null);
+              }
+              callback(null, fechaCierre);
+            });
+          }
+        );
       }
     });
   },
@@ -309,24 +353,28 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto
-            .fundReturned(
-              {},
-              {
-                fromBlock: 0,
-                toBlock: 'latest',
-              },
-            )
-            .get((error, event) => {
-              if (error) {
-                callback(error, null);
-              }
-              callback(null, event);
-            });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto
+              .fundReturned(
+                {},
+                {
+                  fromBlock: 0,
+                  toBlock: "latest"
+                }
+              )
+              .get((error, event) => {
+                if (error) {
+                  callback(error, null);
+                }
+                callback(null, event);
+              });
+          }
+        );
       }
     });
   },
@@ -337,178 +385,227 @@ export default {
     monto,
     monto_max,
     fecha,
-    callback,
+    callback
+  ) {
+    let logIndexN = -1;
+    web3Init((error, accounts) => {
+      if (error) {
+        console.error(error);
+      } else {
+        window.web3.eth.defaultAccount = accounts[0];
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxy = window.web3.eth.contract(baseJSON.abi);
+            window.prox = proxy;
+            proxy.new(
+              CNV_ADDRESS,
+              ORACULO_PRECIO_ADDRESS,
+              beneficiary_address,
+              cant_acciones,
+              symbol,
+              monto,
+              monto_max,
+              fecha,
+              {
+                from: web3.eth.defaultAccount,
+                data: baseJSON.bytecode
+              },
+              (error, instance) => {
+                const filter = web3.eth.filter({
+                  toBlock: "latest"
+                });
+                filter.watch((error, log) => {
+                  if (
+                    log.transactionHash &&
+                    log.transactionHash === instance.transactionHash &&
+                    logIndexN < 0
+                  ) {
+                    if (error) {
+                      callback(error, null);
+                    } else if (log.address) {
+                      logIndexN = log.logIndex;
+                      callback(null, { ...instance, address: log.address });
+                      filter.stopWatching();
+                    }
+                  }
+                });
+              }
+            );
+          }
+        );
+      }
+    });
+  },
+  deployProyecto(
+    proyecto,
+    beneficiary_address,
+    cant_acciones,
+    symbol,
+    callback
   ) {
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxy = window.web3.eth.contract(baseJSON.abi);
-          window.prox = proxy;
-          proxy.new(
-            CNV_ADDRESS,
-            ORACULO_PRECIO_ADDRESS,
-            beneficiary_address,
-            cant_acciones,
-            symbol,
-            monto,
-            monto_max,
-            fecha,
-            {
-              from: web3.eth.defaultAccount,
-              data: baseJSON.bytecode,
-            },
-            (error, instance) => {
-              const filter = web3.eth.filter({
-                toBlock: 'latest',
-              });
-              filter.watch((error, log) => {
-                if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                  if (error) {
-                    callback(error, null);
-                  }
-                  callback(null, { ...instance, address: log.address });
-                  filter.stopWatching();
-                }
-              });
-            },
-          );
-        });
-      }
-    });
-  },
-  deployProyecto(proyecto, beneficiary_address, cant_acciones, symbol, callback) {
-    web3Init((error, accounts) => {
-      if (error) {
-        console.error(error);
-      } else {
-        window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          // const sasFactoryProxy = window.web3.eth.contract(baseJSONFactory.abi);
-          // const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          // const sasFactory = sasFactoryProxy.at(FACTORY_ADDRESS);
-          //
-          // sasFactory.createContrato((error, address) => {
-          //   if (error) {
-          //     callback(error, null);
-          //   }
-          //   if (address) {
-          //     const proyecto = proxySAS.at(address);
-          //     console.log(proyecto);
-          //     proyecto.setCNVAddress(CNV_ADDRESS, (error, res) => {
-          //       if (error) {
-          //         callback(error, null);
-          //       } else {
-          //         proyecto.setBeneficiario(beneficiary_address, (error, res) => {
-          //           if (error) {
-          //             callback(error, null);
-          //           } else {
-          //             callback(null, proyecto);
-          //           }
-          //         });
-          //       }
-          //     });
-          //   }
-          // });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            // const sasFactoryProxy = window.web3.eth.contract(baseJSONFactory.abi);
+            // const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            // const sasFactory = sasFactoryProxy.at(FACTORY_ADDRESS);
+            //
+            // sasFactory.createContrato((error, address) => {
+            //   if (error) {
+            //     callback(error, null);
+            //   }
+            //   if (address) {
+            //     const proyecto = proxySAS.at(address);
+            //     console.log(proyecto);
+            //     proyecto.setCNVAddress(CNV_ADDRESS, (error, res) => {
+            //       if (error) {
+            //         callback(error, null);
+            //       } else {
+            //         proyecto.setBeneficiario(beneficiary_address, (error, res) => {
+            //           if (error) {
+            //             callback(error, null);
+            //           } else {
+            //             callback(null, proyecto);
+            //           }
+            //         });
+            //       }
+            //     });
+            //   }
+            // });
 
-          /* COMBAK:
+            /* COMBAK:
           PARA PODER USAR UN FACTORY, HAY QUE REVISAR EL MODELO DE 'ONLYOWNER',
           POR ENDE, POR AHORA, LO DEJO COMO ESTABA
           */
 
-          const proxy = window.web3.eth.contract(baseJSON.abi);
-          proxy.new({ data: baseJSON.bytecode }, (error, instance) => {
-            if (error) {
-              callback(error, null);
-            }
-            if (instance.address) {
-              instance.setCNVAddress(CNV_ADDRESS, (error, res) => {
-                if (error) {
-                  callback(error, null);
-                } else {
-                  instance.setBeneficiario(beneficiary_address, (error, res) => {
-                    if (error) {
-                      callback(error, null);
-                    } else {
-                      instance.setCantAcciones(cant_acciones, (error, res) => {
+            const proxy = window.web3.eth.contract(baseJSON.abi);
+            proxy.new({ data: baseJSON.bytecode }, (error, instance) => {
+              if (error) {
+                callback(error, null);
+              }
+              if (instance.address) {
+                instance.setCNVAddress(CNV_ADDRESS, (error, res) => {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    instance.setBeneficiario(
+                      beneficiary_address,
+                      (error, res) => {
                         if (error) {
                           callback(error, null);
                         } else {
-                          instance.setSymbol(symbol, (error, res) => {
-                            if (error) {
-                              callback(error, null);
-                            } else {
-                              callback(null, instance);
+                          instance.setCantAcciones(
+                            cant_acciones,
+                            (error, res) => {
+                              if (error) {
+                                callback(error, null);
+                              } else {
+                                instance.setSymbol(symbol, (error, res) => {
+                                  if (error) {
+                                    callback(error, null);
+                                  } else {
+                                    callback(null, instance);
+                                  }
+                                });
+                              }
                             }
-                          });
+                          );
                         }
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          });
-        });
+                      }
+                    );
+                  }
+                });
+              }
+            });
+          }
+        );
       }
     });
   },
   setProjectValidity(project_address, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
 
-          proyecto.setProjectValidity((error, instance) => {
-            const filter = web3.eth.filter({
-              toBlock: 'latest',
-            });
-            filter.watch((error, log) => {
-              console.log(log.transactionHash);
-              if (log.transactionHash && log.transactionHash === instance) {
-                if (error) {
-                  callback(error, null);
+            proyecto.setProjectValidity((error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: "latest"
+              });
+              filter.watch((error, log) => {
+                console.log(log.transactionHash);
+                if (
+                  log.transactionHash &&
+                  log.transactionHash === instance &&
+                  logIndexN < 0
+                ) {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    logIndexN = log.logIndex;
+                    callback(null, instance);
+                    filter.stopWatching();
+                  }
                 }
-                callback(null, instance);
-                filter.stopWatching();
-              }
+              });
             });
-          });
-        });
+          }
+        );
       }
     });
   },
   setBeneficiaryValidity(project_address, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
 
-          proyecto.setBeneficiaryValidity((error, instance) => {
-            const filter = web3.eth.filter({
-              toBlock: 'latest',
-            });
-            filter.watch((error, log) => {
-              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                if (error) {
-                  callback(error, null);
+            proyecto.setBeneficiaryValidity((error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: "latest"
+              });
+              filter.watch((error, log) => {
+                if (
+                  log.transactionHash &&
+                  log.transactionHash === instance.transactionHash &&
+                  logIndexN < 0
+                ) {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    logIndexN = log.logIndex;
+                    callback(null, instance);
+                    filter.stopWatching();
+                  }
                 }
-                callback(null, instance);
-                filter.stopWatching();
-              }
+              });
             });
-          });
-        });
+          }
+        );
       }
     });
   },
@@ -518,25 +615,29 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-          const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv
-            .projectAdded(
-              {},
-              {
-                fromBlock: 0,
-                toBlock: 'latest',
-              },
-            )
-            .watch((error, event) => {
-              if (error) {
-                callback(error, null);
-              }
-              console.log(`${event.args.project} added`);
-              callback(null, event);
-            });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+            const cnv = proxyCNV.at(CNV_ADDRESS);
+            cnv
+              .projectAdded(
+                {},
+                {
+                  fromBlock: 0,
+                  toBlock: "latest"
+                }
+              )
+              .watch((error, event) => {
+                if (error) {
+                  callback(error, null);
+                }
+                console.log(`${event.args.project} added`);
+                callback(null, event);
+              });
+          }
+        );
       }
     });
   },
@@ -546,25 +647,29 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-          const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv
-            .projectRemoved(
-              {},
-              {
-                fromBlock: 0,
-                toBlock: 'latest',
-              },
-            )
-            .watch((error, event) => {
-              if (error) {
-                callback(error, null);
-              }
-              console.log(`${event.args.project} removed`);
-              callback(null, event);
-            });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+            const cnv = proxyCNV.at(CNV_ADDRESS);
+            cnv
+              .projectRemoved(
+                {},
+                {
+                  fromBlock: 0,
+                  toBlock: "latest"
+                }
+              )
+              .watch((error, event) => {
+                if (error) {
+                  callback(error, null);
+                }
+                console.log(`${event.args.project} removed`);
+                callback(null, event);
+              });
+          }
+        );
       }
     });
   },
@@ -587,56 +692,78 @@ export default {
     });
   },
   addProject(project_address, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-          const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv.addProject(project_address, (error, instance) => {
-            const filter = web3.eth.filter({
-              toBlock: 'latest',
-            });
-            filter.watch((error, log) => {
-              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                if (error) {
-                  callback(error, null);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+            const cnv = proxyCNV.at(CNV_ADDRESS);
+            cnv.addProject(project_address, (error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: "latest"
+              });
+              filter.watch((error, log) => {
+                if (
+                  log.transactionHash &&
+                  log.transactionHash === instance.transactionHash &&
+                  logIndexN < 0
+                ) {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    logIndexN = log.logIndex;
+                    callback(null, instance);
+                    filter.stopWatching();
+                  }
                 }
-                callback(null, instance);
-                filter.stopWatching();
-              }
+              });
             });
-          });
-        });
+          }
+        );
       }
     });
   },
   removeProject(project_address, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-          const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv.removeProject(project_address, (error, instance) => {
-            const filter = web3.eth.filter({
-              toBlock: 'latest',
-            });
-            filter.watch((error, log) => {
-              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                if (error) {
-                  callback(error, null);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+            const cnv = proxyCNV.at(CNV_ADDRESS);
+            cnv.removeProject(project_address, (error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: "latest"
+              });
+              filter.watch((error, log) => {
+                if (
+                  log.transactionHash &&
+                  log.transactionHash === instance.transactionHash &&
+                  logIndexN < 0
+                ) {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    logIndexN = log.logIndex;
+                    callback(null, instance);
+                    filter.stopWatching();
+                  }
                 }
-                callback(null, instance);
-                filter.stopWatching();
-              }
+              });
             });
-          });
-        });
+          }
+        );
       }
     });
   },
@@ -646,71 +773,97 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto.balanceOf(account_address, (error, res) => {
-            if (error) {
-              callback(error, null);
-            } else {
-              callback(null, res);
-            }
-          });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto.balanceOf(account_address, (error, res) => {
+              if (error) {
+                callback(error, null);
+              } else {
+                callback(null, res);
+              }
+            });
+          }
+        );
       }
     });
   },
   transfer(project_address, to_address, cant_tokens, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto.transfer(to_address, cant_tokens, (error, instance) => {
-            const filter = web3.eth.filter({
-              toBlock: 'latest',
-            });
-            filter.watch((error, log) => {
-              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                if (error) {
-                  callback(error, null);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto.transfer(to_address, cant_tokens, (error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: "latest"
+              });
+              filter.watch((error, log) => {
+                if (
+                  log.transactionHash &&
+                  log.transactionHash === instance.transactionHash &&
+                  logIndexN < 0
+                ) {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    let logIndexN = log.logIndex;
+                    callback(null, instance);
+                    filter.stopWatching();
+                  }
                 }
-                callback(null, instance);
-                filter.stopWatching();
-              }
+              });
             });
-          });
-        });
+          }
+        );
       }
     });
   },
   closeRound(project_address, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto.closeRound((error, instance) => {
-            const filter = web3.eth.filter({
-              toBlock: 'latest',
-            });
-            filter.watch((error, log) => {
-              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                if (error) {
-                  callback(error, null);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto.closeRound((error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: "latest"
+              });
+              filter.watch((error, log) => {
+                if (
+                  log.transactionHash &&
+                  log.transactionHash === instance.transactionHash &&
+                  logIndexN < 0
+                ) {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    logIndexN = log.logIndex;
+                    callback(null, instance);
+                    filter.stopWatching();
+                  }
                 }
-                callback(null, instance);
-                filter.stopWatching();
-              }
+              });
             });
-          });
-        });
+          }
+        );
       }
     });
   },
@@ -720,17 +873,21 @@ export default {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxySAS = window.web3.eth.contract(baseJSON.abi);
-          const proyecto = proxySAS.at(project_address);
-          proyecto.m_closed_round((error, res) => {
-            if (error) {
-              callback(error, null);
-            } else {
-              callback(null, res);
-            }
-          });
-        });
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxySAS = window.web3.eth.contract(baseJSON.abi);
+            const proyecto = proxySAS.at(project_address);
+            proyecto.m_closed_round((error, res) => {
+              if (error) {
+                callback(error, null);
+              } else {
+                callback(null, res);
+              }
+            });
+          }
+        );
       }
     });
   },
@@ -753,57 +910,79 @@ export default {
     });
   },
   addBeneficiary(beneficiary_address, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-          const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv.addBeneficiary(beneficiary_address, (error, instance) => {
-            const filter = web3.eth.filter({
-              toBlock: 'latest',
-            });
-            filter.watch((error, log) => {
-              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                if (error) {
-                  callback(error, null);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+            const cnv = proxyCNV.at(CNV_ADDRESS);
+            cnv.addBeneficiary(beneficiary_address, (error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: "latest"
+              });
+              filter.watch((error, log) => {
+                if (
+                  log.transactionHash &&
+                  log.transactionHash === instance.transactionHash &&
+                  logIndexN < 0
+                ) {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    logIndexN = log.logIndex;
+                    callback(null, instance);
+                    filter.stopWatching();
+                  }
                 }
-                callback(null, instance);
-                filter.stopWatching();
-              }
+              });
             });
-          });
-        });
+          }
+        );
       }
     });
   },
   removeBeneficiary(beneficiary_address, callback) {
+    let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
         console.error(error);
       } else {
         window.web3.eth.defaultAccount = accounts[0];
-        window.web3.personal.unlockAccount(window.web3.eth.defaultAccount, '', () => {
-          const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
-          const cnv = proxyCNV.at(CNV_ADDRESS);
-          cnv.removeBeneficiary(beneficiary_address, (error, instance) => {
-            const filter = web3.eth.filter({
-              toBlock: 'latest',
-            });
-            filter.watch((error, log) => {
-              if (log.transactionHash && log.transactionHash === instance.transactionHash) {
-                if (error) {
-                  callback(error, null);
+        window.web3.personal.unlockAccount(
+          window.web3.eth.defaultAccount,
+          "",
+          () => {
+            const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
+            const cnv = proxyCNV.at(CNV_ADDRESS);
+            cnv.removeBeneficiary(beneficiary_address, (error, instance) => {
+              const filter = web3.eth.filter({
+                toBlock: "latest"
+              });
+              filter.watch((error, log) => {
+                if (
+                  log.transactionHash &&
+                  log.transactionHash === instance.transactionHash &&
+                  logIndexN < 0
+                ) {
+                  if (error) {
+                    callback(error, null);
+                  } else {
+                    logIndexN = log.logIndex;
+                    callback(null, instance);
+                    filter.stopWatching();
+                  }
                 }
-                callback(null, instance);
-                filter.stopWatching();
-              }
+              });
             });
-          });
-        });
+          }
+        );
       }
     });
-  },
+  }
 };

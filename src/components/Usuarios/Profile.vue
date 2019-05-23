@@ -39,12 +39,12 @@
             value="Guardar"
             :disabled="sent || !validForm")
       .address
-        span(v-if="!myAddress") Todavía no hay una dirección de Ethereum asociada a tu cuenta, ¿querés dirección la cuenta actual?
+        span(v-if="!myAddress") Todavía no hay una dirección de Ethereum asociada a tu cuenta, ¿querés asociar esta dirección a la cuenta actual?
         span(v-if="myAddress") Tu dirección asociada
         .input-asoc
           input(
             type="text"
-            :value="myAddress && myAddress[0] ? myAddress[0] : defaultAccount"
+            :value="myAddress ? myAddress : defaultAccount"
             readonly
             disabled)
           button(
@@ -58,44 +58,44 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapActions, mapGetters } from "vuex";
 
-import fiblo from '@/services/fiblo';
+import fiblo from "@/services/fiblo";
 
-import PresentacionFiblo from '@/components/General/PresentacionFiblo';
+import PresentacionFiblo from "@/components/General/PresentacionFiblo";
 
 export default {
   components: {
-    PresentacionFiblo,
+    PresentacionFiblo
   },
   data() {
     return {
       archivoInvalido: false,
-      myAvatar: '',
-      myAvatarData: '',
-      myNombre: '',
+      myAvatar: "",
+      myAvatarData: "",
+      myNombre: "",
       myAddress: [],
-      defaultAccount: '',
-      sent: false,
+      defaultAccount: "",
+      sent: false
     };
   },
   mounted() {
-    this.setPageTitle('Mi perfil');
+    this.setPageTitle("Mi perfil");
     this.$http({
-      method: 'GET',
+      method: "GET",
       url: `/api/usuarios/${this.usuario.id}/simple_data`,
       headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
+        Authorization: `Bearer ${this.token}`
+      }
     }).then(
       ({ data }) => {
-        this.myAddress = data.address;
+        this.myAddress = data.address[0];
         this.myNombre = data.nombre;
         this.myAvatar = data.avatar;
       },
       error => {
         console.error(error);
-      },
+      }
     );
     fiblo.getDefaultAccount((error, account) => {
       if (error) {
@@ -106,27 +106,27 @@ export default {
     });
   },
   computed: {
-    ...mapState('usuarios', ['token']),
-    ...mapGetters('usuarios', ['usuario']),
+    ...mapState("usuarios", ["token"]),
+    ...mapGetters("usuarios", ["usuario"])
   },
   methods: {
-    ...mapActions('usuarios', ['logout']),
-    ...mapActions('general', ['setPageTitle']),
+    ...mapActions("usuarios", ["logout"]),
+    ...mapActions("general", ["setPageTitle"]),
     updateUsuario() {
       this.sent = true;
       const saveUsuario = () => {
-        console.log('aca');
+        console.log("aca");
         this.$http({
-          method: 'PUT',
-          url: '/api/usuarios',
+          method: "PUT",
+          url: "/api/usuarios",
           body: Object.assign(
             {},
             { nombre: this.myNombre },
-            this.myAvatar && { avatar: this.myAvatar },
+            this.myAvatar && { avatar: this.myAvatar }
           ),
           headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
+            Authorization: `Bearer ${this.token}`
+          }
         }).then(
           ({ status }) => {
             this.sent = false;
@@ -137,25 +137,25 @@ export default {
           error => {
             console.error(error);
             this.sent = false;
-          },
+          }
         );
       };
       if (this.myNombre) {
         if (
           this.myAvatar &&
-          typeof this.myAvatar === 'object' &&
+          typeof this.myAvatar === "object" &&
           this.myAvatar.type &&
-          new RegExp('image/*').test(this.myAvatar.type)
+          new RegExp("image/*").test(this.myAvatar.type)
         ) {
           const formData = new FormData();
-          formData.append('imagenes', this.myAvatar);
+          formData.append("imagenes", this.myAvatar);
           this.$http({
-            method: 'POST',
-            url: '/api/upload',
+            method: "POST",
+            url: "/api/upload",
             body: formData,
             headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
+              Authorization: `Bearer ${this.token}`
+            }
           }).then(
             ({ data }) => {
               this.myAvatar = data[0].uri;
@@ -163,7 +163,7 @@ export default {
             },
             error => {
               console.error(error);
-            },
+            }
           );
         } else {
           saveUsuario();
@@ -173,7 +173,7 @@ export default {
     setAvatar(ev) {
       this.archivoInvalido = false;
       if (ev.target.files && ev.target.files[0]) {
-        if (new RegExp('image/*').test(ev.target.files[0].type)) {
+        if (new RegExp("image/*").test(ev.target.files[0].type)) {
           this.myAvatar = ev.target.files[0];
           const fileReader = new FileReader();
           fileReader.onload = () => {
@@ -191,35 +191,35 @@ export default {
     asociar() {
       if (this.defaultAccount && (!this.myAddress || !this.myAddress[0])) {
         this.$http({
-          method: 'PUT',
-          url: '/api/usuarios/set_address',
+          method: "PUT",
+          url: "/api/usuarios/set_address",
           body: {
-            address: this.defaultAccount,
+            address: this.defaultAccount
           },
           headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
+            Authorization: `Bearer ${this.token}`
+          }
         }).then(
           ({ status }) => {
             this.sent = false;
             if (status === 200) {
               this.myAddress = [this.defaultAccount];
-              this.defaultAccount = '';
+              this.defaultAccount = "";
             }
           },
           error => {
             console.error(error);
             this.sent = false;
-          },
+          }
         );
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/config';
+@import "~Styles/config";
 .profile {
   display: flex;
   justify-content: center;
