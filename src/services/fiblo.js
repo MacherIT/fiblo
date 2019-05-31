@@ -7,13 +7,13 @@ import MODULE from "../../build/contracts/Module.json";
 import SA from "../../build/contracts/StandAlone.json";
 import { default as contract } from "truffle-contract";
 
-const CNV_ADDRESS = baseJSONCNV.networks["33"].address;
+const CNV_ADDRESS = baseJSONCNV.networks["31"].address;
 const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks["31"].address;
 
-// const MODULE_ADDRESS = MODULE.networks['33'].address;
-// const SA_ADDRESS = SA.networks['33'].address;
+// const MODULE_ADDRESS = MODULE.networks['31'].address;
+// const SA_ADDRESS = SA.networks['31'].address;
 
-// const FACTORY_ADDRESS = baseJSONFactory.networks['33'].address;
+// const FACTORY_ADDRESS = baseJSONFactory.networks['31'].address;
 
 const web3Init = callback => {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)

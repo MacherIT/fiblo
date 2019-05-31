@@ -7,7 +7,7 @@
         span {{usuario ? usuario.email : 'Usuario'}}
     MainMenu
     Flash
-    MagicButton(v-if="loggedIn")
+    //- MagicButton(v-if="loggedIn")
     .page-title
       .holder
         span {{pageTitle}}
@@ -20,39 +20,43 @@
       font-awesome-icon.info(icon="info")
     .web3-not-ready(v-if="!web3Ready")
       span Para poder utilizar la plataforma tenés que tener instalada la extensión 'MetaMask' y tener al menos 1 cuenta habilitada.
+    CurrentNetwork
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions } from "vuex";
 
-import fiblo from '@/services/fiblo';
+import fiblo from "@/services/fiblo";
 
-import TourFirstRun from '@/components/General/Tour/FirstRun';
-import TourMain from '@/components/General/Tour/Main';
+import CurrentNetwork from "@/components/General/CurrentNetwork";
 
-import MainMenu from '@/components/General/MainMenu';
-import Flash from '@/components/General/Flash';
-import MagicButton from '@/components/MagicButton';
+import TourFirstRun from "@/components/General/Tour/FirstRun";
+import TourMain from "@/components/General/Tour/Main";
+
+import MainMenu from "@/components/General/MainMenu";
+import Flash from "@/components/General/Flash";
+import MagicButton from "@/components/MagicButton";
 
 export default {
-  name: 'App',
+  name: "App",
   data() {
     return {
-      web3Ready: true,
+      web3Ready: true
     };
   },
   components: {
+    CurrentNetwork,
     TourFirstRun,
     TourMain,
     MainMenu,
     Flash,
-    MagicButton,
+    MagicButton
   },
   computed: {
-    ...mapState('usuarios', ['loggedIn']),
-    ...mapState('general', ['pageTitle']),
-    ...mapState('tour', ['tour']),
-    ...mapGetters('usuarios', ['usuario']),
+    ...mapState("usuarios", ["loggedIn"]),
+    ...mapState("general", ["pageTitle"]),
+    ...mapState("tour", ["tour"]),
+    ...mapGetters("usuarios", ["usuario"])
   },
   mounted() {
     setTimeout(() => {
@@ -63,29 +67,29 @@ export default {
     }, 3000);
   },
   methods: {
-    ...mapActions('tour', ['resetTour']),
+    ...mapActions("tour", ["resetTour"]),
     reiniciarTour() {
-      this.$router.replace('/');
+      this.$router.replace("/");
       this.resetTour();
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss">
-@import '~Styles/config';
+@import "~Styles/config";
 
 @font-face {
-  font-family: 'KeepCalm-Medium';
-  src: url('./assets/fonts/KeepCalm-Medium.ttf');
+  font-family: "KeepCalm-Medium";
+  src: url("./assets/fonts/KeepCalm-Medium.ttf");
 }
 @font-face {
-  font-family: 'Ubuntu-Light';
-  src: url('./assets/fonts/Ubuntu-Light.ttf');
+  font-family: "Ubuntu-Light";
+  src: url("./assets/fonts/Ubuntu-Light.ttf");
 }
 @font-face {
-  font-family: 'Ubuntu-Regular';
-  src: url('./assets/fonts/Ubuntu-Regular.ttf');
+  font-family: "Ubuntu-Regular";
+  src: url("./assets/fonts/Ubuntu-Regular.ttf");
 }
 
 * {
@@ -100,7 +104,7 @@ body {
   background-position: top;
   background-repeat: no-repeat;
   background-size: cover;
-  background-image: url('./assets/images/fondo.jpg');
+  background-image: url("./assets/images/fondo.jpg");
   // background-color: $colorBeigeBase;
   padding: 0;
   margin: 0;
