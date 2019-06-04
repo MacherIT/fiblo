@@ -92,6 +92,19 @@ const web3Init = callback => {
   });
 };
 
+window.method = () => {
+  web3Init((err, accounts) => {
+    window.web3.eth.defaultAccount = accounts[0];
+    web3.eth.estimateGas(
+      {
+        data: baseJSON.bytecode,
+        from: web3.eth.defaultAccount
+      },
+      (err, res) => console.log(err, res)
+    );
+  });
+};
+
 export default {
   isMetaMaskInstalled(callback) {
     web3Init((error, accounts) => {
@@ -379,7 +392,6 @@ export default {
     });
   },
   deployProyectoFull(
-    // beneficiary_address,
     cant_acciones,
     symbol,
     monto,
@@ -398,44 +410,69 @@ export default {
           "",
           () => {
             const proxy = window.web3.eth.contract(baseJSON.abi);
-            window.prox = proxy;
-            proxy.new(
-              CNV_ADDRESS,
-              ORACULO_PRECIO_ADDRESS,
-              // beneficiary_address,
-              window.web3.eth.defaultAccount,
-              cant_acciones,
-              symbol,
-              monto,
-              monto_max,
-              fecha,
+            web3.eth.estimateGas(
               {
-                from: web3.eth.defaultAccount,
                 data: baseJSON.bytecode,
-                gas: 2500000,
-                gasPrice: 183000
+                from: web3.eth.defaultAccount
               },
-              (error, instance) => {
-                const filter = web3.eth.filter({
-                  toBlock: "latest"
-                });
-                filter.watch((error, log) => {
-                  console.log(error, log);
-                  if (
-                    log &&
-                    log.transactionHash &&
-                    log.transactionHash === instance.transactionHash &&
-                    logIndexN < 0
-                  ) {
-                    if (error) {
-                      callback(error, null);
-                    } else if (log.address) {
-                      logIndexN = log.logIndex;
-                      callback(null, { ...instance, address: log.address });
-                      filter.stopWatching();
+              (err, res) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  const estimatedGas = res;
+                  web3.eth.getGasPrice((err, res) => {
+                    if (err) {
+                      console.error(err);
+                    } else {
+                      const gasPrice = res;
+                      proxy.new(
+                        CNV_ADDRESS,
+                        ORACULO_PRECIO_ADDRESS,
+                        window.web3.eth.defaultAccount,
+                        cant_acciones,
+                        symbol,
+                        monto,
+                        monto_max,
+                        fecha,
+                        {
+                          from: web3.eth.defaultAccount,
+                          data: baseJSON.bytecode,
+                          gas: parseInt(estimatedGas + estimatedGas / 4),
+                          gasPrice
+                        },
+                        (error, instance) => {
+                          const filter = web3.eth.filter({
+                            toBlock: "latest"
+                          });
+                          filter.watch((error, log) => {
+                            if (
+                              // log &&
+                              // log.transactionHash &&
+                              // log.transactionHash ===
+                              //   instance.transactionHash &&
+                              // logIndexN < 0
+                              instance.address
+                            ) {
+                              // if (error) {
+                              //   callback(error, null);
+                              //   // } else if (log.address) {
+                              // } else {
+                              console.log("aca");
+
+                              // logIndexN = log.logIndex;
+                              callback(null, {
+                                ...instance
+                                // address: log.address
+                              });
+                              filter.stopWatching();
+                              // }
+                            }
+                          });
+                        }
+                      );
                     }
-                  }
-                });
+                  });
+                }
               }
             );
           }
