@@ -1,14 +1,16 @@
 <template lang="pug">
   .etapa-general
-    .no-beneficiary-address(v-if="!etapa.beneficiary_address")
-      p
-        | No hay ninguna billetera de Ethereum asociada a tu cuenta, podes asociar una billetera desde la sección de
-        router-link(to="/usuarios") usuario
+    //- .no-beneficiary-address(v-if="!etapa.beneficiary_address")
+    //-   p
+    //-     | No hay ninguna billetera de Ethereum asociada a tu cuenta, podes asociar una billetera desde la sección de
+    //-     router-link(to="/usuarios") usuario
+    
+    //- v-if="etapa.beneficiary_address"
+    
     form(
       @submit.prevent="setFields"
       novalidate
-      name="formulario"
-      v-if="etapa.beneficiary_address")
+      name="formulario")
       .logo-nombre-categoria
         .logo
           .no-imagen(v-if="!etapa.logo")
@@ -135,7 +137,7 @@ export default {
       categorias: [],
       sent: false,
       etapa: {
-        beneficiary_address: "",
+        // beneficiary_address: "",
         logo: false,
         nombre: this.proyecto.nombre ? this.proyecto.nombre : "",
         categoria_id: this.proyecto.categoria ? this.proyecto.categoria : "",
@@ -161,21 +163,21 @@ export default {
         console.error(error);
       }
     );
-    this.$http({
-      method: "GET",
-      url: `/api/usuarios/${this.usuario.id}/simple_data`,
-      headers: {
-        Authorization: `Bearer ${this.token}`
-      }
-    }).then(
-      ({ data }) => {
-        beneficiary_address = data.address[0];
-        this.etapa.beneficiary_address = data.address[0];
-      },
-      error => {
-        console.error(error);
-      }
-    );
+    // this.$http({
+    //   method: "GET",
+    //   url: `/api/usuarios/${this.usuario.id}/simple_data`,
+    //   headers: {
+    //     Authorization: `Bearer ${this.token}`
+    //   }
+    // }).then(
+    //   ({ data }) => {
+    //     beneficiary_address = data.address[0];
+    //     this.etapa.beneficiary_address = data.address[0];
+    //   },
+    //   error => {
+    //     console.error(error);
+    //   }
+    // );
   },
   computed: {
     ...mapState("usuarios", ["token"]),
@@ -222,7 +224,7 @@ export default {
     go() {
       this.provincia = this.provincias[0];
       this.etapa = {
-        beneficiary_address,
+        // beneficiary_address,
         logo: false,
         nombre: "Ejemplo",
         categoria_id: this.categorias[0].id,

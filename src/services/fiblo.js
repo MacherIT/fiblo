@@ -7,13 +7,13 @@ import MODULE from "../../build/contracts/Module.json";
 import SA from "../../build/contracts/StandAlone.json";
 import { default as contract } from "truffle-contract";
 
-const CNV_ADDRESS = baseJSONCNV.networks["31"].address;
-const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks["31"].address;
+const CNV_ADDRESS = baseJSONCNV.networks["3"].address;
+const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks["3"].address;
 
-// const MODULE_ADDRESS = MODULE.networks['31'].address;
-// const SA_ADDRESS = SA.networks['31'].address;
+// const MODULE_ADDRESS = MODULE.networks['3'].address;
+// const SA_ADDRESS = SA.networks['3'].address;
 
-// const FACTORY_ADDRESS = baseJSONFactory.networks['31'].address;
+// const FACTORY_ADDRESS = baseJSONFactory.networks['3'].address;
 
 const web3Init = callback => {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
@@ -379,7 +379,7 @@ export default {
     });
   },
   deployProyectoFull(
-    beneficiary_address,
+    // beneficiary_address,
     cant_acciones,
     symbol,
     monto,
@@ -402,7 +402,8 @@ export default {
             proxy.new(
               CNV_ADDRESS,
               ORACULO_PRECIO_ADDRESS,
-              beneficiary_address,
+              // beneficiary_address,
+              window.web3.eth.defaultAccount,
               cant_acciones,
               symbol,
               monto,
@@ -410,14 +411,18 @@ export default {
               fecha,
               {
                 from: web3.eth.defaultAccount,
-                data: baseJSON.bytecode
+                data: baseJSON.bytecode,
+                gas: 2500000,
+                gasPrice: 183000
               },
               (error, instance) => {
                 const filter = web3.eth.filter({
                   toBlock: "latest"
                 });
                 filter.watch((error, log) => {
+                  console.log(error, log);
                   if (
+                    log &&
                     log.transactionHash &&
                     log.transactionHash === instance.transactionHash &&
                     logIndexN < 0

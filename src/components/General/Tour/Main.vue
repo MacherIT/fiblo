@@ -60,22 +60,19 @@
       .texto.etapa4(
         v-show="etapa === 4 && !loggedIn")
         p
-          | BILLETERAS DE PRUEBA
+          | REALIZAR TRANSACCIONES
           |
-          | Para realizar transacciones con billeteras de prueba, importar las siguientes claves privadas:
-          |
-          |
-          a(href="https://miethereum.com/guias/metamask/#toc8", target="_blank") Guia para importar
-          |
-          |
-          strong CREADOR DE PROYECTOS / FIBLO / CNV:
-          em 3db0975119aa36924a7346f37fe7b44c7f1496b33436f099beb1097e438759c8
-          |
-          strong ACCIONISTA1:
-          em ef7ff7b1380476a7b5a8a7b5b3caae166eb7c115492140fa966c4ddebe69871f
-          |
-          strong ACCIONISTA2:
-          em f8070f8bdc76efd98a95bd4b6122e87a1a0d0dad3e96e420ec1dcc9a10f8d67d
+          | Para poder realizar transacciones asegurate de
+          | tener la extensión de MetaMask activada
+          | y RBTC en tu billetera
+          strong
+            a(
+              href="https://coinmarketcap.com/es/currencies/rsk-smart-bitcoin/"
+              target="_blank") RBTC
+          strong
+            a(
+              href="https://metamask.io/"
+              target="_blank") MetaMask
     button.boton.saltar(
       @click="saltar")
       span Saltar

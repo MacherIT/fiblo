@@ -38,21 +38,21 @@
             type="submit"
             value="Guardar"
             :disabled="sent || !validForm")
-      .address
-        span(v-if="!myAddress") Todavía no hay una dirección de Ethereum asociada a tu cuenta, ¿querés asociar esta dirección a la cuenta actual?
-        span(v-if="myAddress") Tu dirección asociada
-        .input-asoc
-          input(
-            type="text"
-            :value="myAddress ? myAddress : defaultAccount"
-            readonly
-            disabled)
-          button(
-            v-if="!myAddress"
-            @click="asociar") Asociar
-        .sent
-          .loading(v-if="sent")
-            font-awesome-icon(icon="circle-notch", spin)
+      //- .address
+      //-   span(v-if="!myAddress") Todavía no hay una dirección de Ethereum asociada a tu cuenta, ¿querés asociar esta dirección a la cuenta actual?
+      //-   span(v-if="myAddress") Tu dirección asociada
+      //-   .input-asoc
+      //-     input(
+      //-       type="text"
+      //-       :value="myAddress ? myAddress : defaultAccount"
+      //-       readonly
+      //-       disabled)
+      //-     button(
+      //-       v-if="!myAddress"
+      //-       @click="asociar") Asociar
+      //-   .sent
+      //-     .loading(v-if="sent")
+      //-       font-awesome-icon(icon="circle-notch", spin)
       .cerrar-sesion
         button(@click="logout()") Cerrar sesión
 </template>

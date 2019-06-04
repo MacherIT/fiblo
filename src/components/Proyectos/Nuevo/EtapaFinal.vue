@@ -54,7 +54,7 @@ export default {
         this.error = true;
       } else {
         if (
-          this.proyecto.beneficiary_address &&
+          // this.proyecto.beneficiary_address &&
           this.proyecto.nombre &&
           this.proyecto.categoria_id &&
           this.proyecto.ciudad &&
@@ -133,7 +133,7 @@ export default {
           Promise.all(proms).then(
             () => {
               fiblo.deployProyectoFull(
-                this.proyecto.beneficiary_address,
+                // this.proyecto.beneficiary_address,
                 this.proyecto.cantAcciones,
                 this.proyecto.nombre
                   .toLowerCase()
