@@ -218,3 +218,16 @@
   nodemon
   ```
 4. Abrir el sitio en el navegador y acceder a http://localhost:8080
+
+
+# Redes específicas
+
+- En todas las redes públicas (que no sean Ganache) se debe incluir el parámetro 'from' en las transacciones.
+
+## Redes públicas
+- Utilizar web3.eth.getGasPrice() para estimar el precio del gas antes de enviar cualquier transacción.
+
+## Ropsten
+- En todas las transacciones se necesita incluir el gas y el gasPrice. 
+
+## RSK
