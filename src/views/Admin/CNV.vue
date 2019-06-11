@@ -71,31 +71,31 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
-import TourCNV from '@/components/General/Tour/CNV';
+import TourCNV from "@/components/General/Tour/CNV";
 
-import fiblo from '@/services/fiblo';
+import fiblo from "@/services/fiblo";
 
 export default {
   components: {
-    TourCNV,
+    TourCNV
   },
   data() {
     return {
       projects: [],
       beneficiaries: [],
-      tabActiva: 0,
+      tabActiva: 0
     };
   },
   computed: {
-    ...mapState('tour', ['tour']),
-    ...mapState('usuarios', ['token']),
+    ...mapState("tour", ["tour"]),
+    ...mapState("usuarios", ["token"])
   },
   mounted() {
     this.$http({
-      method: 'GET',
-      url: '/api/proyectos',
+      method: "GET",
+      url: "/api/proyectos"
     }).then(
       ({ data }) => {
         this.projects = data.map(p => ({
@@ -103,7 +103,7 @@ export default {
           closedRound: false,
           valid: false,
           selfValidatedByCNV: false,
-          beneficiaryValidatedByCNV: false,
+          beneficiaryValidatedByCNV: false
         }));
         this.projects.map(p => {
           fiblo.isProjectClosed(p.address, (error, closed) => {
@@ -138,14 +138,14 @@ export default {
       },
       error => {
         console.error(error);
-      },
+      }
     );
     this.$http({
-      method: 'GET',
-      url: '/api/usuarios',
+      method: "GET",
+      url: "/api/usuarios",
       headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
+        Authorization: `Bearer ${this.token}`
+      }
     }).then(
       ({ data }) => {
         console.log(data);
@@ -162,7 +162,7 @@ export default {
       },
       error => {
         console.error(error);
-      },
+      }
     );
   },
   methods: {
@@ -225,13 +225,13 @@ export default {
         } else {
         }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/_config.scss';
+@import "~Styles/_config.scss";
 .cnv {
   display: flex;
   justify-content: flex-start;
@@ -354,7 +354,7 @@ export default {
         background-color: $colorAzulClaro;
         position: relative;
         &::before {
-          content: '';
+          content: "";
           position: absolute;
           width: 100%;
           height: 5px;

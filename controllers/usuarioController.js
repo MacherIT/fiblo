@@ -1,10 +1,10 @@
-var passport = require('passport');
-var usuarioModel = require('../models/usuarioModel.js');
-var proyectoModel = require('../models/proyectoModel.js');
-var mpc = require('../modules/mpc.js');
-var mca = require('../modules/mca.js');
-var crypto = require('crypto');
-const Op = require('sequelize').Op;
+var passport = require("passport");
+var usuarioModel = require("../models/usuarioModel.js");
+var proyectoModel = require("../models/proyectoModel.js");
+var mpc = require("../modules/mpc.js");
+var mca = require("../modules/mca.js");
+var crypto = require("crypto");
+const Op = require("sequelize").Op;
 
 /**
  * usuarioController.js
@@ -21,9 +21,9 @@ module.exports = {
         include: [
           {
             model: proyectoModel,
-            as: 'proyectos',
-          },
-        ],
+            as: "proyectos"
+          }
+        ]
       })
       .then(
         // usuarioModel.findAll().then(
@@ -32,10 +32,10 @@ module.exports = {
         },
         error => {
           return res.status(500).json({
-            message: 'Error when getting usuario.',
-            error: error,
+            message: "Error when getting usuario.",
+            error: error
           });
-        },
+        }
       );
   },
 
@@ -44,10 +44,10 @@ module.exports = {
       .findAll({
         where: {
           address: {
-            [Op.ne]: null,
-          },
+            [Op.ne]: null
+          }
         },
-        attributes: ['id', 'nombre', 'address'],
+        attributes: ["id", "nombre", "address"]
       })
       .then(
         usuarios => {
@@ -55,10 +55,10 @@ module.exports = {
         },
         error => {
           return res.status(500).json({
-            message: 'Error when getting usuario.',
-            error: error,
+            message: "Error when getting usuario.",
+            error: error
           });
-        },
+        }
       );
   },
 
@@ -71,17 +71,17 @@ module.exports = {
       usuario => {
         if (!usuario) {
           return res.status(404).json({
-            message: 'No such usuario',
+            message: "No such usuario"
           });
         }
         return res.json(usuario);
       },
       error => {
         return res.status(500).json({
-          message: 'Error when getting usuario.',
-          error: error,
+          message: "Error when getting usuario.",
+          error: error
         });
-      },
+      }
     );
   },
   simple_data: function(req, res) {
@@ -89,23 +89,23 @@ module.exports = {
     usuarioModel
       .findOne({
         where: { id: id },
-        attributes: ['nombre', 'avatar', 'address'],
+        attributes: ["nombre", "avatar", "address"]
       })
       .then(
         usuario => {
           if (!usuario) {
             return res.status(404).json({
-              message: 'No such usuario',
+              message: "No such usuario"
             });
           }
           return res.json(usuario);
         },
         error => {
           return res.status(500).json({
-            message: 'Error when getting usuario.',
-            error: error,
+            message: "Error when getting usuario.",
+            error: error
           });
-        },
+        }
       );
   },
   // //////////////
@@ -117,7 +117,9 @@ module.exports = {
             let token = usuario.generateMailToken();
             mpc(usuario.email, token, (error, info) => {
               if (error) {
-                return res.status(500).json({ message: 'Ocurrió un error', token: token });
+                return res
+                  .status(500)
+                  .json({ message: "Ocurrió un error", token: token });
               } else {
                 return res.json();
               }
@@ -128,20 +130,20 @@ module.exports = {
         },
         error => {
           return res.status(500).json({
-            message: 'Error when getting usuario.',
-            error: error,
+            message: "Error when getting usuario.",
+            error: error
           });
-        },
+        }
       );
     } else {
       return res.status(400).json({
-        message: 'Error',
+        message: "Error"
       });
     }
   },
   // //////////////
   login: (req, res) => {
-    passport.authenticate('local', function(err, usuario, info) {
+    passport.authenticate("local", function(err, usuario, info) {
       var token;
 
       // If Passport throws/catches an error
@@ -171,7 +173,7 @@ module.exports = {
       email: req.body.email,
       nombre: req.body.nombre,
       hash: req.body.hash,
-      role: req.body.role,
+      role: req.body.role
     });
 
     usuario.setPassword(req.body.password);
@@ -182,19 +184,20 @@ module.exports = {
         if (!req.headers.authorization) {
           mca(usuario.email, usuario.activation, (error, info) => {
             if (error) {
-              return res.status(500).json({ message: 'Ocurrió un error', usuario: usuario });
+              return res.status(500).json({ message: "Ocurrió un error" });
             } else {
               return res.status(206).json();
             }
           });
+          // return res.json();
         }
       },
       error => {
         return res.status(500).json({
-          message: 'Error when creating usuario',
-          error: error,
+          message: "Error when creating usuario",
+          error: error
         });
-      },
+      }
     );
   },
 
@@ -243,7 +246,7 @@ module.exports = {
       usuario => {
         if (!usuario) {
           return res.status(404).json({
-            message: 'No such usuario',
+            message: "No such usuario"
           });
         }
 
@@ -260,18 +263,18 @@ module.exports = {
           error => {
             console.log(error);
             return res.status(500).json({
-              message: 'Error when updating usuario.',
-              error: error,
+              message: "Error when updating usuario.",
+              error: error
             });
-          },
+          }
         );
       },
       error => {
         return res.status(500).json({
-          message: 'Error when getting usuario',
-          error: error,
+          message: "Error when getting usuario",
+          error: error
         });
-      },
+      }
     );
   },
 
@@ -281,7 +284,7 @@ module.exports = {
       usuario => {
         if (!usuario) {
           return res.status(404).json({
-            message: 'No such usuario',
+            message: "No such usuario"
           });
         }
 
@@ -295,18 +298,18 @@ module.exports = {
           error => {
             console.log(error);
             return res.status(500).json({
-              message: 'Error when updating usuario.',
-              error: error,
+              message: "Error when updating usuario.",
+              error: error
             });
-          },
+          }
         );
       },
       error => {
         return res.status(500).json({
-          message: 'Error when getting usuario',
-          error: error,
+          message: "Error when getting usuario",
+          error: error
         });
-      },
+      }
     );
   },
 
@@ -317,7 +320,7 @@ module.exports = {
         usuario => {
           if (!usuario) {
             return res.status(404).json({
-              message: 'No such usuario',
+              message: "No such usuario"
             });
           } else {
             usuario.setPassword(req.body.password);
@@ -328,23 +331,23 @@ module.exports = {
               },
               error => {
                 return res.status(500).json({
-                  message: 'Error when updating usuario',
-                  error: error,
+                  message: "Error when updating usuario",
+                  error: error
                 });
-              },
+              }
             );
           }
         },
         error => {
           return res.status(500).json({
-            message: 'Error when getting usuario',
-            error: error,
+            message: "Error when getting usuario",
+            error: error
           });
-        },
+        }
       );
     } else {
       return res.status(400).json({
-        message: 'Error',
+        message: "Error"
       });
     }
   },
@@ -355,16 +358,16 @@ module.exports = {
         usuario => {
           if (!usuario) {
             return res.status(404).json({
-              message: 'No such usuario',
+              message: "No such usuario"
             });
           } else {
-            usuario.activation = '';
+            usuario.activation = "";
 
             usuario.save().then((err, usuario) => {
               if (err) {
                 return res.status(500).json({
-                  message: 'Error when updating usuario.',
-                  error: err,
+                  message: "Error when updating usuario.",
+                  error: err
                 });
               }
               return res.json();
@@ -373,14 +376,14 @@ module.exports = {
         },
         error => {
           return res.status(500).json({
-            message: 'Error when getting usuario',
-            error: err,
+            message: "Error when getting usuario",
+            error: err
           });
-        },
+        }
       );
     } else {
       return res.status(400).json({
-        message: 'Error',
+        message: "Error"
       });
     }
   },
@@ -398,10 +401,10 @@ module.exports = {
       },
       error => {
         return res.status(500).json({
-          message: 'Error when deleting the usuario.',
-          error: error,
+          message: "Error when deleting the usuario.",
+          error: error
         });
-      },
+      }
     );
-  },
+  }
 };

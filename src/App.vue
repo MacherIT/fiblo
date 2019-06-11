@@ -61,8 +61,12 @@ export default {
   mounted() {
     setTimeout(() => {
       const self = this;
-      fiblo.isMetaMaskInstalled(ready => {
+      fiblo.isMetaMaskInstalled(async ready => {
         self.web3Ready = ready;
+        if (!ready && window.ethereum && window.ethereum.enable) {
+          await window.ethereum.enable();
+          window.location.reload();
+        }
       });
     }, 3000);
   },

@@ -2,7 +2,7 @@
   .mis-participaciones
     .suma-total
       .total.eth
-        span Ξ {{cantTotalETH.toFixed(2)}}
+        span {{currencySymbol}} {{cantTotalETH.toFixed(2)}}
       .total.ars
         span $ {{(cantTotalETH * valorCambio).toFixed(2)}}
       .total.acc
@@ -33,7 +33,7 @@
             .address
               span {{proyecto.address | limitStr(10)}}
             .monto
-              span Ξ {{(proyecto.misParticipaciones.montoETH).toFixed(2)}} ≈ $ {{(proyecto.misParticipaciones.montoETH * valorCambio).toFixed(2)}} ≈ {{parseInt(proyecto.misParticipaciones.acciones)}} acc
+              span {{currencySymbol}} {{(proyecto.misParticipaciones.montoETH).toFixed(2)}} ≈ $ {{(proyecto.misParticipaciones.montoETH * valorCambio).toFixed(2)}} ≈ {{parseInt(proyecto.misParticipaciones.acciones)}} acc
           .boton-transferir-tokens(
             v-if="proyecto.closedRound && proyecto.misParticipaciones.fromList.indexOf(defaultAccount) >= 0")
             button(
@@ -49,54 +49,71 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions } from "vuex";
 
-import TransferirTokens from '@/components/Proyectos/TranferirTokens';
+import TransferirTokens from "@/components/Proyectos/TranferirTokens";
 
-import fiblo from '@/services/fiblo';
-import marketcap from '@/services/marketcap';
+import fiblo from "@/services/fiblo";
+import marketcap from "@/services/marketcap";
 
 const txs = [];
 
 export default {
   components: {
-    TransferirTokens,
+    TransferirTokens
   },
   data() {
     return {
       proyectos: {},
       valorCambio: 0,
-      transferAddress: '',
-      defaultAccount: '',
+      transferAddress: "",
+      defaultAccount: "",
+      currentNetwork: -1
     };
   },
   computed: {
-    ...mapGetters('usuarios', ['usuario']),
+    ...mapGetters("usuarios", ["usuario"]),
     cantTotalProyectos() {
       return Object.keys(this.proyectos).reduce(
-        (acumulador, p) => (this.proyectos[p].participaEnProyecto ? acumulador + 1 : acumulador),
-        0,
+        (acumulador, p) =>
+          this.proyectos[p].participaEnProyecto ? acumulador + 1 : acumulador,
+        0
       );
     },
     cantTotalAcciones() {
       return Object.keys(this.proyectos).reduce(
-        (acumulador, p) => acumulador + this.proyectos[p].misParticipaciones.acciones,
-        0,
+        (acumulador, p) =>
+          acumulador + this.proyectos[p].misParticipaciones.acciones,
+        0
       );
     },
     cantTotalETH() {
       return Object.keys(this.proyectos).reduce(
-        (acumulador, p) => acumulador + this.proyectos[p].misParticipaciones.montoETH,
-        0,
+        (acumulador, p) =>
+          acumulador + this.proyectos[p].misParticipaciones.montoETH,
+        0
       );
     },
+    currencySymbol() {
+      return this.currentNetwork != 31 && this.currentNetwork != 33
+        ? "Ξ"
+        : "RBTC";
+    }
   },
   mounted() {
     this.initMisParticipaciones();
-    this.setPageTitle('Mis participaciones');
+    this.setPageTitle("Mis participaciones");
+    fiblo.getNetworkVersion((error, netVer) => {
+      if (error) {
+        console.error(error);
+        this.currentNetwork = -1;
+      } else {
+        this.currentNetwork = netVer;
+      }
+    });
   },
   methods: {
-    ...mapActions('general', ['setPageTitle']),
+    ...mapActions("general", ["setPageTitle"]),
     showPopupTransferirTokens(address) {
       this.transferAddress = address;
     },
@@ -116,12 +133,12 @@ export default {
         error => {
           console.error(error);
           this.valorCambio = 4000;
-        },
+        }
       );
 
       this.$http({
-        method: 'GET',
-        url: '/api/proyectos',
+        method: "GET",
+        url: "/api/proyectos"
       }).then(
         ({ data }) => {
           this.proyectos = data.reduce(
@@ -134,11 +151,11 @@ export default {
                 misParticipaciones: {
                   fromList: [],
                   montoETH: 0,
-                  acciones: 0,
-                },
-              },
+                  acciones: 0
+                }
+              }
             }),
-            {},
+            {}
           );
           Object.keys(this.proyectos).map(pid => {
             const p = this.proyectos[pid];
@@ -152,9 +169,13 @@ export default {
                     console.error(error);
                   } else {
                     if (tx.args.uid.toNumber() === this.usuario.id) {
-                      if (p.misParticipaciones.fromList.indexOf(tx.args.from) < 0)
+                      if (
+                        p.misParticipaciones.fromList.indexOf(tx.args.from) < 0
+                      )
                         p.misParticipaciones.fromList.push(tx.args.from);
-                      p.misParticipaciones.montoETH += web3.fromWei(tx.args.amount).toNumber();
+                      p.misParticipaciones.montoETH += web3
+                        .fromWei(tx.args.amount)
+                        .toNumber();
                       p.participaEnProyecto = true;
                       if (!closed) {
                         p.misParticipaciones.acciones +=
@@ -163,13 +184,19 @@ export default {
                             p.cantAcciones) /
                           p.monto;
                       } else {
-                        fiblo.balanceOf(p.address, tx.args.from, (error, balance) => {
-                          if (error) {
-                            console.error(error);
-                          } else {
-                            p.misParticipaciones.acciones = web3.fromWei(balance).toNumber();
+                        fiblo.balanceOf(
+                          p.address,
+                          tx.args.from,
+                          (error, balance) => {
+                            if (error) {
+                              console.error(error);
+                            } else {
+                              p.misParticipaciones.acciones = web3
+                                .fromWei(balance)
+                                .toNumber();
+                            }
                           }
-                        });
+                        );
                       }
                     }
                   }
@@ -180,15 +207,15 @@ export default {
         },
         error => {
           console.error(error);
-        },
+        }
       );
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/_config.scss';
+@import "~Styles/_config.scss";
 .mis-participaciones {
   display: flex;
   justify-content: flex-start;

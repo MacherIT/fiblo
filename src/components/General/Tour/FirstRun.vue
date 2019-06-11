@@ -7,6 +7,9 @@
         .logo
           img(src="@/assets/images/logo-texto-celeste.png")
       .texto-botones
+        .red-actual
+          strong Red actual: 
+          span {{networks[currentNetwork].name}}
         .texto
           p
             | Bienvenido a Fiblo, una plataforma de financiamiento colectivo basada en Ethereum (Blockchain).
@@ -20,17 +23,61 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions } from "vuex";
+
+import fiblo from "@/services/fiblo";
 
 export default {
-  methods: {
-    ...mapActions('tour', ['finishFirstRun', 'skiptTour']),
+  data() {
+    return {
+      networks: {
+        "1": {
+          name: "Ethereum - MainNet",
+          url: "https://api.infura.io/v1/jsonrpc/mainnet"
+          // logo: require("../../assets/images/network-logos/ethereum.png")
+        },
+        "3": {
+          name: "Ethereum - Ropsten",
+          url: "https://api.infura.io/v1/jsonrpc/ropsten"
+          // logo: require("../../assets/images/network-logos/ropsten.png")
+        },
+        "31": {
+          name: "RSK - TestNet",
+          url: "https://public-node.testnet.rsk.co:443"
+          // logo: require("../../assets/images/network-logos/rsk.png")
+        },
+        "5777": {
+          name: "Ethereum - Ganache",
+          url: "http://localhost:7545"
+          // logo: require("../../assets/images/network-logos/ganache.png")
+        },
+        "-1": {
+          name: "",
+          url: ""
+          // logo: ""
+        }
+      },
+      currentNetwork: -1
+    };
   },
+  methods: {
+    ...mapActions("tour", ["finishFirstRun", "skiptTour"])
+  },
+  mounted() {
+    fiblo.getNetworkVersion((error, netVer) => {
+      if (error) {
+        console.error(error);
+        this.currentNetwork = -1;
+      } else {
+        if (this.networks[netVer]) this.currentNetwork = netVer;
+      }
+    });
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/_config.scss';
+@import "~Styles/_config.scss";
 .tour {
   position: fixed;
   left: 0;
@@ -64,7 +111,7 @@ export default {
       align-items: center;
       flex-direction: column;
       &::after {
-        content: '';
+        content: "";
         position: absolute;
         right: 0;
         top: 0;

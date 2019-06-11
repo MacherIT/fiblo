@@ -86,23 +86,23 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions } from "vuex";
 
 export default {
   data() {
     return {
-      etapa: 0,
+      etapa: 0
     };
   },
   computed: {
-    ...mapState('usuarios', ['loggedIn']),
+    ...mapState("usuarios", ["loggedIn"])
   },
   mounted() {
     this.setDiffs();
-    window.addEventListener('resize', this.setDiffs);
+    window.addEventListener("resize", this.setDiffs);
   },
   methods: {
-    ...mapActions('tour', ['finishMain']),
+    ...mapActions("tour", ["finishMain"]),
     saltar() {
       this.finishMain();
     },
@@ -120,52 +120,62 @@ export default {
       }
     },
     setDiffs() {
-      const diffActiveUser = document.querySelector('#root-app .tour svg #diff-active-user');
-      const activeUser = document.querySelector('#root-app .active-user').getBoundingClientRect();
+      const diffActiveUser = document.querySelector(
+        "#root-app .tour svg #diff-active-user"
+      );
+      const activeUser = document
+        .querySelector("#root-app .active-user")
+        .getBoundingClientRect();
       if (diffActiveUser) {
-        diffActiveUser.setAttribute('x', activeUser.x - 10);
-        diffActiveUser.setAttribute('y', 0);
-        diffActiveUser.setAttribute('width', activeUser.width + 20);
-        diffActiveUser.setAttribute('height', activeUser.height + 10);
+        diffActiveUser.setAttribute("x", activeUser.x - 10);
+        diffActiveUser.setAttribute("y", 0);
+        diffActiveUser.setAttribute("width", activeUser.width + 20);
+        diffActiveUser.setAttribute("height", activeUser.height + 10);
       }
 
-      const diffMenu = document.querySelector('#root-app .tour svg #diff-menu');
-      const menu = document.querySelector('#root-app .main-menu').getBoundingClientRect();
+      const diffMenu = document.querySelector("#root-app .tour svg #diff-menu");
+      const menu = document
+        .querySelector("#root-app .main-menu")
+        .getBoundingClientRect();
       if (diffMenu) {
-        diffMenu.setAttribute('x', 0);
-        diffMenu.setAttribute('y', menu.y - 10);
-        diffMenu.setAttribute('width', menu.width + 10);
-        diffMenu.setAttribute('height', menu.height + 20);
+        diffMenu.setAttribute("x", 0);
+        diffMenu.setAttribute("y", menu.y - 10);
+        diffMenu.setAttribute("width", menu.width + 10);
+        diffMenu.setAttribute("height", menu.height + 20);
       }
 
-      const diffMain = document.querySelector('#root-app .tour svg #diff-main');
-      const main = document.querySelector('#root-app .main-box').getBoundingClientRect();
+      const diffMain = document.querySelector("#root-app .tour svg #diff-main");
+      const main = document
+        .querySelector("#root-app .main-box")
+        .getBoundingClientRect();
       if (diffMain) {
-        diffMain.setAttribute('x', main.x - 10);
-        diffMain.setAttribute('y', main.y - 55);
-        diffMain.setAttribute('width', main.width + 20);
-        diffMain.setAttribute('height', main.height + 65);
+        diffMain.setAttribute("x", main.x - 10);
+        diffMain.setAttribute("y", main.y - 55);
+        diffMain.setAttribute("width", main.width + 20);
+        diffMain.setAttribute("height", main.height + 65);
       }
 
       if (!this.loggedIn) {
-        const diffLoginForm = document.querySelector('#root-app .tour svg #diff-login-form');
+        const diffLoginForm = document.querySelector(
+          "#root-app .tour svg #diff-login-form"
+        );
         const loginForm = document
-          .querySelector('#root-app .main-box .login-logout .login form')
+          .querySelector("#root-app .main-box .login-logout .login form")
           .getBoundingClientRect();
         if (diffLoginForm) {
-          diffLoginForm.setAttribute('x', loginForm.x - 10);
-          diffLoginForm.setAttribute('y', loginForm.y - 10);
-          diffLoginForm.setAttribute('width', loginForm.width + 20);
-          diffLoginForm.setAttribute('height', loginForm.height + 20);
+          diffLoginForm.setAttribute("x", loginForm.x - 10);
+          diffLoginForm.setAttribute("y", loginForm.y - 10);
+          diffLoginForm.setAttribute("width", loginForm.width + 20);
+          diffLoginForm.setAttribute("height", loginForm.height + 20);
         }
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/_config.scss';
+@import "~Styles/_config.scss";
 .tour {
   position: fixed;
   left: 0;

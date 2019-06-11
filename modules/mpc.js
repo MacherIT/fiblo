@@ -3,13 +3,12 @@ var express = require("express");
 const nodemailer = require("nodemailer");
 
 let globalTransporter = {
-  host: "", //SERVIDOR DE SALIDA EJ.: server.macherit.tk
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: {
-    user: "", //MAIL CARRIER EJ.: no-reply@pablopan.com
-    pass: process.env.MAIL_PASS
-  }
+    user: "fiblo.dev@gmail.com",
+    pass: "Accion2019"
+  },
+  secure: true
 };
 
 module.exports = (email, token, callback) => {
@@ -21,9 +20,9 @@ module.exports = (email, token, callback) => {
 
     transporter.sendMail(
       {
-        from: "no-reply@pablopan.com",
+        from: "fiblo.dev@gmail.com",
         to: email,
-        subject: "Contacto desde pablopan",
+        subject: "Contacto desde Fiblo",
         text: template.usuario.text(token),
         html: template.usuario.html(token)
       },

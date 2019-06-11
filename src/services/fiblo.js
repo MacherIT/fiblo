@@ -1,14 +1,11 @@
 import Web3 from "web3";
-// import baseJSONFactory from '../../build/contracts/SASFactory.json';
 import baseJSON from "../../build/contracts/ContratoSAS.json";
 import baseJSONCNV from "../../build/contracts/CNV.json";
 import baseJSONOraculoPrecio from "../../build/contracts/OraculoPrecio.json";
-import MODULE from "../../build/contracts/Module.json";
-import SA from "../../build/contracts/StandAlone.json";
-import { default as contract } from "truffle-contract";
 
-const CNV_ADDRESS = baseJSONCNV.networks["3"].address;
-const ORACULO_PRECIO_ADDRESS = baseJSONOraculoPrecio.networks["3"].address;
+let CNV_ADDRESS;
+let ORACULO_PRECIO_ADDRESS;
+let NETWORK_VERSION;
 
 // const MODULE_ADDRESS = MODULE.networks['3'].address;
 // const SA_ADDRESS = SA.networks['3'].address;
@@ -26,86 +23,70 @@ const web3Init = callback => {
     );
   }
 
-  // DEV ONLY
-  // DEV ONLY
-  // DEV ONLY
-
-  const proxySAS = window.web3.eth.contract(baseJSON.abi);
-  window.initProyecto = project_address => {
-    window.proyecto = proxySAS.at(project_address);
-  };
-
-  const oraculoProxy = window.web3.eth.contract(baseJSONOraculoPrecio.abi);
-  window.oraculo = oraculoProxy.at(ORACULO_PRECIO_ADDRESS);
-
-  // window.estimateGas = () => {
-  //   window.web3.eth.getGasPrice((error, result) => {
-  //     const gasPrice = result;
-  //     console.log(`Gas Price is ${gasPrice} wei`); // "10000000000000"
-  //     const ContratoSAS = contract(baseJSON);
-  //     ContratoSAS.setProvider(web3.currentProvider);
-  //     ContratoSAS.at('0xf747639083fad0964e93fdafdcb7352d2d4a1c59')
-  //       .receiveFunds.estimateGas(1)
-  //       .then(result => {
-  //         console.log(result);
-  //       });
-  //   });
-  // };
-
-  // const modProxy = window.web3.eth.contract(MODULE.abi);
-  // window.modulo = modProxy.at(MODULE_ADDRESS);
-  //
-  // const saProxy = window.web3.eth.contract(SA.abi);
-  // window.salon = saProxy.at(SA_ADDRESS);
-
-  // // getGasPrice returns the gas price on the current network
-  // TestContract.web3.eth.getGasPrice((error, result) => {
-  //   const gasPrice = Number(result);
-  //   console.log(`Gas Price is ${gasPrice} wei`); // "10000000000000"
-  //
-  //   // Get Contract instance
-  //   TestContract.deployed()
-  //     .then(instance =>
-  //       // Use the keyword 'estimateGas' after the function name to get the gas estimation for this particular function
-  //       instance.giveAwayDividend.estimateGas(1),
-  //     )
-  //     .then(result => {
-  //       const gas = Number(result);
-  //
-  //       console.log(`gas estimation = ${gas} units`);
-  //       console.log(`gas cost estimation = ${gas * gasPrice} wei`);
-  //       console.log(
-  //         `gas cost estimation = ${TestContract.web3.fromWei(gas * gasPrice, 'ether')} ether`,
-  //       );
-  //     });
-  // });
-
-  // DEV ONLY
-  // DEV ONLY
-  // DEV ONLY
-
-  window.web3.eth.getAccounts((error, accounts) => {
+  window.web3.version.getNetwork((error, networkVersion) => {
     if (error) {
-      callback(error, null);
+      console.error(error);
+    } else {
+      NETWORK_VERSION = networkVersion;
+
+      CNV_ADDRESS = baseJSONCNV.networks[networkVersion].address;
+      ORACULO_PRECIO_ADDRESS =
+        baseJSONOraculoPrecio.networks[networkVersion].address;
+
+      const proxySAS = window.web3.eth.contract(baseJSON.abi);
+      window.initProyecto = project_address => {
+        window.proyecto = proxySAS.at(project_address);
+      };
+
+      const oraculoProxy = window.web3.eth.contract(baseJSONOraculoPrecio.abi);
+      window.oraculo = oraculoProxy.at(ORACULO_PRECIO_ADDRESS);
+
+      const cnvProxy = window.web3.eth.contract(baseJSONCNV.abi);
+      window.cnv = cnvProxy.at(CNV_ADDRESS);
+
+      window.web3.eth.getAccounts((error, accounts) => {
+        if (error) {
+          callback(error, null);
+        }
+        callback(null, accounts);
+      });
     }
-    callback(null, accounts);
   });
 };
 
-window.method = () => {
-  web3Init((err, accounts) => {
-    window.web3.eth.defaultAccount = accounts[0];
-    web3.eth.estimateGas(
-      {
-        data: baseJSON.bytecode,
-        from: web3.eth.defaultAccount
-      },
-      (err, res) => console.log(err, res)
+const web3InitNoAccount = callback => {
+  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+  if (typeof window.web3 !== "undefined") {
+    // Use Mist/MetaMask's provider
+    window.web3 = new Web3(window.web3.currentProvider);
+  } else {
+    window.web3 = new Web3(
+      new Web3.providers.HttpProvider("http://127.0.0.1:7545")
     );
+  }
+
+  window.web3.version.getNetwork((error, networkVersion) => {
+    if (error) {
+      callback(error, null);
+    } else {
+      NETWORK_VERSION = networkVersion;
+      callback(null, networkVersion);
+    }
   });
 };
 
 export default {
+  getNetworkVersion(callback) {
+    web3InitNoAccount((error, accounts) => {
+      if (error) {
+        callback(error, null);
+      } else if (NETWORK_VERSION) {
+        callback(null, NETWORK_VERSION);
+      } else {
+        callback(false, null);
+      }
+    });
+  },
   isMetaMaskInstalled(callback) {
     web3Init((error, accounts) => {
       if (error) {
@@ -154,35 +135,59 @@ export default {
             const proyecto = proxySAS.at(project_address);
             console.log(monto);
 
-            proyecto.receiveFunds(
-              parseInt(userId),
+            web3.eth.estimateGas(
               {
-                from: window.web3.eth.defaultAccount,
-                value: Math.floor(window.web3.toWei(monto, "ether"))
+                data: baseJSON.bytecode,
+                from: web3.eth.defaultAccount
               },
-              (error, instance) => {
-                console.log(
-                  window.web3.eth.accounts[0],
-                  window.web3.toWei(parseFloat(monto), "ether")
-                );
-                const filter = web3.eth.filter({
-                  toBlock: "latest"
-                });
-                filter.watch((error, log) => {
-                  if (
-                    log.transactionHash &&
-                    log.transactionHash === instance.transactionHash &&
-                    logIndexN < 0
-                  ) {
-                    if (error) {
-                      callback(error, null);
+              (err, res) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  const gas = res;
+                  web3.eth.getGasPrice((err, res) => {
+                    if (err) {
+                      console.error(err);
                     } else {
-                      logIndexN = log.logIndex;
-                      callback(null, instance);
-                      filter.stopWatching();
+                      const gasPrice = res;
+
+                      proyecto.receiveFunds(
+                        parseInt(userId),
+                        {
+                          from: window.web3.eth.defaultAccount,
+                          value: Math.floor(window.web3.toWei(monto, "ether")),
+                          gas,
+                          gasPrice
+                        },
+                        (error, instance) => {
+                          console.log(
+                            window.web3.eth.accounts[0],
+                            window.web3.toWei(parseFloat(monto), "ether")
+                          );
+                          const filter = web3.eth.filter({
+                            toBlock: "latest"
+                          });
+                          filter.watch((error, log) => {
+                            if (
+                              log.transactionHash &&
+                              log.transactionHash ===
+                                instance.transactionHash &&
+                              logIndexN < 0
+                            ) {
+                              if (error) {
+                                callback(error, null);
+                              } else {
+                                logIndexN = log.logIndex;
+                                callback(null, instance);
+                                filter.stopWatching();
+                              }
+                            }
+                          });
+                        }
+                      );
                     }
-                  }
-                });
+                  });
+                }
               }
             );
           }
@@ -391,14 +396,7 @@ export default {
       }
     });
   },
-  deployProyectoFull(
-    cant_acciones,
-    symbol,
-    monto,
-    monto_max,
-    fecha,
-    callback
-  ) {
+  deployProyectoFull(cant_acciones, symbol, monto, monto_max, fecha, callback) {
     let logIndexN = -1;
     web3Init((error, accounts) => {
       if (error) {
@@ -419,7 +417,7 @@ export default {
                 if (err) {
                   console.error(err);
                 } else {
-                  const estimatedGas = res;
+                  const gas = res;
                   web3.eth.getGasPrice((err, res) => {
                     if (err) {
                       console.error(err);
@@ -437,7 +435,7 @@ export default {
                         {
                           from: web3.eth.defaultAccount,
                           data: baseJSON.bytecode,
-                          gas: parseInt(estimatedGas + estimatedGas / 4),
+                          gas,
                           gasPrice
                         },
                         (error, instance) => {
@@ -449,7 +447,7 @@ export default {
                               // log &&
                               // log.transactionHash &&
                               // log.transactionHash ===
-                              //   instance.transactionHash &&
+                              // instance.transactionHash &&
                               // logIndexN < 0
                               instance.address
                             ) {
@@ -457,7 +455,7 @@ export default {
                               //   callback(error, null);
                               //   // } else if (log.address) {
                               // } else {
-                              console.log("aca");
+                              // console.log("aca");
 
                               // logIndexN = log.logIndex;
                               callback(null, {
@@ -586,27 +584,51 @@ export default {
             const proxySAS = window.web3.eth.contract(baseJSON.abi);
             const proyecto = proxySAS.at(project_address);
 
-            proyecto.setProjectValidity((error, instance) => {
-              const filter = web3.eth.filter({
-                toBlock: "latest"
-              });
-              filter.watch((error, log) => {
-                console.log(log.transactionHash);
-                if (
-                  log.transactionHash &&
-                  log.transactionHash === instance &&
-                  logIndexN < 0
-                ) {
-                  if (error) {
-                    callback(error, null);
-                  } else {
-                    logIndexN = log.logIndex;
-                    callback(null, instance);
-                    filter.stopWatching();
-                  }
+            web3.eth.estimateGas(
+              {
+                data: baseJSON.bytecode,
+                from: web3.eth.defaultAccount
+              },
+              (err, res) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  const gas = res;
+                  web3.eth.getGasPrice((err, res) => {
+                    if (err) {
+                      console.error(err);
+                    } else {
+                      const gasPrice = res;
+
+                      proyecto.setProjectValidity(
+                        { gas, gasPrice },
+                        (error, instance) => {
+                          const filter = web3.eth.filter({
+                            toBlock: "latest"
+                          });
+                          filter.watch((error, log) => {
+                            console.log(log.transactionHash);
+                            if (
+                              log.transactionHash &&
+                              log.transactionHash === instance &&
+                              logIndexN < 0
+                            ) {
+                              if (error) {
+                                callback(error, null);
+                              } else {
+                                logIndexN = log.logIndex;
+                                callback(null, instance);
+                                filter.stopWatching();
+                              }
+                            }
+                          });
+                        }
+                      );
+                    }
+                  });
                 }
-              });
-            });
+              }
+            );
           }
         );
       }
@@ -626,26 +648,51 @@ export default {
             const proxySAS = window.web3.eth.contract(baseJSON.abi);
             const proyecto = proxySAS.at(project_address);
 
-            proyecto.setBeneficiaryValidity((error, instance) => {
-              const filter = web3.eth.filter({
-                toBlock: "latest"
-              });
-              filter.watch((error, log) => {
-                if (
-                  log.transactionHash &&
-                  log.transactionHash === instance.transactionHash &&
-                  logIndexN < 0
-                ) {
-                  if (error) {
-                    callback(error, null);
-                  } else {
-                    logIndexN = log.logIndex;
-                    callback(null, instance);
-                    filter.stopWatching();
-                  }
+            web3.eth.estimateGas(
+              {
+                data: baseJSON.bytecode,
+                from: web3.eth.defaultAccount
+              },
+              (err, res) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  const gas = res;
+                  web3.eth.getGasPrice((err, res) => {
+                    if (err) {
+                      console.error(err);
+                    } else {
+                      const gasPrice = res;
+
+                      proyecto.setBeneficiaryValidity(
+                        { gas, gasPrice },
+                        (error, instance) => {
+                          const filter = web3.eth.filter({
+                            toBlock: "latest"
+                          });
+                          filter.watch((error, log) => {
+                            if (
+                              log.transactionHash &&
+                              log.transactionHash ===
+                                instance.transactionHash &&
+                              logIndexN < 0
+                            ) {
+                              if (error) {
+                                callback(error, null);
+                              } else {
+                                logIndexN = log.logIndex;
+                                callback(null, instance);
+                                filter.stopWatching();
+                              }
+                            }
+                          });
+                        }
+                      );
+                    }
+                  });
                 }
-              });
-            });
+              }
+            );
           }
         );
       }
@@ -746,26 +793,51 @@ export default {
           () => {
             const proxyCNV = window.web3.eth.contract(baseJSONCNV.abi);
             const cnv = proxyCNV.at(CNV_ADDRESS);
-            cnv.addProject(project_address, (error, instance) => {
-              const filter = web3.eth.filter({
-                toBlock: "latest"
-              });
-              filter.watch((error, log) => {
-                if (
-                  log.transactionHash &&
-                  log.transactionHash === instance.transactionHash &&
-                  logIndexN < 0
-                ) {
-                  if (error) {
-                    callback(error, null);
-                  } else {
-                    logIndexN = log.logIndex;
-                    callback(null, instance);
-                    filter.stopWatching();
-                  }
+            web3.eth.estimateGas(
+              {
+                data: baseJSON.bytecode,
+                from: web3.eth.defaultAccount
+              },
+              (err, res) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  const gas = res;
+                  web3.eth.getGasPrice((err, res) => {
+                    if (err) {
+                      console.error(err);
+                    } else {
+                      const gasPrice = res;
+                      cnv.addProject(
+                        project_address,
+                        { gas, gasPrice },
+                        (error, instance) => {
+                          const filter = web3.eth.filter({
+                            toBlock: "latest"
+                          });
+                          filter.watch((error, log) => {
+                            if (
+                              log.transactionHash &&
+                              log.transactionHash ===
+                                instance.transactionHash &&
+                              logIndexN < 0
+                            ) {
+                              if (error) {
+                                callback(error, null);
+                              } else {
+                                logIndexN = log.logIndex;
+                                callback(null, instance);
+                                filter.stopWatching();
+                              }
+                            }
+                          });
+                        }
+                      );
+                    }
+                  });
                 }
-              });
-            });
+              }
+            );
           }
         );
       }

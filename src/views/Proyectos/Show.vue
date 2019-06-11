@@ -40,8 +40,8 @@
             .resultado
               span {{montoRecaudado > 0 ? 'Se' : 'No se'}} alcanzó el monto esperado
             .alcanzacion
-              span(v-if="montoRecaudado === 0") Se alcanzó Ξ {{montoTotalContribuciones}} ≈ $ {{(montoTotalContribuciones * valorCambioFechaFin).toFixed(2)}} de los $ {{proyecto.monto}} esperados
-              span(v-if="montoRecaudado > 0") Se alcanzó Ξ {{montoRecaudado}} ≈ $ {{(montoRecaudado * valorCambio).toFixed(2)}} de los $ {{proyecto.monto}} esperados
+              span(v-if="montoRecaudado === 0") Se alcanzó {{currencySymbol}} {{montoTotalContribuciones}} ≈ $ {{(montoTotalContribuciones * valorCambioFechaFin).toFixed(2)}} de los $ {{proyecto.monto}} esperados
+              span(v-if="montoRecaudado > 0") Se alcanzó {{currencySymbol}} {{montoRecaudado}} ≈ $ {{(montoRecaudado * valorCambio).toFixed(2)}} de los $ {{proyecto.monto}} esperados
             .conclusion
               p(v-if="montoRecaudado === 0")
                 | Al {{moment(fechaCierre).format('DD/MM/YYYY')}} no se alcanzó el monto esperado del proyecto.
@@ -128,7 +128,7 @@
                   .address
                     span(v-for="(address, index) in contribucion.from") {{address | limitStr(10)}}{{index !== contribucion.from.length - 1 ? ' / ' : ''}}
                   .monto
-                    span(v-if="!closedRound") Ξ {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ {{parseInt(contribucion.monto * valorCambio / valorAccion)}} acciones
+                    span(v-if="!closedRound") {{currencySymbol}} {{(contribucion.monto).toFixed(2)}} ≈ $ {{(contribucion.monto * valorCambio).toFixed(2)}} ≈ {{parseInt(contribucion.monto * valorCambio / valorAccion)}} acciones
                     span(v-if="closedRound") {{parseInt(contribucion.acciones)}} acciones
         .tab.participar(v-if="tabActiva === 'participar'")
           .compra-acciones
@@ -140,15 +140,15 @@
                   //- v-validate="'required|max_value:' + montoMaxETH"
                   input(
                     type="text"
-                    placeholder="2 Ξ"
+                    :placeholder="'2 ' + currencySymbol"
                     v-model="montoAccionETH"
                     v-validate="'required'"
                     name="montoAccionETH"
                     @change="adjustMontos('ETH')")
                     //- :disabled="!projectValidity || !beneficiaryValidity")
-                  span Ξ
+                  span {{currencySymbol}}
                 .error
-                  span.fadeIn(v-if="montoAccionETH > montoMaxETH") El monto a comprar no puede superar {{montoMaxETH.toFixed(2)}} Ξ
+                  span.fadeIn(v-if="montoAccionETH > montoMaxETH") El monto a comprar no puede superar {{montoMaxETH.toFixed(2)}} {{currencySymbol}}
               .campo
                 input(
                   type="number"
@@ -205,17 +205,17 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
+import { mapState, mapGetters, mapActions } from "vuex";
+import moment from "moment";
 
-import TourComprar from '@/components/General/Tour/Comprar';
+import TourComprar from "@/components/General/Tour/Comprar";
 
-import fiblo from '@/services/fiblo';
-import marketcap from '@/services/marketcap';
+import fiblo from "@/services/fiblo";
+import marketcap from "@/services/marketcap";
 
 export default {
   components: {
-    TourComprar,
+    TourComprar
   },
   data() {
     return {
@@ -227,37 +227,52 @@ export default {
       closedRound: false,
       sent: false,
       montoRecaudado: 0,
-      montoAccionETH: '',
-      montoAccionARS: '',
-      montoAccionACC: '',
+      montoAccionETH: "",
+      montoAccionARS: "",
+      montoAccionACC: "",
       valorCambio: 1,
       valorCambioFechaFin: 1,
       contribuciones: {},
-      tabActiva: 'info',
+      tabActiva: "info",
       valorAccion: 0,
       fundsReturned: [],
       montoTotalContribuciones: 0,
-      fechaCierre: '',
+      fechaCierre: "",
+      currentNetwork: -1
     };
   },
   computed: {
-    ...mapState('tour', ['tour']),
-    ...mapState('usuarios', ['token']),
-    ...mapGetters('usuarios', ['usuario']),
+    ...mapState("tour", ["tour"]),
+    ...mapState("usuarios", ["token"]),
+    ...mapGetters("usuarios", ["usuario"]),
     ciudad() {
       // return this.proyecto && this.proyecto.ciudad ? JSON.parse(this.proyecto.ciudad) : '';
-      return '';
+      return "";
     },
     montoMaxETH() {
-      return parseFloat(this.proyecto.montoSuperaMax / this.valorCambio - this.montoRecaudado);
+      return parseFloat(
+        this.proyecto.montoSuperaMax / this.valorCambio - this.montoRecaudado
+      );
     },
+    currencySymbol() {
+      return this.currentNetwork != 31 && this.currentNetwork != 33 ? "Ξ" : "RBTC";
+    }
   },
   mounted() {
     this.$http({
-      method: 'GET',
-      url: `/api/proyectos/${this.$route.params.id}`,
+      method: "GET",
+      url: `/api/proyectos/${this.$route.params.id}`
     }).then(
       ({ data }) => {
+        fiblo.getNetworkVersion((error, netVer) => {
+          if (error) {
+            console.error(error);
+            this.currentNetwork = -1;
+          } else {
+            this.currentNetwork = netVer;
+          }
+        });
+
         marketcap.getArsAtDate(data.fechaFin).then(
           monto => {
             this.valorCambioFechaFin = monto;
@@ -265,7 +280,7 @@ export default {
           error => {
             console.error(error);
             this.valorCambioFechaFin = 4000;
-          },
+          }
         );
 
         this.proyecto = data;
@@ -307,9 +322,9 @@ export default {
       error => {
         console.error(error);
         if (error.status === 404) {
-          this.$router.replace('/');
+          this.$router.replace("/");
         }
-      },
+      }
     );
     marketcap.getArs().then(
       monto => {
@@ -318,16 +333,16 @@ export default {
       error => {
         console.error(error);
         this.valorCambio = 4000;
-      },
+      }
     );
   },
   methods: {
-    ...mapActions('general', ['setPageTitle', 'setFlash']),
+    ...mapActions("general", ["setPageTitle", "setFlash"]),
     adjustMontos(prop) {
-      if (prop === 'ETH') {
+      if (prop === "ETH") {
         this.montoAccionARS = this.montoAccionETH * this.valorCambio;
         this.montoAccionACC = this.montoAccionARS / this.valorAccion;
-      } else if (prop === 'ARS') {
+      } else if (prop === "ARS") {
         this.montoAccionETH = this.montoAccionARS / this.valorCambio;
         this.montoAccionACC = this.montoAccionARS / this.valorAccion;
       } else {
@@ -339,18 +354,21 @@ export default {
       Object.keys(this.contribuciones).map(uid => {
         if (Object.keys(this.contribuciones[uid].user).length === 1) {
           this.$http({
-            method: 'GET',
+            method: "GET",
             url: `/api/usuarios/${uid}/simple_data`,
             headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
+              Authorization: `Bearer ${this.token}`
+            }
           }).then(
             ({ data }) => {
-              this.contribuciones[uid].user = { ...this.contribuciones[uid].user, ...data };
+              this.contribuciones[uid].user = {
+                ...this.contribuciones[uid].user,
+                ...data
+              };
             },
             error => {
               console.error(error);
-            },
+            }
           );
         }
       });
@@ -366,37 +384,41 @@ export default {
           if (!this.contribuciones[`${contribucion.args.uid.toNumber()}`]) {
             this.contribuciones[`${contribucion.args.uid.toNumber()}`] = {
               user: {
-                id: contribucion.args.uid.toNumber(),
+                id: contribucion.args.uid.toNumber()
               },
               monto: 0,
               acciones: 0,
-              from: [],
+              from: []
             };
           }
           if (
-            this.contribuciones[`${contribucion.args.uid.toNumber()}`].from.indexOf(
-              contribucion.args.from,
-            ) < 0
+            this.contribuciones[
+              `${contribucion.args.uid.toNumber()}`
+            ].from.indexOf(contribucion.args.from) < 0
           ) {
-            this.contribuciones[`${contribucion.args.uid.toNumber()}`].from.push(
-              contribucion.args.from,
-            );
+            this.contribuciones[
+              `${contribucion.args.uid.toNumber()}`
+            ].from.push(contribucion.args.from);
           }
-          this.contribuciones[`${contribucion.args.uid.toNumber()}`].monto += window.web3
-            .fromWei(contribucion.args.amount)
-            .toNumber();
+          this.contribuciones[
+            `${contribucion.args.uid.toNumber()}`
+          ].monto += window.web3.fromWei(contribucion.args.amount).toNumber();
           this.getUserData();
           if (this.closedRound) {
-            fiblo.balanceOf(project_address, contribucion.args.from, (error, balance) => {
-              if (error) {
-                console.error(error);
-              } else {
-                // console.log(window.web3.fromWei(balance).toNumber());
-                this.contribuciones[
-                  `${contribucion.args.uid.toNumber()}`
-                ].acciones = window.web3.fromWei(balance).toNumber();
+            fiblo.balanceOf(
+              project_address,
+              contribucion.args.from,
+              (error, balance) => {
+                if (error) {
+                  console.error(error);
+                } else {
+                  // console.log(window.web3.fromWei(balance).toNumber());
+                  this.contribuciones[
+                    `${contribucion.args.uid.toNumber()}`
+                  ].acciones = window.web3.fromWei(balance).toNumber();
+                }
               }
-            });
+            );
           }
         }
       });
@@ -418,14 +440,14 @@ export default {
               this.sent = false;
               console.error(error);
               this.setFlash({
-                tipo: 'error',
-                mensaje: 'Ocurrió un error al transferir los fondos.',
+                tipo: "error",
+                mensaje: "Ocurrió un error al transferir los fondos."
               });
             } else {
               this.getMontoRecaudado();
               this.sent = false;
             }
-          },
+          }
         );
       } else {
         this.$validator.validateAll();
@@ -465,18 +487,19 @@ export default {
           console.error(error);
         } else {
           this.montoTotalContribuciones = arr.reduce(
-            (acumulador, tx) => acumulador + window.web3.fromWei(tx.args.amount).toNumber(),
-            0,
+            (acumulador, tx) =>
+              acumulador + window.web3.fromWei(tx.args.amount).toNumber(),
+            0
           );
         }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/_config.scss';
+@import "~Styles/_config.scss";
 .proyecto-show {
   display: flex;
   justify-content: flex-start;
@@ -844,7 +867,7 @@ export default {
                     position: absolute;
                     right: -30px;
                     top: -30px;
-                    content: 'Propia';
+                    content: "Propia";
                     background-color: $colorPaletaC4;
                     @include minmaxwh(60px);
                     -webkit-transform: rotate(45deg);
@@ -1058,7 +1081,7 @@ export default {
           background-color: $colorAzulClaro;
           position: relative;
           &::before {
-            content: '';
+            content: "";
             position: absolute;
             width: 100%;
             height: 5px;

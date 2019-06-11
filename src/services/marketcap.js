@@ -1,33 +1,45 @@
-import axios from 'axios';
-import moment from 'moment';
+import axios from "axios";
+import moment from "moment";
+
+import fiblo from "./fiblo";
+
+const getNetVer = () =>
+  new Promise((resolve, reject) => {
+    fiblo.getNetworkVersion((error, netVer) => {
+      if (error) {
+        console.error(error);
+        resolve(-1);
+      } else {
+        resolve(netVer);
+      }
+    });
+  });
 
 export default {
-  getArs() {
+  async getArs() {
+    const netVer = await getNetVer();
+    const currency = netVer != 31 && netVer != 33 ? "ethereum" : "bitcoin";
+
     return axios({
-      method: 'GET',
-      url: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=ARS',
-      // url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=ARS',
+      method: "GET",
+      url: `https://api.coingecko.com/api/v3/simple/price?ids=${currency}&vs_currencies=ARS`
     }).then(({ data }) => {
-      // COINGECKO
-      if (data && data.bitcoin && data.bitcoin.ars) {
-        return parseFloat(data.bitcoin.ars);
+      if (data && data[currency] && data[currency].ars) {
+        return parseFloat(data[currency].ars);
       }
       return 1;
-      // COINMARKETCAP
-      // if (data && data[0] && data[0].price_ars) {
-      //   return parseFloat(data[0].price_ars);
-      // }
     });
   },
-  getArsAtDate(atDate) {
+  async getArsAtDate(atDate) {
+    const netVer = await getNetVer();
+    const currency = netVer != 31 && netVer != 33 ? "ethereum" : "bitcoin";
+
     return axios({
-      method: 'GET',
-      url: `https://api.coingecko.com/api/v3/coins/ethereum/history?date=${moment(atDate).format(
-        'DD-MM-YYYY',
-      )}`,
-      // url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=ARS',
+      method: "GET",
+      url: `https://api.coingecko.com/api/v3/coins/${currency}/history?date=${moment(
+        atDate
+      ).format("DD-MM-YYYY")}`
     }).then(({ data }) => {
-      // COINGECKO
       if (
         data &&
         data.market_data &&
@@ -37,10 +49,6 @@ export default {
         return parseFloat(data.market_data.current_price.ars);
       }
       return 1;
-      // COINMARKETCAP
-      // if (data && data[0] && data[0].price_ars) {
-      //   return parseFloat(data[0].price_ars);
-      // }
     });
-  },
+  }
 };

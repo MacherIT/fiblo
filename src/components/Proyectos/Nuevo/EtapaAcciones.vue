@@ -13,7 +13,7 @@
             v-model="etapa.monto"
             placeholder="$100")
           .equivalencia
-            span ≈ Ξ {{(etapa.monto / valorCambio).toFixed(2)}}
+            span ≈ {{currencySymbol}} {{(etapa.monto / valorCambio).toFixed(2)}}
           .error
             span.fadeIn(v-if="etapa.monto > 200") El monto máximo es $100
       .campo
@@ -26,7 +26,7 @@
             v-model="etapa.montoSuperaMax"
             placeholder="$200")
           .equivalencia
-            span ≈ Ξ {{(etapa.montoSuperaMax / valorCambio).toFixed(2)}}
+            span ≈ {{currencySymbol}} {{(etapa.montoSuperaMax / valorCambio).toFixed(2)}}
           .error
             span.fadeIn(v-if="etapa.montoSuperaMax > 200") El monto máximo es $200
       .campo
@@ -50,20 +50,33 @@
 </template>
 
 <script>
-import marketcap from '@/services/marketcap';
+import fiblo from "@/services/fiblo";
+import marketcap from "@/services/marketcap";
 
 export default {
-  props: ['proyecto', 'set', 'setEtapaActiva'],
+  props: ["proyecto", "set", "setEtapaActiva"],
   data() {
     return {
-      valorCambio: '',
+      valorCambio: "",
       sent: false,
       etapa: {
-        monto: this.proyecto.monto ? this.proyecto.monto : '',
-        montoSuperaMax: this.proyecto.montoSuperaMax ? this.proyecto.montoSuperaMax : '',
-        cantAcciones: this.proyecto.cantAcciones ? this.proyecto.cantAcciones : '',
+        monto: this.proyecto.monto ? this.proyecto.monto : "",
+        montoSuperaMax: this.proyecto.montoSuperaMax
+          ? this.proyecto.montoSuperaMax
+          : "",
+        cantAcciones: this.proyecto.cantAcciones
+          ? this.proyecto.cantAcciones
+          : ""
       },
+      currentNetwork: -1
     };
+  },
+  computed: {
+    currencySymbol() {
+      return this.currentNetwork != 31 && this.currentNetwork != 33
+        ? "Ξ"
+        : "RBTC";
+    }
   },
   mounted() {
     marketcap.getArs().then(
@@ -73,8 +86,16 @@ export default {
       error => {
         console.error(error);
         this.valorCambio = 4000;
-      },
+      }
     );
+    fiblo.getNetworkVersion((error, netVer) => {
+      if (error) {
+        console.error(error);
+        this.currentNetwork = -1;
+      } else {
+        this.currentNetwork = netVer;
+      }
+    });
   },
   methods: {
     setFields() {
@@ -82,13 +103,13 @@ export default {
         this.set(k, this.etapa[k]);
       });
       this.setEtapaActiva(4);
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~Styles/_config.scss';
+@import "~Styles/_config.scss";
 .etapa-acciones {
   width: 100%;
   height: 100%;
