@@ -7,72 +7,63 @@ let CNV_ADDRESS;
 let ORACULO_PRECIO_ADDRESS;
 let NETWORK_VERSION;
 
-// const MODULE_ADDRESS = MODULE.networks['3'].address;
-// const SA_ADDRESS = SA.networks['3'].address;
-
-// const FACTORY_ADDRESS = baseJSONFactory.networks['3'].address;
-
 const web3Init = callback => {
-  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-  if (typeof window.web3 !== "undefined") {
-    // Use Mist/MetaMask's provider
-    window.web3 = new Web3(window.web3.currentProvider);
-  } else {
-    window.web3 = new Web3(
-      new Web3.providers.HttpProvider("http://127.0.0.1:7545")
-    );
+  try {
+    if (typeof window.web3 !== "undefined")
+      window.web3 = new Web3(window.web3.currentProvider);
+
+    window.web3.version.getNetwork((error, networkVersion) => {
+      if (error) {
+        console.error(error);
+      } else {
+        NETWORK_VERSION = networkVersion;
+
+        CNV_ADDRESS = baseJSONCNV.networks[networkVersion].address;
+        ORACULO_PRECIO_ADDRESS =
+          baseJSONOraculoPrecio.networks[networkVersion].address;
+
+        const proxySAS = window.web3.eth.contract(baseJSON.abi);
+        window.initProyecto = project_address => {
+          window.proyecto = proxySAS.at(project_address);
+        };
+
+        const oraculoProxy = window.web3.eth.contract(
+          baseJSONOraculoPrecio.abi
+        );
+        window.oraculo = oraculoProxy.at(ORACULO_PRECIO_ADDRESS);
+
+        const cnvProxy = window.web3.eth.contract(baseJSONCNV.abi);
+        window.cnv = cnvProxy.at(CNV_ADDRESS);
+
+        window.web3.eth.getAccounts((error, accounts) => {
+          if (error) {
+            callback(error, null);
+          }
+          callback(null, accounts);
+        });
+      }
+    });
+  } catch (error) {
+    callback("NO-METAMASK", null);
   }
-
-  window.web3.version.getNetwork((error, networkVersion) => {
-    if (error) {
-      console.error(error);
-    } else {
-      NETWORK_VERSION = networkVersion;
-
-      CNV_ADDRESS = baseJSONCNV.networks[networkVersion].address;
-      ORACULO_PRECIO_ADDRESS =
-        baseJSONOraculoPrecio.networks[networkVersion].address;
-
-      const proxySAS = window.web3.eth.contract(baseJSON.abi);
-      window.initProyecto = project_address => {
-        window.proyecto = proxySAS.at(project_address);
-      };
-
-      const oraculoProxy = window.web3.eth.contract(baseJSONOraculoPrecio.abi);
-      window.oraculo = oraculoProxy.at(ORACULO_PRECIO_ADDRESS);
-
-      const cnvProxy = window.web3.eth.contract(baseJSONCNV.abi);
-      window.cnv = cnvProxy.at(CNV_ADDRESS);
-
-      window.web3.eth.getAccounts((error, accounts) => {
-        if (error) {
-          callback(error, null);
-        }
-        callback(null, accounts);
-      });
-    }
-  });
 };
 
 const web3InitNoAccount = callback => {
-  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-  if (typeof window.web3 !== "undefined") {
-    // Use Mist/MetaMask's provider
-    window.web3 = new Web3(window.web3.currentProvider);
-  } else {
-    window.web3 = new Web3(
-      new Web3.providers.HttpProvider("http://127.0.0.1:7545")
-    );
-  }
+  try {
+    if (typeof window.web3 !== "undefined")
+      window.web3 = new Web3(window.web3.currentProvider);
 
-  window.web3.version.getNetwork((error, networkVersion) => {
-    if (error) {
-      callback(error, null);
-    } else {
-      NETWORK_VERSION = networkVersion;
-      callback(null, networkVersion);
-    }
-  });
+    window.web3.version.getNetwork((error, networkVersion) => {
+      if (error) {
+        callback(error, null);
+      } else {
+        NETWORK_VERSION = networkVersion;
+        callback(null, networkVersion);
+      }
+    });
+  } catch (error) {
+    callback("NO-METAMASK", null);
+  }
 };
 
 export default {
@@ -90,7 +81,7 @@ export default {
   isMetaMaskInstalled(callback) {
     web3Init((error, accounts) => {
       if (error) {
-        callback(false);
+        callback(error, null);
       } else if (
         !window.web3 ||
         !window.web3.currentProvider ||
@@ -98,9 +89,9 @@ export default {
         !accounts ||
         !accounts[0]
       ) {
-        callback(false);
+        callback(null, false);
       } else {
-        callback(true);
+        callback(null, true);
       }
     });
   },

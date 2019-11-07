@@ -1,10 +1,11 @@
 <template lang="pug">
   .current-network.fadeIn(
     :title="networks[currentNetwork].url"
-    v-if="networks[currentNetwork].name")
+    v-if="networks[currentNetwork].name || alternText")
     img(
-      :src="networks[currentNetwork].logo")
-    span {{networks[currentNetwork].name}}
+      :src="networks[currentNetwork].logo"
+      v-if="networks[currentNetwork].logo")
+    span {{networks[currentNetwork].name || alternText}}
 </template>
 
 <script>
@@ -40,16 +41,23 @@ export default {
           logo: ""
         }
       },
-      currentNetwork: -1
+      currentNetwork: -1,
+      alternText: ""
     };
   },
   mounted() {
     fiblo.getNetworkVersion((error, netVer) => {
       if (error) {
-        console.error(error);
-        this.currentNetwork = -1;
+        if (error !== "NO-METAMASK") {
+          this.currentNetwork = -1;
+          this.alternText = "FIBLO NO TRABAJA ACTUALMENTE CON ESTA RED";
+        }
       } else {
-        if (this.networks[netVer]) this.currentNetwork = netVer;
+        if (this.networks[netVer]) {
+          this.currentNetwork = netVer;
+        } else {
+          this.alternText = "FIBLO NO TRABAJA ACTUALMENTE CON ESTA RED";
+        }
       }
     });
   }

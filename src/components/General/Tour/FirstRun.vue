@@ -7,7 +7,7 @@
         .logo
           img(src="@/assets/images/logo-texto-celeste.png")
       .texto-botones
-        .red-actual
+        .red-actual(v-if="currentNetwork > 0")
           strong Red actual: 
           span {{networks[currentNetwork].name}}
         .texto
@@ -66,7 +66,6 @@ export default {
   mounted() {
     fiblo.getNetworkVersion((error, netVer) => {
       if (error) {
-        console.error(error);
         this.currentNetwork = -1;
       } else {
         if (this.networks[netVer]) this.currentNetwork = netVer;
